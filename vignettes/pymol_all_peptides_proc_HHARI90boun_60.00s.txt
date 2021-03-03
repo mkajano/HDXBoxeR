@@ -1,0 +1,62 @@
+hide
+show cartoon
+color black
+bg white
+set_color NSig, [115,115,115]
+set_color col_-Inf_-120, [103,0,13]
+set_color col_-120_-110, [128,6,16]
+set_color col_-110_-100, [154,12,19]
+set_color col_-100_-90, [174,17,23]
+set_color col_-90_-80, [190,21,26]
+set_color col_-80_-70, [206,26,30]
+set_color col_-70_-60, [221,41,36]
+set_color col_-60_-50, [236,56,42]
+set_color col_-50_-40, [243,74,54]
+set_color col_-40_-30, [248,94,66]
+set_color col_-30_-20, [251,112,80]
+set_color col_-20_-10, [251,129,97]
+set_color col_-10_0, [252,146,114]
+set_color col_0_10, [158,202,225]
+set_color col_10_20, [136,190,220]
+set_color col_20_30, [115,178,215]
+set_color col_30_40, [96,167,210]
+set_color col_40_50, [79,155,203]
+set_color col_50_60, [63,143,196]
+set_color col_60_70, [49,129,189]
+set_color col_70_80, [35,115,182]
+set_color col_80_90, [24,102,172]
+set_color col_90_100, [14,89,162]
+set_color col_100_110, [8,75,147]
+set_color col_110_120, [8,61,127]
+set_color col_120_Inf, [8,48,107]
+color NSig, resi 63-77
+color NSig, resi 64-77
+color NSig, resi 114-135
+color NSig, resi 140-147
+color NSig, resi 154-161
+color NSig, resi 169-177
+color NSig, resi 176-183
+color NSig, resi 183-200
+color NSig, resi 194-200
+color NSig, resi 201-213
+color NSig, resi 213-220
+color NSig, resi 214-220
+color col_-20_-10, resi 176-193
+color col_-20_-10, resi 178-193
+color col_-10_0, resi 62-77
+color col_-10_0, resi 213-225
+color col_0_10, resi 40-58
+color col_0_10, resi 40-59
+color col_0_10, resi 47-63
+color col_0_10, resi 95-115
+color col_0_10, resi 98-115
+color col_0_10, resi 114-124
+color col_0_10, resi 116-124
+color col_0_10, resi 116-135
+color col_0_10, resi 136-147
+color col_0_10, resi 136-149
+color col_0_10, resi 183-193
+color col_10_20, resi 78-88
+color col_10_20, resi 95-107
+color col_20_30, resi 82-88
+color col_20_30, resi 89-97
