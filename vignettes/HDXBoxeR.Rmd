@@ -44,11 +44,11 @@ The vignette is divided into a few different sections that will introduce differ
 7.	Data summary aka how to get general information about the set. 
 8.	Save data in the reprocessed format. 
 9.	Extreme outputs generation aka how to automatically prepare input for bimodal analysis. 
-10.	Cheatsheet aka section for impatient. 
+10.	Proposed workflow aka section for impatient. 
 
 ## 1.	Input preparation
 Th HDXBoxeR requires data! The package can be tested using the data that is included as a reference and example with the package, so don’t worry. However, to be able to do your analysis you need to import your data into R. **The HDXBoxeR requires a very specific input format!** 
-Input for the HDXBoxeR should be generated using HDXExaminer from Sierra Scientifics. . 
+Input for the HDXBoxeR should be generated using HDXExaminer from Sierra Scientifics. 
 
 ### Input preparation
 
@@ -65,8 +65,16 @@ The example looks as follows:
  
 The input file has 24 columns including the “Mark” column. We keep typically just peptides with high and medium confidence. Example data compares two Protein States: Unbound and Bound. Each of the sets has three replicates.  Data also should have one replicate of undeuterated and fully deuterated sets labeled as 0s and FD respectively for allowing full analysis. 
 
-## 2.	Installation
-Install HDXBoxeR package by using command: install.packages(HDXBoxeR). The package is deposited in GIT in CRAN.
+## 2.	Installation & Loading
+The HDXBoxeR package is deposited in GIT.
+
+#Installation requires devtools package, install with command below if missing. 
+#install.packages("devtools") 
+
+library(devtools)
+devtools::install_github("mkajano/HDXBoxeR")
+library(HDXBoxeR)
+
 
 ## 3.	How to load data into R
 
@@ -480,7 +488,131 @@ extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 18
 
 
 ## 10. Proposed Workflow. 
+```{r eval=FALSE}
 
+library(HDXBoxeR)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+
+############################
+## Load data
+###########################
+
+##########Deuteration uptake vs procent deuteration file preparation
+#### Input for uptake deuteration
+a<-output_tp(file_nm) 
+# input for procent deuteration
+b<-output_tp_proc(file_nm) 
+
+# Time courses inputs
+tc_a<-output_tcourse(filepath = file_nm)
+tc_aP<-output_tcourse_proc(filepath = file_nm)
+
+
+######################################
+## Statistical analysis
+#####################################
+
+###average calculation for all peptides
+av1<-ave_timepoint(a)
+###average differences (against first Protein State in the file)
+da1<-dif_ave(av1)
+###standard deviation calculation for all peptides
+sd1<-sd_timepoint(a)
+### Global critical interval for 1 protein sets
+CI_single(s1 =sd1[,7], replicates = 3 )
+##Global critical interval for 2 protein sets
+CI_2pts(s1 = sd1[,7], s2=sd1[,8], replicates = 3)
+##individual peptide p-value calculation against first set in the input file
+pv1<-pv_timepoint(a)
+
+## Plots
+
+# Boxplots
+boxplot_tp(a, col= c("gold2", "dodgerblue"))
+
+# Volcano plots
+plots_vol_tp(a, cola=c(2,3), replicates=3, pv_cutoff = 0.01)
+
+# Significantly different peptides plot across the sequence
+par(mfrow=c(4,1))
+plot_peptide_sig_tp(a,nb_pep_row = 18, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff = 0.01) 
+
+##Average uptake heat maps
+### heat maps 
+plot_heat_map_tp(a, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+
+### heat map for procent deuteration, require both uptake and procent deuteration data frame as input
+plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
+
+###Maximum uptake or procent deuteration per peptide
+plot_heat_map_max_uptake_tp(a, replicates=3)
+### 
+plot_heat_map_max_uptake_tp(input_up = a, input_proc = b, replicates=3, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+
+## Legend for the heatmaps.
+#default ranges for figures does not require argument
+legend_heat_map(ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf))
+
+######################
+###Timecourses plots
+######################
+
+## average procent deuteration in timecourse
+plots_av_tcourse(tc_aP, replicates = 3)
+###average heat map for timecourses
+plot_heat_map_tc(tc_aP, replicates=3)
+legend_heat_map_timecourse()
+
+###Robot plots for the timecourses
+robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff=0.01, CI_factor = 1)
+
+
+#######################
+##Pymol scripts
+#######################
+
+pymol_script_significant_peptide(a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+###same but for procent deuteration
+pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+
+###scripts prepared by residue
+pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+
+##################
+##Summary
+##################
+all_summary(file_nm, Dfact=0.85,replicates = 3)
+
+###############
+##Outputs
+###############
+
+###final output for the paper 
+### USAGE output_prep(pathto_allresults.csv, output_name.csv)
+output_prep(filepath = file_nm, output_name = "output.csv")
+
+###long version of the uptake data, timepoint
+### USAGE output_tp_csv(pathto_allresults.csv, output_name.csv)
+output_tp_csv(filepath =file_nm , output = "output_test.csv")
+## for percent deuteration for time points use function output_tp_proc_csv()
+# for deuteration uptake/procent deuteration for time courses use functions: output_tcourse_csv(), output_tcourse_proc_csv() respectively
+
+### verbose versions of the output functions create csv files with all important data averages, sd, and pvalues for uptake data
+verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv")
+## for procent deuteration use function verbose_timepoint_output_proc()
+## use verbose_timepoint_output_subset() to select few states. 
+
+###########################
+##Extreme input preparation
+###########################
+
+# returns empty column if data is missing
+extreme_input_gap(hm_dir ="filepath", replicates = 3, timepoints =c(3, 60, 1800, 72000))
+# if data is missing, it writes there values for undeuterated 
+extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+
+
+```
 
 
 
