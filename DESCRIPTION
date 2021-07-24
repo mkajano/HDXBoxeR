@@ -16,7 +16,6 @@ Imports:
     dplyr,
     graphics,
     grDevices,
-    qpcR,
     RColorBrewer,
     stats,
     stringr,
