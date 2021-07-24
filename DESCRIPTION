@@ -1,16 +1,34 @@
-Package: HDXBoxeR
 Type: Package
-Title: Processing and Analysis of HDX-MS data from HDX-Examiner input
+Package: HDXBoxeR
+Title: Processing and Analysis of the Differential Hydrogen-Deuterium Mass Spectrometry Data
 Version: 0.0.1
-Author: Maria K. Janowska, Katherine Reiter, Rachel E. Klevit
+Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), email="mka.janowska@gmail.com"),
+             person("Katherine", "Reiter", role = "ctb"),
+             person("Rachel E.", "Klevit", role = "ctb"))
+Author:  Maria K. Janowska [aut, cre],
+  Katherine Reiter [ctb],
+  Rachel E. Klevit [ctb] 
 Maintainer: Maria K. Janowska <mka.janowska@gmail.com>
-Description: Processing and analysis of HDX-MS data from HDX-Examiner using pvalue 
-        statistics and CI analysis of the data. 
-Imports: stringr, dplyr, RColorBrewer, pals, tidyr, qpcR, methods, remotes
-VignetteBuilder: knitr, rmarkdown
-Suggests: knitr, rmarkdown
-License: MIT + file LICENSE
+Description: Processing and analysis of Differential Hydrogen-Deuterium Mass Spectrometry
+    data using p-value statistics and CI analysis of the data.
+License: GPL (>= 2)
+Imports: 
+    dplyr,
+    graphics,
+    grDevices,
+    qpcR,
+    RColorBrewer,
+    stats,
+    stringr,
+    tidyr,
+    utils
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: 
+    knitr,
+    rmarkdown
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.1
 Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1

@@ -47,7 +47,7 @@ pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10
     ##pallette definition
     ##color set up
 
-    cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("grey45"))
+    cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("white"))
 
 
     ##assign name to colors in pallettes

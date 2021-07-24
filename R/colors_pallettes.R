@@ -10,8 +10,8 @@
 #' @export
 color_ranges_Blue_Red_heat_map<-function(ranges, colors_initial) {
 
-  blue1<-brewer.pal(n = 9, name = "Blues")[4:9]
-  red1<-brewer.pal(n = 9, name = "Reds")[4:9]
+  blue1<-brewer.pal(n = 9, name = "Blues")[4:8]
+  red1<-brewer.pal(n = 9, name = "Reds")[4:8]
   cbr1<-c(colors_initial, rev(colorRampPalette(red1)(floor(length(ranges)/2))),
           colorRampPalette(blue1)(floor(length(ranges)/2) ))
   return(cbr1)

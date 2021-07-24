@@ -56,7 +56,7 @@ legend_heat_map_tp<-function(df){
 #' @export
 legend_heat_map<-function(ranges=c(-Inf,seq(-30, 30, by=10), Inf )){
   ##color set up
-  cbr1<-color_ranges_Blue_Red_heat_map(ranges, c("white", "grey45"))
+  cbr1<-color_ranges_Blue_Red_heat_map(ranges, c( "grey45", "white"))
 
   leg_nm<-c("no coverage", "not-significant")
   for ( i in 1:(length(ranges)-1)){

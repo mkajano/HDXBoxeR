@@ -51,7 +51,7 @@ heat_map_tp_proc<-function(df,dfup, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
   si_apc<-si_apc*cv_mis+1
 
   ###define missing coverage
-  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("white", "grey45"))
+  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "grey45", "white"))
 
 
 

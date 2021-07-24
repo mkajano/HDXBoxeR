@@ -43,7 +43,7 @@ heat_map_tp<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
   #####preparation of average per residue data.frame, which will have
 
   xli=ranges/10; num_ass<-c(-10001:(-10001-(length(xli)-2)))
-  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("white", "grey45"))
+  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "grey45", "white"))
 
   for ( i in 1:(length(xli)-1)){
     ave.p.cov[xli[i]< ave.p.cov & ave.p.cov < xli[i+1]] <- num_ass[i]

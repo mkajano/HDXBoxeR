@@ -61,7 +61,7 @@ heat_map_tp_maxuptake<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
   ##pallette definition
   ##color set up
 
-  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("white", "grey45"))
+  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "grey45", "white"))
 
 
   plot(c(1,1), type="n", xlab="", ylab="", lwd=2, col=4, xlim=c(min(df[,start_col]), max(df[,end_col])-5),

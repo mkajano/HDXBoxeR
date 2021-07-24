@@ -71,7 +71,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc, ranges=c(-I
     cv_mis=coverage; cv_mis[cv_mis > 1]<- (1)###define lack of coverage
     si_apc<-si_apc*cv_mis+1
 
-    cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("white", "grey45"))
+    cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "grey45", "white"))
 
 
     ##assign name to colors in pallettes

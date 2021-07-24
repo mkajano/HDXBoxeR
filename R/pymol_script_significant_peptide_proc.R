@@ -46,7 +46,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, ranges=c(-I
     si_apc<-abs(si.f)-9999
 
 
-    cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "grey45"))
+    cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "white"))
 
     ##assign name to colors in pallettes
     col_nm<-c("NSig")

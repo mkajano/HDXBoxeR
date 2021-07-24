@@ -63,7 +63,7 @@ heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd, ranges=c(-Inf, seq(-30, 3
 
   ###define missing coverage
   ##pallette definition
-  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c("white", "grey45"))
+  cbr1<-color_ranges_Blue_Red_heat_map(ranges=xli, c( "grey45", "white"))
 
 
 
