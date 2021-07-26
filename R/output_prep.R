@@ -15,10 +15,10 @@
 #' @importFrom stringr str_sub
 #' @importFrom  RColorBrewer brewer.pal
 #' @importFrom tidyr separate
-#' @import qpcR
+#' @importFrom methods rbind2
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' output_prep(filepath=file_nm, "output_file_name.csv")
+#' #output_prep(filepath=file_nm, "output_file_name.csv")
 #' @export
 output_prep<- function(filepath, output_name){
   Start<-c()
