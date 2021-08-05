@@ -1,4 +1,4 @@
-#' Returns average deuteration plot for time course
+#' Generates average deuteration plot for the time-course.
 #'
 #' Returns plots with average deuteration at each peptide.
 #'
