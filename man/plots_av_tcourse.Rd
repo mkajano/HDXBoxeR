@@ -2,7 +2,7 @@
 % Please edit documentation in R/av_timecourse_plots.R
 \name{plots_av_tcourse}
 \alias{plots_av_tcourse}
-\title{Returns average deuteration plot for time course}
+\title{Generates average deuteration plot for the time-course.}
 \usage{
 plots_av_tcourse(df, replicates = 3, cola)
 }

@@ -17,8 +17,10 @@
 #' @importFrom tidyr separate
 #' @importFrom methods rbind2
 #' @examples
+#' \dontrun{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #output_prep(filepath=file_nm, "output_file_name.csv")
+#' output_prep(filepath=file_nm, "output_file_name.csv")
+#' }
 #' @export
 output_prep<- function(filepath, output_name){
   Start<-c()
@@ -44,7 +46,7 @@ output_prep<- function(filepath, output_name){
   ##loop below will go through Protein states, timepoints and Experiments to get replicates
   ##it will save a dataframe in wide format instead of long format, result of this loop is dataframe named "b"
   b<-c()
-  for (state in levels(a$Protein.State)){##
+  for (state in unique(a$Protein.State)){##
     temp1<-a[which(a$Protein.State ==state ),] ##creates temporary df, temp1, with Protein states going through all unique protein states
     for (time in unique(temp1$Deut.Time)){
       temp2<-temp1[which(temp1$Deut.Time ==time),]##creates temporary df, temp2 from one state of protein with the same timepoints

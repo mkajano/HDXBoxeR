@@ -19,6 +19,8 @@ In reprocessed data frame columns have time course data for procent deuteration.
 Function takes raw data from HDXexaminer and organize data into columns with \% deuteration
 }
 \examples{
+\donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tcourse_csv(file_nm, "output.csv")
+}
 }

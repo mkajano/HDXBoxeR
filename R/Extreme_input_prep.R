@@ -7,7 +7,9 @@
 #' @param timepoints lists timepoints used in experiments.
 #' @return Inputs for extreme for all data prepared.
 #' @examples
-#' # extreme_input_gap(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+#' \dontrun{
+#' extreme_input_gap(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+#' }
 #' @export
 extreme_input_gap<-function(hm_dir, replicates,timepoints ){
   setwd(hm_dir)

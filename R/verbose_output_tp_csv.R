@@ -8,8 +8,10 @@
 #' @param output_name name of the output in csv format.
 #' @return csv with analysis for uptake file, standard deviation, p-values for all protein states.
 #' @examples
+#' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' verbose_timepoint_output(file_nm, "output_file_name.csv")
+#' }
 #' @export
 verbose_timepoint_output<-function(filepath, output_name){
   df<-output_tp(filepath)

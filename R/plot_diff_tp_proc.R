@@ -32,14 +32,17 @@ dif_tp_proc<-function(df, cola) {
 
 lab_dif_proc<-function(df, cola){
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
-  exp_ddu<-expression(Delta*' %D'[2]*'O')
-  mtext(c("Index"),  c(SOUTH<-1),line=0.7, outer=TRUE, adj=0.36)
-  mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE)
-  nmx<-str_sub(colnames(df[8:dim(df)[2]]), start = 4, end=-10)
-  nm1<-c(paste(str_sub(colnames(df)[7], start = 4, end=-10), "-"), nmx)
+  yloc =1
+  yadj =0
+  xloc =getCoords1(1, input = "p")
+  xadj =0
+
+  nmx<-str_sub(colnames(df[8:dim(df)[2]]), start = 4, end=-8)
+  nm1<-c(paste(str_sub(colnames(df)[7], start = 4, end=-8), "-"), nmx)
   cola2<-c("white", cola)
-  legend(c("right"), nm1,
-         fill=cola2,  bty="n", cex=0.6, inset=c(-0.34,0), xpd = TRUE, border = cola2)
+  legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
+         yjust = yadj,
+         fill=cola2,  bty="n", cex=0.5, xpd = TRUE, border = cola2 )
 }
 
 
@@ -66,8 +69,13 @@ plots_diff_tp_proc<-function(df,replicates=3, cola){
   da1<-dif_ave(av1)
   for ( i in(unique(df$Deut.Time))){
     dif_tp_proc(da1[da1$Deut.Time==i,], cola)
-    lab_dif_proc(da1, cola)
+
     mtext(i,  c(NORTH<-3),line=-1, outer=FALSE, cex=0.5)}
+  exp_ddu<-expression(Delta*' %D'[2]*'O')
+  mtext(c("Index"),  c(SOUTH<-1),line=0.7, outer=TRUE, adj=0.36)
+  mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE)
+  par(mfrow=c(1, 1))
+  lab_dif_proc(da1, cola)
   reset_par()
 }
 

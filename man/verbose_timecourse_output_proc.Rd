@@ -19,6 +19,8 @@ Returns information from analysis and save it as csv file.
 Sets are compared to the first state in the input file.
 }
 \examples{
+\donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 verbose_timecourse_output_proc(file_nm, "output_file_name.csv")
+}
 }

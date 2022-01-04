@@ -32,16 +32,18 @@ dif_tp<-function(df, cola) {
 #' @export
 lab_dif<-function(df, cola){
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
+  yloc =1
+  yadj =0
+  xloc =getCoords1(1, input = "p")
+  xadj =0
   n1=max((dim(df)[2]-7), 3)
   #cola<-c(brewer.pal(n = n1, name = "Paired"))
-  exp_ddu<-expression(Delta*' D'[2]*'O uptake [Da]')
-  mtext(c("Index"),  c(SOUTH<-1),line=0.7, outer=TRUE, adj=0.36)
-  mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE)
   nmx<-str_sub(colnames(df[8:dim(df)[2]]), start = 4, end=-9)
   nm1<-c(paste(str_sub(colnames(df)[7], start = 4, end=-9), "-"), nmx)
   cola2<-c("white", cola)
-  legend(c("right"), nm1,
-         fill=cola2,  bty="n", cex=0.6, inset=c(-0.35,0), xpd = TRUE, border = cola2)
+  legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
+         yjust = yadj,
+         fill=cola2,  bty="n", cex=0.6, xpd = TRUE, border = cola2 )
 
 }
 
@@ -63,15 +65,20 @@ lab_dif<-function(df, cola){
 #' @export
 plots_diff_tp<-function(df, replicates=3, cola){
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
-  par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1.4, 1, 1, 7), oma=c(4,4,1,2), cex.axis=1, cex.main=1, cex.lab=1.1,
+  par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1.4, 1, 1, 9), oma=c(4,4,1,0.1), cex.axis=1, cex.main=1, cex.lab=1.1,
       mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
 
   av1<-ave_timepoint(df, replicates)
   da1<-dif_ave(av1)
   for ( i in(unique(df$Deut.Time))){
     dif_tp(da1[da1$Deut.Time==i,], cola)
-    lab_dif(da1, cola)
+
     mtext(i,  c(NORTH<-3),line=-1, outer=FALSE, cex=0.5)}
+  exp_ddu<-expression(Delta*' D'[2]*'O uptake [Da]')
+  mtext(c("Index"),  c(SOUTH<-1),line=0.7, outer=TRUE, adj=0.36)
+  mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE)
+  par(mfrow=c(1, 1))
+  lab_dif(da1, cola)
   reset_par()
 }
 

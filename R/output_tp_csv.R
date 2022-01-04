@@ -9,8 +9,10 @@
 #' @param output name of the output csv file
 #' @return Returns reprocessed data. Data.frame with reorganized data where in columns are deuteration uptake for different timepoints in the analysis.
 #' @examples
+#' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp_csv(file_nm, "output.csv")
+#' }
 #' @export
 output_tp_csv<-function(filepath, output){
   write.csv(output_tp(filepath), output)}

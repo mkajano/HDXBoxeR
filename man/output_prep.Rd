@@ -20,6 +20,8 @@ Masson, G.R., Burke, J.E., Ahn, N.G. et al. Recommendations for performing, inte
 It generates csv file in format ready for publication of the data.
 }
 \examples{
+\dontrun{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#output_prep(filepath=file_nm, "output_file_name.csv")
+output_prep(filepath=file_nm, "output_file_name.csv")
+}
 }

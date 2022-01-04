@@ -55,6 +55,10 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
   CI_all=CI_all*CI_factor
 
   cola<-brewer.pal(n = length(7:dim(sh_avc)[2])+1, name = "Oranges")
+  par(mfrow = c(1, 1), mar = c(1.5, 1.5, 1.5,
+                               1.5), oma = c(4, 3, 1.5, 1.5), cex.axis = 1, cex.main = 1,
+      cex.lab = 1.1, mgp = c(0.1, 0.4, 0), ps = 14, font = 2,
+      bg = "white", font.lab = 2, font.axis = 2)
 
   plot(x=1, type = "n", ylim=ylim, xlim=xlim, ylab="",
        xlab="", yaxt="n")
@@ -62,8 +66,8 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
   axis(2, at=seq(-1000, 1000, by=50), cex.axis=1, labels=c(rev(seq(50,1000, by=50)), seq(0,1000, by=50)))
   axis(2, at=seq(-1000, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
   exp_ddu<-expression('% Deuteration')
-  mtext(c("Residue"),  c(SOUTH<-1),line=0.7, outer=TRUE, cex=0.8)
-  mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=0.8)
+  mtext(c("Residue"),  c(SOUTH<-1),line=0.7, outer=TRUE, cex=1)
+  mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=1)
   cov_nb<-c()
   cov_nb_all<-c()
 

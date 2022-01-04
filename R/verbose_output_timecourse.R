@@ -8,8 +8,10 @@
 #' @param output_name name of the output in csv format.
 #' @return csv with analysis for procent deuteration: standard deviation, for all protein states for time courses.
 #' @examples
+#' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' verbose_timecourse_output_proc(file_nm, "output_file_name.csv")
+#' }
 #' @export
 verbose_timecourse_output_proc<-function(filepath, output_name){
   df<-output_tcourse_proc(filepath)

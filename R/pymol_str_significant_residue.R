@@ -10,11 +10,13 @@
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @return pymol script with colors assigned per residues by maximum uptake per residue
 #' @examples
+#' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
 #' pymol_script_significant_residue(df=a, replicates=3, pv_cutoff=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 #' pymol_script_significant_residue(df=a)
+#' }
 #' @export
 pymol_script_significant_residue<-function(df, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            pv_cutoff=0.01,  replicates=3){

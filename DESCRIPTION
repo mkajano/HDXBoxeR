@@ -5,7 +5,7 @@ Version: 0.0.1
 Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), email="mka.janowska@gmail.com"),
              person("Katherine", "Reiter", role = "ctb"),
              person("Rachel E.", "Klevit", role = "ctb"))
-Author:  Maria K. Janowska [aut, cre],
+Author: Maria K. Janowska [aut, cre],
   Katherine Reiter [ctb],
   Rachel E. Klevit [ctb] 
 Maintainer: Maria K. Janowska <mka.janowska@gmail.com>
@@ -21,7 +21,8 @@ Imports:
     stringr,
     tidyr,
     utils, 
-    methods
+    methods, 
+    qpdf
 Suggests: 
     knitr,
     rmarkdown
@@ -30,4 +31,4 @@ VignetteBuilder:
     rmarkdown
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2

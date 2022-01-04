@@ -47,6 +47,18 @@ legend_heat_map_tp<-function(df){
   axis(2, at=0.5:(dim(df)[2]-7.5), labels=nm1, las=2, line = , cex.axis=0.7)
 }
 
+#' Legend for the heatmaps percent.Extracts names from data.frame
+#'
+#' Returns names for legend for the heatmaps
+#'
+#' @param df average data frame.
+#' @return legend for the heatmap prercent
+#' @export
+legend_heat_map_tp_proc<-function(df){
+  nm1<-str_sub(colnames(df[8:dim(df)[2]]), start=4, end=-8)
+  axis(2, at=0.5:(dim(df)[2]-7.5), labels=nm1, las=2, line = , cex.axis=0.7)
+}
+
 #' Legend for the heatmaps prep function.
 #'
 #' Returns names for legend for the heatmaps

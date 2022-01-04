@@ -121,7 +121,7 @@ plot_heat_map_max_uptake_tp_proc<-function(input_proc, input_up, mar_x=3.5, rang
     p1=pv1[pv1$Deut.Time==i,]
     sd=s1[s1$Deut.Time==i,]
     colmp<-heat_map_tp_maxuptake_proc(a1, au, p1, sd, ranges, pv_cutoff, replicates)
-    legend_heat_map_tp(av1)
+    legend_heat_map_tp_proc(av1)
     mtext(i, side=3, outer=FALSE, line=0, cex=0.65)}
   mtext(c("Residues"),  c(NORTH<-1),line=0.7, outer=TRUE, cex=0.8)
   return()}

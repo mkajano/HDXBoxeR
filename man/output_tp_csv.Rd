@@ -19,6 +19,8 @@ In reprocessed data frame columns have time points data for uptake data.
 Function takes raw data from HDXexaminer and organize data into columns with uptake of deuterons
 }
 \examples{
+\donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp_csv(file_nm, "output.csv")
+}
 }

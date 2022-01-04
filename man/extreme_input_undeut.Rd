@@ -20,5 +20,7 @@ Inputs for extreme for all data prepared.
 If data is missing it returns non-deuterated data in these columns.
 }
 \examples{
-# extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+\dontrun{
+extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+}
 }
