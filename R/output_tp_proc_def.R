@@ -19,7 +19,8 @@
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' #a<- output_tp_proc_def(filepath=file_nm) ###all default parameters used
-#' #a<-output_tp_proc_def(filepath=file_nm, replicates=3, states=c("Bound", "Unbound"), times=c("3.00s", "72000.00s"), seq_match=T, csv="NA")
+#' #a<-output_tp_proc_def(filepath=file_nm, replicates=3,
+#' states=c("Bound", "Unbound"), times=c("3.00s", "72000.00s"), seq_match=T, csv="NA")
 #' @export
 output_tp_proc_def<-function(filepath, replicates, states, times, seq_match=F, csv="NA"){
   if(missing(states)) { states=arguments_call(filepath)[[1]]; print(c("Protein.States used:", states))}
