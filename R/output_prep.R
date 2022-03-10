@@ -16,6 +16,7 @@
 #' @importFrom  RColorBrewer brewer.pal
 #' @importFrom tidyr separate
 #' @importFrom methods rbind2
+#' @importFrom wrapr orderv
 #' @examples
 #' \dontrun{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -108,5 +109,5 @@ output_prep<- function(filepath, output_name){
   bp<-arrange(bp, Start, End, Protein.State, ord)
   bp<-bp[,-dim(bp)[2]]
   ###write output
-  write.csv(bp, output_name)
+  write.csv(bp, output_name, row.names = FALSE)
   return()}

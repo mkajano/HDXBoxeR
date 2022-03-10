@@ -22,7 +22,8 @@ Imports:
     tidyr,
     utils, 
     methods, 
-    qpdf
+    qpdf,
+    wrapr
 Suggests: 
     knitr,
     rmarkdown

@@ -111,7 +111,7 @@ extreme_input_undeut<-function(hm_dir, replicates,timepoints ){
 
         #### order the files correctly + add mock dif to lists of files that need to bound together.
 
-        order_files<-order(one_rep)
+        order_files<-orderv(one_rep)
         nm1_rb<-c()
         for ( ti in 1:length(timepoints)){
           nb_rep=length(which(one_rep[,1]==timepoints[ti]))
