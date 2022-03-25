@@ -2,7 +2,7 @@
 % Please edit documentation in R/ave_sd_timecourse_proc.R
 \name{sd_timecourse_proc}
 \alias{sd_timecourse_proc}
-\title{Returns standard deviation for procent deuteration data for timecourses.}
+\title{Returns standard deviation for percent deuteration data for timecourses.}
 \usage{
 sd_timecourse_proc(filepath)
 }

@@ -8,7 +8,7 @@
 #' @return average deuteration plots
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' a<- output_tcourse(file_nm)
+#' a<- output_tc(file_nm)
 #' plots_av_tcourse(df=a, replicates=3, cola=c(1:4))
 #' plots_av_tcourse(df=a)
 #' @export

@@ -4,12 +4,16 @@
 \alias{verbose_timepoint_output}
 \title{Returns csv with averages from analysis for uptake file, standard deviation, p-values.}
 \usage{
-verbose_timepoint_output(filepath, output_name)
+verbose_timepoint_output(filepath, output_name, replicates = 3, ...)
 }
 \arguments{
 \item{filepath}{path to All.Data.csv input from HDX-Examiner.}
 
 \item{output_name}{name of the output in csv format.}
+
+\item{replicates}{number of replicates used}
+
+\item{...}{other variables for output_tp}
 }
 \value{
 csv with analysis for uptake file, standard deviation, p-values for all protein states.
@@ -22,5 +26,8 @@ Sets are compared to the first state in the input file.
 \donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 verbose_timepoint_output(file_nm, "output_file_name.csv")
+names_states<- nm_states(file_nm)
+verbose_timepoint_output(file_nm, "output_file_name.csv", seq_match=TRUE, percent=TRUE,
+states=names_states, replicates=3, times="3.00s")
 }
 }

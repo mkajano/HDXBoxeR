@@ -13,7 +13,7 @@
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a_up<- output_tp(file_nm)
-#' a_proc<- output_tp_proc(file_nm)
+#' a_proc<- output_tp(file_nm, percent=TRUE)
 #' pymol_script_significant_peptide_proc(input_proc=a_proc,
 #' input_up=a_up, replicates=3, pv_cutoff=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))

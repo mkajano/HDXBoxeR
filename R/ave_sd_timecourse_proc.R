@@ -2,7 +2,7 @@ average_timecourse_proc<-function(filepath){
   Start<-c()
   End<-c()
   Charge<-c()
-  df<-output_tcourse_proc(filepath)
+  df<-output_tc(filepath, percent=T)
   fp<-output_FD_proc(filepath)
   ud<-output_UD_proc(filepath)
 
@@ -44,7 +44,7 @@ average_timecourse_proc<-function(filepath){
   return(bp)
 }
 
-#' Returns standard deviation for procent deuteration data for timecourses.
+#' Returns standard deviation for percent deuteration data for timecourses.
 #'
 #' Calculates standard deviation for time course data.
 #'
@@ -58,7 +58,7 @@ sd_timecourse_proc<-function(filepath){
   Start<-c()
   End<-c()
   Charge<-c()
-  df<-output_tcourse_proc(filepath)
+  df<-output_tc(filepath, percent=T)
   fp<-output_FD_proc(filepath)
   ud<-output_UD_proc(filepath)
 

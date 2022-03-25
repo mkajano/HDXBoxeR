@@ -21,7 +21,7 @@ Returns plots with difference in procent deuteration for each peptide.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- output_tp_proc(file_nm)
+a<- output_tp(file_nm, percent=TRUE)
 plots_diff_tp_proc(df=a, replicates=3, cola=c(1:4))
 plots_diff_tp_proc(df=a)
 }

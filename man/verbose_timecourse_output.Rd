@@ -2,23 +2,32 @@
 % Please edit documentation in R/verbose_output_timecourse.R
 \name{verbose_timecourse_output}
 \alias{verbose_timecourse_output}
-\title{Returns csv with averages from analysis for deuteration uptake file, standard deviation for time courses.}
+\title{Returns csv with averages from analysis for procent deuteration file, standard deviation for time courses.}
 \usage{
-verbose_timecourse_output(filepath, output_name)
+verbose_timecourse_output(filepath, output_name, replicates = 3, ...)
 }
 \arguments{
 \item{filepath}{path to All.Data.csv input from HDX-Examiner.}
 
 \item{output_name}{name of the output in csv format.}
+
+\item{replicates}{number of replicates used}
+
+\item{...}{other variables for output_tc}
 }
 \value{
-csv with analysis for deuteration uptake: standard deviation, for all protein states for time courses.
+csv with analysis for procent deuteration: standard deviation, for all protein states for time courses.
 }
 \description{
 Returns information from analysis and save it as csv file.
 Sets are compared to the first state in the input file.
 }
 \examples{
+\donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-verbose_timecourse_output(file_nm, "output_file_name.csv")
+verbose_timecourse_output(file_nm, "output_file_name.csv", replicates=3)
+names_states<- nm_states(file_nm)
+verbose_timecourse_output(file_nm, "output_file_name.csv", seq_match=TRUE, percent=TRUE,
+states=names_states, replicates=3, times="3.00s")
+}
 }

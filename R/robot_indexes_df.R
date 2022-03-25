@@ -12,8 +12,8 @@
 #' @return Returns dataframe listing peptides that are significantly different between sets.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' tm_df<-output_tcourse(filepath=file_nm)
-#' tmP_df<-output_tcourse_proc(filepath=file_nm)
+#' tm_df<-output_tc(filepath=file_nm)
+#' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #'
 #' # more restictive peptide selection
 #' robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3)
@@ -68,14 +68,12 @@ robot_indexes_df<-function(thP, th, replicates=3,
 #' @return Returns indexes of significant peptides
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' tm_df<-output_tcourse(filepath=file_nm)
-#' tmP_df<-output_tcourse_proc(filepath=file_nm)
+#' tm_df<-output_tc(filepath=file_nm)
+#' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #'
 #'  # more restictive peptide selection
 #' robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3)
 #' @export
-
-
 robot_indexes<-function(thP, th, replicates=3,
                         pvalue=0.01, states, CI_factor=1){
   if(missing(states)) states=unique(thP$Protein.State)

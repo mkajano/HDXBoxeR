@@ -27,8 +27,8 @@ Function to help decide which peptides will be drawn on Robot plots.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-tm_df<-output_tcourse(filepath=file_nm)
-tmP_df<-output_tcourse_proc(filepath=file_nm)
+tm_df<-output_tc(filepath=file_nm)
+tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 
  # more restictive peptide selection
 robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3)

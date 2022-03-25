@@ -4,15 +4,12 @@
 #'
 #' @param filepath filepath to the All_results input file.
 #' @return data frame with average deuteration uptake data.
-#' @examples
-#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' sd_timecourse(filepath=file_nm)
 #' @export
 average_timecourse<-function(filepath){
   Start<-c()
   End<-c()
   Charge<-c()
-  df<-output_tcourse(filepath)
+  df<-output_tc(filepath)
   fp<-output_FD(filepath)
   ud<-output_UD(filepath)
 
@@ -69,7 +66,7 @@ sd_timecourse<-function(filepath){
   End<-c()
   Charge<-c()
 
-  df<-output_tcourse(filepath)
+  df<-output_tc(filepath)
   fp<-output_FD(filepath)
   ud<-output_UD(filepath)
 

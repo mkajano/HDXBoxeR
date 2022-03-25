@@ -39,8 +39,8 @@ Peptides ranges are plotted as a line at corresponding \% deuteration values.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-tm_df<-output_tcourse(filepath=file_nm)
-tmP_df<-output_tcourse_proc(filepath=file_nm)
+tm_df<-output_tc(filepath=file_nm)
+tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001)
 
 # more restictive peptide selection

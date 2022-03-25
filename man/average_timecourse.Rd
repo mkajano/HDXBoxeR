@@ -15,7 +15,3 @@ data frame with average deuteration uptake data.
 \description{
 Calculates average for time course data.
 }
-\examples{
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-sd_timecourse(filepath=file_nm)
-}

@@ -1,39 +1,71 @@
 
-#' Returns default arguments for the output_tp functions
+#' Returns default arguments for the output_tp functions. States
 #'
 #' Function used as internal function
 #'
 #' @param filepath input file location
 #' @return The default arguments to output_tp functions.
 #' @export
-arguments_call<-function(filepath){
-  a <- read.csv(file = filepath, header = F, skip = 1)
-  nm <- read.csv(file = filepath, header = T, row.names = NULL,
-                 nrows = 1)
-  nm1 <- colnames(nm)
-  colnames(a) <- c(nm1)
-  a <- a[, c(1:6)]
-  if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
-    a<-a[-which(a$Deut.Time == c('0.00s')),]}
-  if (all(a$Deut.Time == 'FD')== FALSE & length(unique(a$Deut.Time == 'FD'))==2){
-    a<-a[-which(a$Deut.Time == c('FD')),]}
-  if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
-    a<-a[-which(a$Deut.Time == c('0s')),]}
-  a <- na.omit(a)
+arguments_call1<-function (filepath) {
+  a<-arg_df(filepath)
+  states = unique(a$Protein.State)
+  return(states)
+}
 
-  states=unique(a$Protein.State)
+#' Returns default arguments for the output_tp functions. Deut.Time
+#'
+#' Function used as internal function
+#'
+#' @param filepath input file location
+#' @param states states used
+#' @return The default arguments to output_tp functions.
+#' @export
+arguments_call2<-function (filepath, states) {
 
-  tm1<-unique(a[which(a$Protein.State==a$Protein.State[1]),which(colnames(a)=="Deut.Time")]); for (i in unique(a$Protein.State)){
-    times=intersect(tm1, a[which(a$Protein.State==i),which(colnames(a)=="Deut.Time")])
+  a<-arg_df(filepath)
+  un_times<-c()
+  for ( i in states) {
+
+    un_times<-c(un_times,unique(a[which(a$Protein.State == i),
+                                  which(colnames(a) == "Deut.Time")])) }
+
+  dt.df<-as.data.frame(table(un_times))
+
+  vdtFT<-dt.df[,2]==length(states)
+
+  if (length(unique(vdtFT))==1 & all(vdtFT) == FALSE) {
+    stop("No common Deut.Times between the Protein.States, or Protein.States named incorrectly, program will halt")
+  } else  {
+    times<-as.vector(dt.df[which(dt.df[,2]==length(states)),1])
   }
 
 
-  len_rep<-c(); for (i in unique(a$Protein.State)){
-    for (j in unique(a$Deut.Time)){
+  return(times)
+}
 
-      len_rep<-c(len_rep, length(unique(a[which(a$Protein.State==i & a$Deut.Time==j),
-                                          which(colnames(a)=="Experiment")])))
-    }}; replicates=min(len_rep)
 
-  return(list(states, times, replicates))}
+
+
+#' Returns default arguments for the output_tp functions. # replicates
+#'
+#' Function used as internal function
+#'
+#' @param filepath input file location
+#' @param states states used
+#' @param times deuteration times
+#' @return The default arguments to output_tp functions.
+#' @export
+arguments_call3<-function (filepath, states, times) {
+  a<-arg_df(filepath)
+  len_rep <- c()
+  for (i in states) {
+    for (j in times) {
+      len_rep <- c(len_rep, length(unique(a[which(a$Protein.State ==
+                                                    i & a$Deut.Time == j), which(colnames(a) == "Experiment")])))
+    }
+  }
+  replicates = min(len_rep)
+  return(replicates)
+}
+
 

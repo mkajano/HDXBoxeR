@@ -48,8 +48,8 @@ Peptides ranges are plotted as a line at corresponding \% deuteration values.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-tm_df<-output_tcourse(filepath=file_nm)
-tmP_df<-output_tcourse_proc(filepath=file_nm)
+tm_df<-output_tc(filepath=file_nm)
+tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 names_states<- nm_states(file_nm) ### returns states names
 ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3, states=names_states[1:2])
 robot_2states_indexes(thP = tmP_df, th=tm_df,

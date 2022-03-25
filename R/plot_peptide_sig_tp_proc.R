@@ -72,7 +72,7 @@ peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a_up<- output_tp(file_nm)
-#' a_proc<- output_tp_proc(file_nm)
+#' a_proc<- output_tp(file_nm, percent=TRUE)
 #' plot_peptide_sig_tp_proc(input_proc=a_proc, input_up=a_up, replicates=3, pv_cutoff=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), nb_pep_row=40 )
 #' @export

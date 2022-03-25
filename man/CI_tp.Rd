@@ -24,7 +24,7 @@ Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- output_tcourse_noSeq(file_nm)
+a<- output_tc(file_nm, seq_match=FALSE)
 sd<-sd_timepoint(df=a, replicates=3)
 CI_tp(df=sd, replicates=3, alpha=0.01 )
 CI_tp(sd)

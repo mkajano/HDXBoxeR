@@ -28,7 +28,7 @@ Returns heat map on timecourses with raw data.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- output_tcourse(file_nm)
+a<- output_tc(file_nm)
 plot_heat_map_tc(df=a, replicates=3, ranges=c(seq(0, 100, by=5), Inf))
 plot_heat_map_tc(df=a)
 }

@@ -1,5 +1,5 @@
 ####################
-#' Prepares output for HDX-MS for the deuteration uptake or percent deuteration for the time points.
+#' Prepares output for HDX-MS for the deuteration uptake or percent deuteration for the time courses.
 #'
 #' Returns a data frame organized for additional analysis.
 #' In columns are deuteration uptake or percent deuteration data for the given protein states.
@@ -17,89 +17,86 @@
 #' @return data frame with reorganized data where in columns is the deuteration uptake for Protein States.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' a<- output_tp(filepath=file_nm) ###all default parameters used
+#' a<- output_tc(filepath=file_nm) ###all default parameters used
 #' # all possible flags listed & percent deuteration output, with sequences matching
 #' #  for protein states.
-#' a<-output_tp(filepath=file_nm, replicates=3, states=c("bound", "Unbound"),
+#' a<-output_tc(filepath=file_nm, replicates=3, states=c("bound", "Unbound"),
 #' times=c("3.00s", "72000.00s"), seq_match=TRUE, csv="NA", percent=TRUE)
 #' @export
-output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA", percent=FALSE){
+output_tc<- function(filepath, replicates, states, times, seq_match=F, csv="NA", percent=FALSE){
   if(missing(states)) { states=arguments_call1(filepath); print(c("Protein.States used:", states))}
   if(missing(times)) times=arguments_call2(filepath, states); print(c("Deut.times used:", times))
   if(missing(replicates)) replicates=arguments_call3(filepath, states, times); print(c("Number of replicates used:", replicates))
 
   a<-arg_df(filepath)
   rownames(a)<-1:dim(a)[1] ##name rows
+
   ##loop below will go through Protein states, timepoints and Experiments to get replicates
   ##it will save a dataframe in wide format instead of long format, result of this loop is dataframe named "b"
+
+
   ##creates temporary df, temp1, with Protein states going through all unique protein states
-
-  uptake_seq_matchF<-function(a, percent){
-    b<-c()
-    ##creates temporary df, temp1, with Protein states going through all unique protein states
-    for (time in times){
-      temp1<-a[which(a$Deut.Time ==time),]
-      st_l<-c()
-      nbs=0
-      for (state in states){##
-        temp2<-temp1[which(temp1$Protein.State ==state ),]##creates temporary df, temp2 from one state of protein with the same timepoints
-        nb=0
-        nbs=nbs+1
-        #print(c(time, state))
-        st<-gsub(c(' '),'',state)
-        df_nm_st<-paste(st, "_", nbs,sep="")
-        st_l<-c(st_l, df_nm_st)
-        bs<-c()
-        for (exp in unique(temp2$Experiment)[1:replicates]){
-          nb=nb+1
-          df_nm<-paste("b",nb,sep="")
-          temp3<-temp2[which(temp2$Experiment == exp),]
-          n_tmp<-names(temp3)
-          nms<-c(paste(st,n_tmp[1],"_",nb,sep=""), n_tmp[2],paste(st,n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
-                 paste(st, "_",n_tmp[9],"_",nb,sep=""), paste(st, "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
-          colnames(temp3)<-nms
-          assign(df_nm, temp3)
-          bs<-c(bs, df_nm) ##creates number of data.frames that equals to number of replicates
-          df_List<-mget(bs)
-          ##will merge all the replicates dataframes to bp dataframe
-          bp<-Reduce(function(x, y) merge(x, y, by = c('Deut.Time', 'Start','End', 'Sequence', 'Search.RT',
-                                                       'Charge')), df_List)}
-        assign(df_nm_st, bp)
-      }
-      df_List2<-mget(st_l)
-      bp2<-Reduce(function(x, y) merge(x, y, by = c('Deut.Time', 'Start','End', 'Sequence', 'Search.RT',
-                                                    'Charge')), df_List2)
-      b=rbind(b, bp2)
-    } ## b has all information bound together again to have all information df
-    b<-arrange(b, Deut.Time, Start, End, Charge)
-    ord=b$Deut.Time
-    ord=as.numeric(str_sub(ord, end=-2))
-    bp1<-data.frame(b, ord)
-    bp1<-arrange(bp1, ord)
-    b<-bp1[,-dim(bp1)[2]]
-
-
-    if (percent==F){
-      tp<-data.frame(b[,1:6], b[,grep("X..Deut", colnames(b))])
-    } else if (percent==T){
-      tp<-data.frame(b[,1:6], b[,grep("Deut.._", colnames(b))])
+  tc_seq_matchT<-function(a, percent){
+  b<-c()
+  ##creates temporary df, temp1, with Protein states going through all unique protein states
+  for (state in states){
+    temp1<-a[which(a$Protein.State ==state),]
+    st_l<-c()
+    nbs=0
+    for (time in times){##
+      temp2<-temp1[which(temp1$Deut.Time ==time ),]##creates temporary df, temp2 from one state of protein with the same timepoints
+      nb=0
+      nbs=nbs+1
+      #print(c(time, state))
+      df_nm_st<-paste(time, "_", nbs,sep="")
+      st_l<-c(st_l, df_nm_st)
+      bs<-c()
+      for (exp in unique(temp2$Experiment)[1:replicates]){
+        nb=nb+1
+        df_nm<-paste("b",nb,sep="")
+        temp3<-temp2[which(temp2$Experiment == exp),]
+        n_tmp<-names(temp3)
+        nms<-c(n_tmp[1],paste("t",time,n_tmp[2],"_",nb,sep=""),paste("t",time,n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
+               paste("t",time, "_",n_tmp[9],"_",nb,sep=""), paste("t",time, "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
+        colnames(temp3)<-nms
+        assign(df_nm, temp3)
+        bs<-c(bs, df_nm) ##creates number of data.frames that equals to number of replicates
+        df_List<-mget(bs)
+        ##will merge all the replicates dataframes to bp dataframe
+        bp<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
+                                                     'Charge')), df_List)}
+      assign(df_nm_st, bp)
     }
+    df_List2<-mget(st_l)
+    bp2<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
+                                                  'Charge')), df_List2)
+    b=rbind(b, bp2)
 
-    return(tp)}
-  uptake_seq_matchT<-function(a, percent){
+  } ## b has all information bound together again to have all information df
+  b<-arrange(b, Start, End,  Charge)
+
+  if (percent==F){
+    tp<-data.frame(b[,1:6], b[,grep("X..Deut", colnames(b))])
+  } else if (percent==T){
+    tp<-data.frame(b[,1:6], b[,grep("Deut.._", colnames(b))])
+  }
+
+  return(tp)}
+
+  tc_seq_matchF<-function(a, percent){
+
     b<-c()
     ##creates temporary df, temp1, with Protein states going through all unique protein states
-    for (time in times){
-      temp1<-a[which(a$Deut.Time ==time),]
+    for (state in unique(a$Protein.State)){
+      temp1<-a[which(a$Protein.State ==state),]
       st_l<-c()
       nbs=0
-      for (state in states){##
-        temp2<-temp1[which(temp1$Protein.State ==state ),]##creates temporary df, temp2 from one state of protein with the same timepoints
+      for (time in unique(temp1$Deut.Time)){##
+        temp2<-temp1[which(temp1$Deut.Time ==time ),]##creates temporary df, temp2 from one state of protein with the same timepoints
         nb=0
         nbs=nbs+1
         #print(c(time, state))
-        st<-gsub(c(' '),'',state)
-        df_nm_st<-paste(st, "_", nbs,sep="")
+        df_nm_st<-paste(time, "_", nbs,sep="")
         st_l<-c(st_l, df_nm_st)
         bs<-c()
         for (exp in unique(temp2$Experiment)[1:replicates]){
@@ -107,24 +104,25 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
           df_nm<-paste("b",nb,sep="")
           temp3<-temp2[which(temp2$Experiment == exp),]
           n_tmp<-names(temp3)
-          nms<-c(paste(st,n_tmp[1],"_",nb,sep=""), n_tmp[2],paste(st,n_tmp[3],"_",nb,sep=""),n_tmp[4:5] ,
-                 paste(st,n_tmp[6],"_",nb,sep=""),n_tmp[7:8] ,
-                 paste(st, "_",n_tmp[9],"_",nb,sep=""), paste(st, "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
+          nms<-c(n_tmp[1],paste("t",time,n_tmp[2],"_",nb,sep=""),paste("t",time,n_tmp[3],"_",nb,sep=""),
+                 n_tmp[4:5] , paste("t",time,n_tmp[6],"_",nb,sep=""),n_tmp[7:8],
+                 paste("t",time, "_",n_tmp[9],"_",nb,sep=""), paste("t",time, "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
+
           colnames(temp3)<-nms
           assign(df_nm, temp3)
           bs<-c(bs, df_nm) ##creates number of data.frames that equals to number of replicates
           df_List<-mget(bs)
           ##will merge all the replicates dataframes to bp dataframe
-          bp<-Reduce(function(x, y) merge(x, y, by = c('Deut.Time', 'Start','End',  'Search.RT',
+          bp<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Search.RT',
                                                        'Charge')), df_List)}
         assign(df_nm_st, bp)
       }
       df_List2<-mget(st_l)
-      bp2<-Reduce(function(x, y) merge(x, y, by = c('Deut.Time', 'Start','End',  'Search.RT',
+      bp2<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Search.RT',
                                                     'Charge')), df_List2)
       b=rbind(b, bp2)
-    } ## b has all information bound together again to have all information df
 
+    }
 
     seq_df<- data.frame(b[,grep("Sequence", colnames(b))])
     seq_df<-data.frame(seq_df[,grep("Sequence_1", colnames(seq_df))])
@@ -147,14 +145,11 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
     b<-data.frame(seq_list, b)
     colnames(b)[1]<- "Sequence"
 
-    b<-arrange(b, Deut.Time, Start, End, Charge)
-    ord=b$Deut.Time
-    ord=as.numeric(str_sub(ord, end=-2))
-    bp1<-data.frame(b, ord)
-    bp1<-arrange(bp1, ord)
-    b<-bp1[,-dim(bp1)[2]]
-
     df_description <- data.frame(b[, 1:6])
+
+    ## b has all information bound together again to have all information df
+    b<-arrange(b, Start, End,  Charge)
+
 
     if (percent==F){
       tp<-data.frame(df_description, b[,grep("X..Deut", colnames(b))])
@@ -162,14 +157,13 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
       tp<-data.frame(df_description, b[,grep("Deut.._", colnames(b))])
     }
 
-    return(tp)
+    return(tp)}
 
-  }
 
   if (seq_match==F){
-    all1<-uptake_seq_matchF(a, percent)
+    all1<-tc_seq_matchF(a, percent)
   } else if (seq_match==T){
-    all1<-uptake_seq_matchT(a, percent)
+    all1<-tc_seq_matchT(a, percent)
   } else {print("incorrect seq_match argument provided, halted")
   }
 
