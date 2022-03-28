@@ -8,7 +8,8 @@ pymol_script_significant_peptide(
   df,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   pv_cutoff = 0.01,
-  replicates = 3
+  replicates = 3,
+  order.pep = TRUE
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ pymol_script_significant_peptide(
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
+
+\item{order.pep}{flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.}
 }
 \value{
 pymol script with colors assigned per peptide
@@ -32,7 +35,7 @@ Number of colors and corresponding to them ranges can be defined by user.
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
 pymol_script_significant_peptide(df=a, replicates=3, pv_cutoff=0.01,
-ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
+ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
 pymol_script_significant_peptide(df=a)
 }
 }

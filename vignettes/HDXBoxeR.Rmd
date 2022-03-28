@@ -418,7 +418,7 @@ b<-output_tp(file_nm, percent=T)
 
 ### Scripts written for significantly different peptides (uptake data). Color scheme, ranges to be colored and p-value can be changed.
 pymol_script_significant_peptide(a)
-pymol_script_significant_peptide(a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3)
+pymol_script_significant_peptide(a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3, order.pep=FALSE)
 ###same but for procent deuteration
 pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3)
 
@@ -559,8 +559,8 @@ robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff=0.01, CI_factor = 1)
 #######################
 
 pymol_script_significant_peptide(a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
-###same but for procent deuteration
-pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+###same but for percent deuteration
+pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3, order.pep=FALSE)
 
 ###scripts prepared by residue
 pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
@@ -583,7 +583,7 @@ output_prep(filepath = file_nm, output_name = "output.csv")
 output_tp(filepath =file_nm , csv = "output_test.csv")
 
 ### verbose versions of the output functions create csv files with all important data averages, sd, and pvalues for uptake data
-verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv", percent=T)
+verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv", percent=TRUE)
 
 ###########################
 ##Extreme input preparation

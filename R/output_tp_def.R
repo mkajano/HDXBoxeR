@@ -166,6 +166,8 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
 
   }
 
+
+
   if (seq_match==F){
     all1<-uptake_seq_matchF(a, percent)
   } else if (seq_match==T){
@@ -177,4 +179,11 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
     print("no csv file written")
   } else {
     write.csv(all1, file=csv)}
+
+  for ( i in 7:dim(all1)[2]){
+    if (is.character(all1[,i])==TRUE){
+      all1[,i]<-as.numeric(all1[,i])
+    }
+  }
+
   return(all1)}

@@ -171,4 +171,10 @@ output_tc<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
     print("no csv file written")
   } else {
     write.csv(all1, file=csv)}
+
+  for ( i in 7:dim(all1)[2]){
+    if (is.character(all1[,i])==TRUE){
+      all1[,i]<-as.numeric(all1[,i])
+    }}
+
   return(all1)}

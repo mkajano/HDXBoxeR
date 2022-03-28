@@ -9,11 +9,12 @@ pymol_script_significant_peptide_proc(
   input_up,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   pv_cutoff = 0.01,
-  replicates = 3
+  replicates = 3,
+  order.pep = TRUE
 )
 }
 \arguments{
-\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.}
+\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=T) function.}
 
 \item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.}
 
@@ -22,6 +23,8 @@ pymol_script_significant_peptide_proc(
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
+
+\item{order.pep}{flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.}
 }
 \value{
 pymol script with colors assigned per peptide
@@ -37,6 +40,6 @@ a_up<- output_tp(file_nm)
 a_proc<- output_tp(file_nm, percent=TRUE)
 pymol_script_significant_peptide_proc(input_proc=a_proc,
 input_up=a_up, replicates=3, pv_cutoff=0.01,
-ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
+ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
 }
 }

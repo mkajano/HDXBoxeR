@@ -7,18 +7,19 @@
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
+#' @param order.pep flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.
 #' @return pymol script with colors assigned per peptide
 #' @examples
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
 #' pymol_script_significant_peptide(df=a, replicates=3, pv_cutoff=0.01,
-#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
+#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
 #' pymol_script_significant_peptide(df=a)
 #' }
 #' @export
 pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-                                           pv_cutoff=0.01, replicates=3){
+                                           pv_cutoff=0.01, replicates=3, order.pep=TRUE){
   #####from HDX get data and
   for ( deut_time in(unique(df$Deut.Time))){
 
@@ -73,14 +74,24 @@ pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10
       output_name<-paste("pymol_all_peptides_", nm1[j],"_", deut_time, ".txt", sep="")
 
       res.txt<-c()
+      len.pep<-c()
       for ( i in 1:length(col_nm)){
         if (length(which(si_apc[,j]==i)) !=0 ) {
           pep_nb<-which(si_apc[,j] == i)
           for ( k in pep_nb){line<-c()
           line<- paste(c("color ", col_nm[i],", resi ", df1[k,start_col], "-", df1[k,end_col] , sep=""))
+          len.pep<-c(len.pep, df1[k,end_col]-df1[k,start_col] )
           res.txt<-c(res.txt,
                      paste(line, sep="' '", collapse=""))}
         }}
+
+      if (order.pep==T){
+        res.txt<-res.txt[rev(order(len.pep))]
+        print("peptides ordered according to peptide length")
+      } else if (order.pep==F){
+        print("peptides ordered according to position in sequence")}
+
+
       fileConn<-file(output_name)
       writeLines(c("hide","show cartoon","color black", "bg white",
                    set_colors, res.txt ), fileConn)
