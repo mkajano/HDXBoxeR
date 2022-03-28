@@ -61,13 +61,15 @@ Input for the HDXBoxeR should be generated using HDXExaminer from Sierra Scienti
 * Tools > Options > Display > Deuteration Table : Display all columns (we did not select show low-confidence results)
 * Tools > Export > All results table
 
-HDXBoxeR significantly facilitates the comparison of multiple different Protein States in the time series and number of replicates. We recommend using at least 3 replicates to have good statistical analysis. All the Protein States imported are required to have the same number of replicates. Another recommendation is to use only peptides the User is confident of. There is no point in analyzing bad data. 
+HDXBoxeR significantly facilitates the comparison of multiple different Protein States in the time series and number of replicates. We recommend using at least 3 replicates to have good statistical analysis. All the Protein States imported should have the same number of replicates (or it will be trimmed to such). Another recommendation is to use only peptides the User is confident of. There is no point in analyzing bad data. 
 
 The example looks as follows:
 
 ![](figures/example_table.png)
  
-The input file has 24 columns including the “Mark” column. We keep typically just peptides with high and medium confidence. Example data compares two Protein States: Unbound and Bound. Each of the sets has three replicates.  Data also should have one replicate of undeuterated and fully deuterated sets labeled as 0s and FD respectively for allowing full analysis. 
+The input file should have the following columns: Protein State, Deut Time, Experiment, Start, End, Sequence, Charge, Search RT, # Deut, Deut %. If any of these columns is missing data will not be loaded. 
+Another thing to make sure of is that the columns are properly aligned, meaning there is the name number of headers and columns, as sometimes the Confidence column gets shifted in the AllResultsTable.csv file. 
+We keep typically just peptides with high and medium confidence. Example data compares two Protein States: Unbound and Bound. Each of the sets has three replicates.  Data also should have one replicate of undeuterated and fully deuterated sets labeled as 0s and FD respectively for allowing full analysis.
 
 ## 2.	Installation & Loading
 The HDXBoxeR package is deposited in GIT.
@@ -81,22 +83,18 @@ library(HDXBoxeR)
 
 
 ## 3.	How to load data into R
-
-To load data into R you will need input as described in section 1 (file should have 24 columns!). Example input is provided as a reference and to start the fun. 
+To load data into R you will need input as described in section 1. Example input is provided as a reference, and to start the fun. 
 Data, when it is loaded, will be reprocessed to different formats depending on what kind of analysis will be performed. 
-
-There are few options in which input can be processed as listed below. Function names reflect which option is chosen.
+There are a few options in which input can be processed as listed below. Function names reflect which option is chosen.
 Input can be formatted to:
-  
 * Analyze time points **or** time courses analysis (output_tp vs output_tc functions).
 * Analyze Deuterons Uptake **or** Percent Deuteration (flag percent=F/T)
 * Use all protein states/deuteration times **or** use selected (options: states and times respectively). 
 * Use a maximum common number of replicates used **or** specify how many replicates should be used (replicates option in the function). 
 * Match Peptide sequence between protein states **or** not. Default set to match peptide sequences to prevent matching use functions with Seq.
-* Save the output to csv format of not (option: csv, if “NA”, no csv saved, otherwise specify the output name). 
+* Save the output to csv format of not (option: csv, if “NA”, no csv saved, otherwise specify the output name).
 
 Examples:
-
 
 ```{r}
 # Path to example input
@@ -129,8 +127,7 @@ a<-output_tp(filepath=file_nm, replicates=3, states=names_states[2], times=c("3.
  
 ## 4.	Statistical Analysis
 Great! Now the hardest part is done, let’s get to the actual analysis. 
-HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states. To be able to do statistics we recommend providing 3 replicates for each protein state. **Number of replicates have to be the same for all Protein States in the analysis.**  
-
+HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states. To be able to do statistics we recommend providing 3 replicates for each protein state (but duplicate data also work). **Number of replicates and Deut Time will be trimmed to be the same for all Protein States in the analysis.**  
 ### Some theoretical details about statistical analysis
 
 HDXBoxeR uses the hybrid statistical approach using Welch T-test and Critical interval statistical framework as proposed by Hageman and Weis (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016).  For peptides to be deemed significantly different they need to be deemed significant on the level of individual peptides (Welch T-test) and exceed the global critical interval for all peptides in the set. 
@@ -139,7 +136,7 @@ For details about calculation please refer to the cited paper (Hageman and Weis;
 
 ### Practical tips to doing statistical analysis in HDXBoxeR
 
-Most of the statistical analysis is already implemented in plot and other functions, but it is good to have a way to do it yourself if needed.  HDXBoxeR allows for the facile calculation of averages, the standard deviation for each set. Additionally, it allows for the calculation of global and individual critical intervals. **Individual p-values for each peptide are calculated against the first protein state based from the location from input file. ** If the user desires calculation against different protein states it can be done by loading HDXExaminer input using output*states*  type of function. 
+Most of the statistical analysis is already implemented in plot and other functions, but it is good to have a way to do it yourself if needed.  HDXBoxeR allows for the facile calculation of averages, the standard deviation for each set. Additionally, it allows for the calculation of global and individual critical intervals. **Individual p-values for each peptide are calculated against the first protein state based from the location from input file. ** If the user desires calculation against different protein states it can be done by loading HDXExaminer taking advantage of **states** parameter in output_tp() or output_tc() functions. 
 
 
 ```{r}
@@ -178,10 +175,10 @@ head(pv2)
 
 HDXBoxeR boasts with functionality to draw multiple types of plots including volcano plots, heat maps, robot plots (modified butterfly plots). 
 **Info on how to load input to HDXBoxeR can be found in section 3.**
-If the plots that are return have chopped labels adjust the fugure sizes. 
+If the plots that are return have chopped labels adjust the figure sizes. 
 
 ### Boxplots
-Boxplots allows for fast comparisons of average uptake or percent deuteration for all protein states.
+Boxplots allow for fast comparisons of average uptake or percent deuteration for all protein states.
 
 
 ```{r fig1, fig.height = 5, fig.width = 3.5}
@@ -216,11 +213,9 @@ plots_av_tp(a,replicates=3, cola=c(1:10))
 plots_av_tp_proc(b)
 
 ```
-
-
 ### Difference uptake or procent deuteration plots per time-point
 
-The average differences plots are plotting deuteration uptake (or percent deuteration) between different Protein states. As a default, the first Protein State from the input file is chosen as a state from which other values are subtracted. For example, if the input file has three Protein States: State1, State2, State2, average difference plots will show two curves for the difference in deuteration uptake: (1) State1-State2, (2) State1-State3. If other permutations are desired, use output_tp_States or similar functions to define which state should be written as first in the input file. All time-points are drawn on separate plots. The function is useful when comparing the multiple Protein States.
+The average differences plots are plotting deuteration uptake (or percent deuteration) between different Protein states. As a default, the first Protein State from the input file is chosen as a state from which other values are subtracted. For example, if the input file has three Protein States: State1, State2, State2, average difference plots will show two curves for the difference in deuteration uptake: (1) State1-State2, (2) State1-State3. If other permutations are desired, use states parameter in output_tp or output_tc functions. All time-points are drawn on separate plots. The function is useful when comparing the multiple Protein States.
 
 ```{r fig4, fig.height = 5, fig.width = 4}
 ###load data
@@ -294,8 +289,6 @@ legend_sig_peptides(ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf))
 
 ```
 
-
-
 ### Differential heat maps
 
 Differential Heat maps are plots where peptides significantly different between the sets are translated into residue-specific information. Heat maps are a fast, highly informative, and elegant way to see which regions are perturbed in the sets. Of course, it means that some information is lost (coverage). There are two options on how these calculations are performed: 1. average uptake of all significant peptides which contain that residues are calculated 2. Maximum uptake value from all peptides classified as significant with that residue in its sequence.
@@ -305,7 +298,7 @@ Differential heat maps can be calculated using the difference in percent deutera
 The example scheme for how average uptake and maximum uptake per residues are generated is shown below. 
 ![](figures/max_uptake_ave_uptake.png){width=50%}
 
-```{r fig7, fig.height = 3, fig.width = 4}
+```{r fig7, fig.height = 1.5, fig.width = 2}
 ###load data
 library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
@@ -352,9 +345,6 @@ legend_heat_map_timecourse()
 
 
 ```
-
-
-
 
 ### Robot plots
 
@@ -431,7 +421,6 @@ pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf),
 The HDXBoxeR has the functionality to return summary information about the sets: timepoints, # replicates, # peptides, peptide coverage, average peptide length, average redundancy, standard deviation, critical interval, average back exchange, and back exchange range. Information provided complies with Masson *et al.* Nature Methods volume 16, pages595–602(2019). 
 The all_summary() function requires undeuterated and Fully deuterated sets marked in Deut.time as 0s and FD respectively. Also for calculation of the back exchange Dfact parameter needs to be specified. The Dfact is the fraction of Deuterium/Hydrogen used in the labeling buffer. Default set up to 0.85
 
-
 ```{r echo = FALSE}
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 
@@ -463,7 +452,7 @@ verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv",
 ```
 ## 9. Preparation inputs for bimodal analysis for HX-Express v2
 
-To perform bimodal analysis using  HX-Express v2 (J. Am. Soc. Mass Spectrom. 2013, 24, 12, 1906–1912) spectra aligned using MassLynx (?) need to be combined into one input. The input file contains all replicates and all the time points. The HDXBoxeR prepares the inputs for HX-Express v2. The function has to be invoked in the folder where all the directories containing peptides are. HDXBoxeR will loop through all the folders and write outputs for all peptides for which information was provided. 
+To perform bimodal analysis using  HX-Express v2 (J. Am. Soc. Mass Spectrom. 2013, 24, 12, 1906–1912) spectra aligned using MassLynx need to be combined into one input. The input file contains all replicates and all the time points. The HDXBoxeR prepares the inputs for HX-Express v2. The function has to be invoked in the folder where all the directories containing peptides are. HDXBoxeR will loop through all the folders and write outputs for all peptides for which information was provided. 
 
 ```{r eval=FALSE}
 # returns empty column if data is missing
@@ -596,10 +585,6 @@ extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 18
 
 
 ```
-
-
-
-
 
 ## 11. List of all functions & parameters. 
 
