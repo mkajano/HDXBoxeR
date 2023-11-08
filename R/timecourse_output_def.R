@@ -76,9 +76,9 @@ output_tc<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
   b<-arrange(b, Start, End,  Charge)
 
   if (percent==F){
-    tp<-data.frame(b[,1:6], b[,grep("X..Deut", colnames(b))])
+    tp<-data.frame(b[,c(1:6,grep("X..Deut", colnames(b)))])
   } else if (percent==T){
-    tp<-data.frame(b[,1:6], b[,grep("Deut.._", colnames(b))])
+    tp<-data.frame(b[,c(1:6,grep("Deut.._", colnames(b)))])
   }
 
   return(tp)}
@@ -145,16 +145,14 @@ output_tc<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
     b<-data.frame(seq_list, b)
     colnames(b)[1]<- "Sequence"
 
-    df_description <- data.frame(b[, 1:6])
 
     ## b has all information bound together again to have all information df
     b<-arrange(b, Start, End,  Charge)
 
-
     if (percent==F){
-      tp<-data.frame(df_description, b[,grep("X..Deut", colnames(b))])
+      tp<-data.frame(b[,c(1:6,grep("X..Deut", colnames(b)))])
     } else if (percent==T){
-      tp<-data.frame(df_description, b[,grep("Deut.._", colnames(b))])
+      tp<-data.frame( b[,c(1:6,grep("Deut.._", colnames(b)))])
     }
 
     return(tp)}

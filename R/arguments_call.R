@@ -37,6 +37,7 @@ arguments_call2<-function (filepath, states) {
     stop("No common Deut.Times between the Protein.States, or Protein.States named incorrectly, program will halt")
   } else  {
     times<-as.vector(dt.df[which(dt.df[,2]==length(states)),1])
+    times<-times[order(as.numeric(gsub("\\D+", "", times)))]
   }
 
 
