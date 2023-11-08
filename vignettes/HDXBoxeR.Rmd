@@ -309,17 +309,18 @@ b<-output_tp(file_nm, percent=T)
 
 ##Average uptake heat maps
 ### heat maps 
-plot_heat_map_tp(a, replicates=3)
+#plot_heat_map_tp(a, replicates=3, mar_x=3)
 ##change some parameters
-plot_heat_map_tp(a, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+#plot_heat_map_tp(a, mar_x=1, 
+#                 ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), #pv_cutoff=0.01)
 
 ### heat map for procent deuteration, require both uptake and procent deuteration data frame as input
-plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
+#plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
 
 ###Maximum uptake or procent deuteration per peptide
-plot_heat_map_max_uptake_tp(a, replicates=3)
+#plot_heat_map_max_uptake_tp(a, replicates=3)
 ### 
-plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+#plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=1, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
 ```
 ```{r leg2, fig.height = 3, fig.width = 2.5}
 ## Legend for the heatmaps.
