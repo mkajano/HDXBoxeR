@@ -7,13 +7,13 @@
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
 #' @param output_name Name of output file. It has to be csv file
 #' @return Returns&saves data.frame in format that is accepted for the publications.
-#' @importFrom grDevices col2rgb colorRampPalette
-#' @importFrom graphics abline axis box boxplot legend mtext par plot points polygon rect text
+#' @importFrom grDevices col2rgb colorRampPalette rgb
+#' @importFrom graphics abline axis box boxplot legend mtext par plot points polygon rect text arrows
 #' @importFrom stats df na.omit qt sd t.test
 #' @importFrom utils head read.csv tail type.convert write.csv write.table
 #' @importFrom dplyr arrange %>%
 #' @importFrom stringr str_sub
-#' @importFrom  RColorBrewer brewer.pal
+#' @importFrom RColorBrewer brewer.pal
 #' @importFrom tidyr separate
 #' @importFrom methods rbind2
 #' @importFrom wrapr orderv

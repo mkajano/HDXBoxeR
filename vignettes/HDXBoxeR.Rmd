@@ -170,12 +170,80 @@ pv2<-pv_timepoint(h)
 head(pv2)
 ```
 
+### States, replicates, timepoints etc
+
+There are few variables that are going to be useful while analyzing the data. It might be a good idea to have them saved in the memory. One can call them as follows:
+
+```{r}
+###load data
+library(HDXBoxeR)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+
+states<-arguments_call1(filepath=file_nm)
+times<-arguments_call2(filepath=file_nm, states=states)
+replicates<-arguments_call3(filepath=file_nm, states=states, times=times)
+
+```
+
+
+### Sub-setting of the input table
+
+Sometimes we do not want to work on or plot the whole imported data set. One can either load a smaller subset or choose a part of the subset from the loaded data set to work on the subset. The already loaded data can be subsetted using select_indices function or by choosing desired columns from the loaded data. In the loaded data first 6 columns are always the columns that describe peptides, the rest of the columns are data. 
+
+```{r}
+###load data
+library(HDXBoxeR)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+a<-output_tp(file_nm) 
+
+#To choose only the Second state from the loaded data one could simply select desired columns such as:
+a2<-a[,c(1:6, 10:12)]
+
+#if one wants to focus just on the few first peptides in the data it is possible to select a few rows from the input data. 
+a2<-a[1:3,]
+
+#To have more control of the selecting one can also use the select_indices functions as follows:
+##for output_tp function variables that can be used are:
+#below one time of 60s was used for peptides that started at residue 50, ended at residue 100 and were maximum 12 residues long. 
+#not all parameters need to be used.
+inda<-select_indices(a,  times = c("60.00s"),start = 50, end=100, length=12)
+
+#after the indices are selected the input can be subsetted as normal
+
+a2<-a[inda,]
+
+##for the output_tc function allowed are the following parameters
+b<-output_tc(file_nm) 
+indb<-select_indices(b,  states = "bound",start = 50, end=100, length=12)
+
+head(b[indb,1:6])
+
+```
+
 
 ## 5. Plots
 
 HDXBoxeR boasts with functionality to draw multiple types of plots including volcano plots, heat maps, robot plots (modified butterfly plots). 
 **Info on how to load input to HDXBoxeR can be found in section 3.**
 If the plots that are return have chopped labels adjust the figure sizes. 
+
+
+### Uptake plots
+
+Sometimes it is just useful to look at raw-ish data. Uptake plots are the answer here
+```{r figuptake, fig.height = 3.5, fig.width = 5}
+###load data
+library(HDXBoxeR)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+a<-output_tc(file_nm, percent=TRUE) 
+
+# define the timepoint using in the experiment. Here the times in seconds
+x<-c(3, 60,1800, 72000)
+par(mfrow=c(1,2))
+uptake_plots(a[1:4,],x)
+
+```
+
 
 ### Boxplots
 Boxplots allow for fast comparisons of average uptake or percent deuteration for all protein states.
@@ -298,7 +366,7 @@ Differential heat maps can be calculated using the difference in percent deutera
 The example scheme for how average uptake and maximum uptake per residues are generated is shown below. 
 ![](figures/max_uptake_ave_uptake.png){width=50%}
 
-```{r fig7, fig.height = 1.5, fig.width = 2}
+```{r fig7, fig.height = 3, fig.width = 5}
 ###load data
 library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
@@ -309,23 +377,43 @@ b<-output_tp(file_nm, percent=T)
 
 ##Average uptake heat maps
 ### heat maps 
-#plot_heat_map_tp(a, replicates=3, mar_x=3)
+plot_heat_map_tp(a, replicates=3, mar_x=3)
 ##change some parameters
-#plot_heat_map_tp(a, mar_x=1, 
-#                 ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), #pv_cutoff=0.01)
+plot_heat_map_tp(a, mar_x=1, 
+                 ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
 
-### heat map for procent deuteration, require both uptake and procent deuteration data frame as input
-#plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
+### heat map for percent deuteration, require both uptake and percent deuteration data frame as input
+plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
 
-###Maximum uptake or procent deuteration per peptide
-#plot_heat_map_max_uptake_tp(a, replicates=3)
-### 
-#plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=1, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+###Maximum uptake or percent deuteration per peptide
+plot_heat_map_max_uptake_tp(a, replicates=3)
+### #
+plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=1, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
 ```
 ```{r leg2, fig.height = 3, fig.width = 2.5}
 ## Legend for the heatmaps.
 #default ranges for figures does not require argument
 legend_heat_map(ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf))
+
+```
+
+### Woods plots
+
+Woods plots come in two flavors one that looks at the timecourse or timepoints. Below are example. The usage of the subset_indices is highly recommended. 
+```{r fig_woods, fig.height = 5, fig.width = 5}
+##
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+
+
+tp_aP<-output_tp(filepath = file_nm, percent=T) #timepoints
+indp<-select_indices(tp_aP,  times = c("3.00s", "60.00s"))
+deuteration_woods_timepoints(tp_aP[indp,])
+
+## input for timecourses 
+tc_aP<-output_tc(filepath = file_nm, percent=T) #timecourse
+deuteration_woods_timecourse(tc_aP)
+
+
 
 ```
 
@@ -395,6 +483,27 @@ inds2=inds[c(1,4, 7,8, 9, 11,13,14, 15,16, 20,21, 24)] ### pick which peptides y
 robot_2states_indexes(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2],indexes = inds2, pvalue=0.001, CI_factor = 2, ylim=c(-120, 120), xlim=c(50, 230))
 
 ```
+
+### Woods_CI plots
+
+Very similar to robot plots, but slightly different representation. 
+
+```{r fig_woods_CI, fig.height = 5, fig.width = 5}
+###load data
+library(HDXBoxeR)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+## input for timecourses for procent deuteration and uptake
+tc_a<-output_tc(filepath = file_nm)
+tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
+
+###All peptides drawn 
+woods_CI_plot(thP = tc_aP, th=tc_a)
+###USe more stingent parameters to have less peptides drawn. CI_factor is a factor that modifies (multiplicate) Critial interval. 
+woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
+
+
+```
+
 
 ## 6.	Scripts for Pymol
 
