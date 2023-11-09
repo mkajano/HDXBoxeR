@@ -5,11 +5,7 @@
 #' @param input_data output from function output_tp(..., percent=T)
 #' @param cola colors, default NA
 #' @param times Deuteration times, if missing all deuteration times used
-<<<<<<< HEAD
 #' @param replicates replicates
-=======
-#' @replicates replicates
->>>>>>> 9d7c7e48a7048366fd2426fa4c37fa872ddfe906
 #' @param ... other parameters
 #' @return Woods plots for the timepoints
 #' @examples
