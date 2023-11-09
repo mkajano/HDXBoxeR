@@ -5,6 +5,7 @@
 #' @param input_data output from function output_tp(..., percent=T)
 #' @param cola colors, default NA
 #' @param timepoints the labeling times
+#' @param replicates replicates
 #' @return  Uptake plots
 #' @examples
 #' \donttest{
@@ -14,10 +15,10 @@
 #' uptake_plots(a, x)
 #' }
 #' @export
-uptake_plots<-function(input_data, timepoints,cola=NA) {
+uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA) {
   indd<-c()
-  a1<-ave_timepoint(input_data)
-  s1<-sd_timepoint(input_data)
+  a1<-ave_timepoint(input_data, replicates)
+  s1<-sd_timepoint(input_data, replicates)
 
   indd<-duplicate_sets(input_data[,c(3,4,6,1)])
   states=unique(a1$Protein.State)

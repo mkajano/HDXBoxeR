@@ -407,11 +407,11 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 
 tp_aP<-output_tp(filepath = file_nm, percent=T) #timepoints
 indp<-select_indices(tp_aP,  times = c("3.00s", "60.00s"))
-deuteration_woods_timepoints(tp_aP[indp,])
+deuteration_woods_timepoints(tp_aP[indp,], replicates = 3)
 
 ## input for timecourses 
 tc_aP<-output_tc(filepath = file_nm, percent=T) #timecourse
-deuteration_woods_timecourse(tc_aP)
+deuteration_woods_timecourse(tc_aP, replicates=3)
 
 
 

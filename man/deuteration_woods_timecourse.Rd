@@ -4,12 +4,14 @@
 \alias{deuteration_woods_timecourse}
 \title{Return woods plots for the timecourse}
 \usage{
-deuteration_woods_timecourse(input_data, states, ...)
+deuteration_woods_timecourse(input_data, states, replicates = 3, ...)
 }
 \arguments{
 \item{input_data}{output from function output_tc(..., percent=T)}
 
 \item{states}{states, if missing all states used}
+
+\item{replicates}{replicates}
 
 \item{...}{other parameters}
 }

@@ -4,12 +4,14 @@
 \alias{uptake_plots}
 \title{Uptake plots}
 \usage{
-uptake_plots(input_data, timepoints, cola = NA)
+uptake_plots(input_data, timepoints, replicates = 3, cola = NA)
 }
 \arguments{
 \item{input_data}{output from function output_tp(..., percent=T)}
 
 \item{timepoints}{the labeling times}
+
+\item{replicates}{replicates}
 
 \item{cola}{colors, default NA}
 }

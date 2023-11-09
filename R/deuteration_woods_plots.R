@@ -5,6 +5,7 @@
 #' @param input_data output from function output_tp(..., percent=T)
 #' @param cola colors, default NA
 #' @param times Deuteration times, if missing all deuteration times used
+#' @param replicates replicates
 #' @param ... other parameters
 #' @return Woods plots for the timepoints
 #' @examples
@@ -14,10 +15,10 @@
 #' deuteration_woods_timepoints(a)
 #' }
 #' @export
-deuteration_woods_timepoints<-function(input_data,times, cola=NA,...) {
+deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA,...) {
   if(missing(times)) times=unique(input_data$Deut.Time)
-  a1<-ave_timepoint(input_data)
-  s1<-sd_timepoint(input_data)
+  a1<-ave_timepoint(input_data, replicates)
+  s1<-sd_timepoint(input_data, replicates)
 
   if (is.na(cola[1])==F){
 
@@ -65,6 +66,7 @@ deuteration_woods_timepoints<-function(input_data,times, cola=NA,...) {
 #'
 #' @param input_data output from function output_tc(..., percent=T)
 #' @param states states, if missing all states used
+#' @param replicates replicates
 #' @param ... other parameters
 #' @return Woods plots for the timecourse
 #' @examples
@@ -74,10 +76,10 @@ deuteration_woods_timepoints<-function(input_data,times, cola=NA,...) {
 #' deuteration_woods_timecourse(a)
 #' }
 #' @export
-deuteration_woods_timecourse<-function(input_data, states, ...) {
+deuteration_woods_timecourse<-function(input_data, states, replicates=3, ...) {
   if(missing(states)) states=unique(input_data$Protein.State)
-  a1<-ave_timepoint(input_data)
-  s1<-sd_timepoint(input_data)
+  a1<-ave_timepoint(input_data, replicates)
+  s1<-sd_timepoint(input_data, replicates)
 
 
   cola<-colorRampPalette(brewer.pal(9,"YlGnBu")[4:9])(length(7:dim(a1)[2]))

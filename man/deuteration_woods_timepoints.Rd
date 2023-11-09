@@ -4,12 +4,14 @@
 \alias{deuteration_woods_timepoints}
 \title{Return woods plots for the timepoints}
 \usage{
-deuteration_woods_timepoints(input_data, times, cola = NA, ...)
+deuteration_woods_timepoints(input_data, times, replicates = 3, cola = NA, ...)
 }
 \arguments{
 \item{input_data}{output from function output_tp(..., percent=T)}
 
 \item{times}{Deuteration times, if missing all deuteration times used}
+
+\item{replicates}{replicates}
 
 \item{cola}{colors, default NA}
 
