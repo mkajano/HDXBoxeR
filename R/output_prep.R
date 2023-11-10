@@ -9,6 +9,7 @@
 #' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
+#' @param percent return either uptake or percent deuteration, default=FALSE, return uptake
 #' @return Returns&saves data.frame in format that is accepted for the publications.
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' @importFrom graphics abline axis box boxplot legend mtext par plot points polygon rect text arrows
@@ -26,16 +27,14 @@
 #' output_prep(filepath=file_nm, "output_file_name.csv")
 #' }
 #' @export
-output_prep<-function(filepath, output_name, states, replicates, times){
+output_prep<-function(filepath, output_name, states, replicates, times, percent=FALSE){
   if(missing(states)) { states=arguments_call1(filepath); print(c("Protein.States used:", states))}
   if(missing(times)) times=arguments_call2(filepath, states); print(c("Deut.times used:", times))
   if(missing(replicates)) replicates=arguments_call3(filepath, states, times); print(c("Number of replicates used:", replicates))
 
-
   undeut<-arg_UN_FD(filepath)[[1]]
   FD<-arg_UN_FD(filepath)[[2]]
   a<-arg_UN_FD(filepath)[[3]]
-  rownames(a)<-1:dim(a)[1] ##name rows
 
   a<-na.omit(a)
   rownames(a)<-1:dim(a)[1] ##name rows
@@ -71,20 +70,23 @@ output_prep<-function(filepath, output_name, states, replicates, times){
           names(b)[grep("Exp.Cent", colnames(b))], names(b)[grep("X..Deut", colnames(b))], names(b)[grep("Deut.._", colnames(b))] )
   b<-b[,ord1]
 
-  col_deut<-c(grep("X..Deut", colnames(b)))
-  chars <- sapply(b[, col_deut], is.character)
-  if (chars[1] == TRUE){
-    b[ , col_deut[which(chars==TRUE)]] <- as.data.frame(apply(b[ , col_deut[which(chars==TRUE)]], 2, as.numeric))}
 
 
   ###calculate means +sd and write to out dataframe. Later assign names, choose only important
-  out<-data.frame(b[,1:7], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
-                  round(rowMeans(b[,grep("X..Deut", colnames(b))]), digits = 4),
-                  round(apply(b[,grep("X..Deut", colnames(b))],1,sd), digits=4))
+
+  FD2<-data.frame(FD[,c(1,2,4:6,8,7,9)], rep(0,times=dim(FD)[1]), rep(0,times=dim(FD)[1]), rep(0,times=dim(FD)[1]))
+  undeut2<-data.frame(undeut[,c(1,2,4:6,8,7,9)], rep(0,times=dim(undeut)[1]),  rep(0,times=dim(undeut)[1]), rep(0,times=dim(undeut)[1]))
+
+  if (percent==FALSE){
+    col_deut<-c(grep("X..Deut", colnames(b)))
+    chars <- sapply(b[, col_deut], is.character)
+    if (chars[1] == TRUE){
+      b[ , col_deut[which(chars==TRUE)]] <- as.data.frame(apply(b[ , col_deut[which(chars==TRUE)]], 2, as.numeric))}
 
   ###prepare Full deuteration data.frame to be bound without data.frame.
-  FD2<-data.frame(FD[,c(1,2,4:6,8,7)], rep(0,times=dim(FD)[1]), FD[,10], rep(0,times=dim(FD)[1]))
-  undeut2<-data.frame(undeut[,c(1,2,4:6,8,7,3,9)], rep(0,times=dim(undeut)[1]),  rep(0,times=dim(undeut)[1]), rep(0,times=dim(undeut)[1]))
+    out<-data.frame(b[,1:7], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
+                    round(rowMeans(b[,grep("X..Deut", colnames(b))]), digits = 4),
+                    round(apply(b[,grep("X..Deut", colnames(b))],1,sd), digits=4))
 
   nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge",
               "Mean.Peptide_Mass_[Da]", "st.dev_Peptide_Mass",
@@ -93,12 +95,34 @@ output_prep<-function(filepath, output_name, states, replicates, times){
   colnames(FD2)<-nm_final
   colnames(undeut2)<-nm_final
   colnames(out)<-nm_final
+  } else { ###percent deuteration
+    col_deut<-c(grep("Deut.._", colnames(b)))
+    chars <- sapply(b[, col_deut], is.character)
+    if (chars[1] == TRUE){
+      b[ , col_deut[which(chars==TRUE)]] <- as.data.frame(apply(b[ , col_deut[which(chars==TRUE)]], 2, as.numeric))}
+
+
+    out<-data.frame(b[,1:7], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
+                    round(rowMeans(b[,grep("Deut.._", colnames(b))]), digits = 4),
+                    round(apply(b[,grep("Deut.._", colnames(b))],1,sd), digits=4))
+
+    nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge",
+                "Mean.Peptide_Mass_[Da]", "st.dev_Peptide_Mass",
+                "Mean.Percent_Deut_[Da]", "st.dev_Percent_Deut")
+
+    colnames(FD2)<-nm_final
+    colnames(undeut2)<-nm_final
+    colnames(out)<-nm_final
+  }
+
 
 
   out<-rbind(out, FD2)
   out<-rbind(out, undeut2)
-  out<-out[,c(1:6,9,11,12)]
-  out<-(arrange(out, Start, End, Protein.State))
+  out<-out[,c(1:8,10:11)]
+
+
+  out<-(arrange(out, Start, End, Protein.State, Charge))
   ##find a way to order correctly assign negative time to zero and
   ##very long time for FD and order based of these columns
   ##if bp does not work use out
@@ -109,7 +133,7 @@ output_prep<-function(filepath, output_name, states, replicates, times){
   ord=as.numeric(str_sub(ord, end=-2))
 
   bp<-data.frame(out, ord)
-  bp<-arrange(bp, Start, End, Protein.State, ord)
+  bp<-arrange(bp, Start, End, Protein.State, Charge, ord)
   bp<-bp[,-dim(bp)[2]]
   ###write output
   write.csv(bp, output_name, row.names = FALSE)

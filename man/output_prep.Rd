@@ -4,7 +4,7 @@
 \alias{output_prep}
 \title{Prepares output with HDX-MS data for publications}
 \usage{
-output_prep(filepath, output_name, states, replicates, times)
+output_prep(filepath, output_name, states, replicates, times, percent = FALSE)
 }
 \arguments{
 \item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
@@ -16,6 +16,8 @@ output_prep(filepath, output_name, states, replicates, times)
 \item{replicates}{number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.}
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
+
+\item{percent}{return either uptake or percent deuteration, default=FALSE, return uptake}
 }
 \value{
 Returns&saves data.frame in format that is accepted for the publications.
