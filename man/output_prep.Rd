@@ -4,12 +4,18 @@
 \alias{output_prep}
 \title{Prepares output with HDX-MS data for publications}
 \usage{
-output_prep(filepath, output_name)
+output_prep(filepath, output_name, states, replicates, times)
 }
 \arguments{
 \item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
 
 \item{output_name}{Name of output file. It has to be csv file}
+
+\item{states}{function allows to choose what states should be used for analysis. Default all states are used.}
+
+\item{replicates}{number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.}
+
+\item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 }
 \value{
 Returns&saves data.frame in format that is accepted for the publications.

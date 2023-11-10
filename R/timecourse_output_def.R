@@ -87,11 +87,11 @@ output_tc<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
 
     b<-c()
     ##creates temporary df, temp1, with Protein states going through all unique protein states
-    for (state in unique(a$Protein.State)){
+    for (state in states){
       temp1<-a[which(a$Protein.State ==state),]
       st_l<-c()
       nbs=0
-      for (time in unique(temp1$Deut.Time)){##
+      for (time in times){##
         temp2<-temp1[which(temp1$Deut.Time ==time ),]##creates temporary df, temp2 from one state of protein with the same timepoints
         nb=0
         nbs=nbs+1

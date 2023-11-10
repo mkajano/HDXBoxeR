@@ -6,6 +6,9 @@
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
 #' @param output_name Name of output file. It has to be csv file
+#' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
+#' @param states function allows to choose what states should be used for analysis. Default all states are used.
+#' @param times lists the deuteration times to be used in analysis. Default all states used.
 #' @return Returns&saves data.frame in format that is accepted for the publications.
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' @importFrom graphics abline axis box boxplot legend mtext par plot points polygon rect text arrows
@@ -23,37 +26,29 @@
 #' output_prep(filepath=file_nm, "output_file_name.csv")
 #' }
 #' @export
-output_prep<- function(filepath, output_name){
-  Start<-c()
-  End<-c()
+output_prep<-function(filepath, output_name, states, replicates, times){
+  if(missing(states)) { states=arguments_call1(filepath); print(c("Protein.States used:", states))}
+  if(missing(times)) times=arguments_call2(filepath, states); print(c("Deut.times used:", times))
+  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); print(c("Number of replicates used:", replicates))
 
-  a<-read.csv(file=filepath,  header = F, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = T, row.names = NULL, nrows = 1)###load the header names
-  nm1<-colnames(nm)
-  colnames(a)<-c(nm1) ##assign names to the columns
-  a<-a[,c(1:6,8,9, 17, 21, 22)]
 
-  if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
-    undeut<-a[which(a$Deut.Time == '0s'),]}
-  if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
-    a<-a[-which(a$Deut.Time == c('0.00s')),]}
-  if (all(a$Deut.Time == 'FD')== FALSE & length(unique(a$Deut.Time == 'FD'))==2){
-    FD<-a[which(a$Deut.Time == 'FD'),]
-    a<-a[-which(a$Deut.Time == c('FD')),]}
-
+  undeut<-arg_UN_FD(filepath)[[1]]
+  FD<-arg_UN_FD(filepath)[[2]]
+  a<-arg_UN_FD(filepath)[[3]]
+  rownames(a)<-1:dim(a)[1] ##name rows
 
   a<-na.omit(a)
   rownames(a)<-1:dim(a)[1] ##name rows
   ##loop below will go through Protein states, timepoints and Experiments to get replicates
   ##it will save a dataframe in wide format instead of long format, result of this loop is dataframe named "b"
   b<-c()
-  for (state in unique(a$Protein.State)){##
+  for (state in states){##
     temp1<-a[which(a$Protein.State ==state ),] ##creates temporary df, temp1, with Protein states going through all unique protein states
-    for (time in unique(temp1$Deut.Time)){
+    for (time in times){
       temp2<-temp1[which(temp1$Deut.Time ==time),]##creates temporary df, temp2 from one state of protein with the same timepoints
       nb=0
       bs<-c()
-      for (exp in unique(temp2$Experiment)){
+      for (exp in unique(temp2$Experiment)[1:replicates]){
         nb=nb+1
         df_nm<-paste("b",nb,sep="")
         temp3<-temp2[which(temp2$Experiment == exp),]
@@ -75,15 +70,23 @@ output_prep<- function(filepath, output_name){
           names(b)[grep("Experiment", colnames(b))],
           names(b)[grep("Exp.Cent", colnames(b))], names(b)[grep("X..Deut", colnames(b))], names(b)[grep("Deut.._", colnames(b))] )
   b<-b[,ord1]
-  ###calculate means +sd and write to out dataframe. Later assign names, choose only important
-  out<-data.frame(b[,1:8], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
-                  rowMeans(b[,grep("X..Deut", colnames(b))]),apply(b[,grep("X..Deut", colnames(b))],1,sd))
 
-  ###prepare Full deuteration data.frame to be bound with out data.frame.
-  FD2<-data.frame(FD[,c(1,2,4:6,8,7,3,9)], rep(0,times=dim(FD)[1]), FD[,10], rep(0,times=dim(FD)[1]))
+  col_deut<-c(grep("X..Deut", colnames(b)))
+  chars <- sapply(b[, col_deut], is.character)
+  if (chars[1] == TRUE){
+    b[ , col_deut[which(chars==TRUE)]] <- as.data.frame(apply(b[ , col_deut[which(chars==TRUE)]], 2, as.numeric))}
+
+
+  ###calculate means +sd and write to out dataframe. Later assign names, choose only important
+  out<-data.frame(b[,1:7], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
+                  round(rowMeans(b[,grep("X..Deut", colnames(b))]), digits = 4),
+                  round(apply(b[,grep("X..Deut", colnames(b))],1,sd), digits=4))
+
+  ###prepare Full deuteration data.frame to be bound without data.frame.
+  FD2<-data.frame(FD[,c(1,2,4:6,8,7)], rep(0,times=dim(FD)[1]), FD[,10], rep(0,times=dim(FD)[1]))
   undeut2<-data.frame(undeut[,c(1,2,4:6,8,7,3,9)], rep(0,times=dim(undeut)[1]),  rep(0,times=dim(undeut)[1]), rep(0,times=dim(undeut)[1]))
 
-  nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge","Experiment",
+  nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge",
               "Mean.Peptide_Mass_[Da]", "st.dev_Peptide_Mass",
               "Mean.Deut.Uptake_[Da]", "st.dev_Deut_Uptake")
 
@@ -111,3 +114,57 @@ output_prep<- function(filepath, output_name){
   ###write output
   write.csv(bp, output_name, row.names = FALSE)
   return()}
+
+
+
+
+#' Returns initially processed data.frame from the export from the HDXExaminer
+#'
+#' Function used as internal function
+#'
+#' @param filepath input file location
+#' @return Data.frame for further processing
+#' @export
+arg_UN_FD<-function(filepath){
+  a <- read.csv(file = filepath, header = F, skip = 1)
+  nm <- read.csv(file = filepath, header = T, row.names = NULL,
+                 nrows = 1)
+  nm1 <- colnames(nm)
+
+  if(length(unique(nm1=="row.names"))==2){
+    nm1<-nm1[-which(nm1=="row.names")]
+    nm1<-c(nm1, "row.names")}
+
+  colnames(a) <- c(nm1)
+
+  dif_col<- setdiff(c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
+                      "Charge", "Search.RT", "X..Deut", "Deut.."), nm1)
+
+  if (length(dif_col)!=0)
+  {stop(paste("input file missing column(s): ", dif_col, sep=""))}
+
+
+  undeut <- a[a$Deut.Time=="0s",c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
+                                  "Charge", "Search.RT","Exp.Cent", "X..Deut", "Deut..")]
+  FD <- a[a$Deut.Time=="FD",c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
+                              "Charge", "Search.RT","Exp.Cent", "X..Deut", "Deut..")]
+
+
+  a <- a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
+            "Charge", "Search.RT","Exp.Cent", "X..Deut", "Deut..")]
+  if (all(a$Deut.Time == "0.00s") == FALSE & length(unique(a$Deut.Time ==
+                                                           "0.00s")) == 2) {
+    a <- a[-which(a$Deut.Time == c("0.00s")), ]  }
+  if (all(a$Deut.Time == "FD") == FALSE & length(unique(a$Deut.Time ==
+                                                        "FD")) == 2) {
+    a <- a[-which(a$Deut.Time == c("FD")), ]}
+  if (all(a$Deut.Time == "0s") == FALSE & length(unique(a$Deut.Time ==
+                                                        "0s")) == 2) {
+    a <- a[-which(a$Deut.Time == c("0s")), ] }
+  a <- na.omit(a)
+
+
+  return(list(undeut, FD, a))
+}
+
+
