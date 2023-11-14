@@ -20,6 +20,8 @@
 #' @export
 pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            pv_cutoff=0.01, replicates=3, order.pep=TRUE){
+
+
   #####from HDX get data and
   for ( deut_time in(unique(df$Deut.Time))){
 
@@ -86,7 +88,12 @@ pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10
         }}
 
       if (order.pep==T){
-        res.txt<-res.txt[rev(order(len.pep))]
+        nsig_pep<-res.txt[grep("color NSig",res.txt)]
+        sig_pep<-res.txt[grep("color col", res.txt)]
+        len_pep_sig<-len.pep[grep("color col", res.txt)]
+        sig_pep<-sig_pep[rev(order(len_pep_sig))]
+        res.txt<-c(nsig_pep, sig_pep)
+
         print("peptides ordered according to peptide length")
       } else if (order.pep==F){
         print("peptides ordered according to position in sequence")}

@@ -6,6 +6,7 @@
 #' @param cola colors, default NA
 #' @param times Deuteration times, if missing all deuteration times used
 #' @param replicates replicates
+#' @param ylim y axis limits
 #' @param ... other parameters
 #' @return Woods plots for the timepoints
 #' @examples
@@ -15,8 +16,9 @@
 #' deuteration_woods_timepoints(a)
 #' }
 #' @export
-deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA,...) {
+deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, ylim=c(0,120), ...) {
   if(missing(times)) times=unique(input_data$Deut.Time)
+
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
 
@@ -35,7 +37,7 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA,.
   for (time in times){
     indc<-c()
     indc=0
-    pl_gen_ch2(a1, ddlab = 1, ylim=c(0,120))
+    pl_gen_ch2(a1, ddlab = 1,ylim=ylim, ...)
 
     a2<-c()
     a2<-a1[a1$Deut.Time==time,]
@@ -67,6 +69,7 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA,.
 #' @param input_data output from function output_tc(..., percent=T)
 #' @param states states, if missing all states used
 #' @param replicates replicates
+#' @param ylim y axis limits
 #' @param ... other parameters
 #' @return Woods plots for the timecourse
 #' @examples
@@ -76,7 +79,7 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA,.
 #' deuteration_woods_timecourse(a)
 #' }
 #' @export
-deuteration_woods_timecourse<-function(input_data, states, replicates=3, ...) {
+deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(0,120), ...) {
   if(missing(states)) states=unique(input_data$Protein.State)
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
@@ -92,7 +95,7 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ...) {
   for (state in states){
     indc<-c()
     indc=0
-    pl_gen_ch2(a1, ddlab = 1, ylim=c(0,120))
+    pl_gen_ch2(a1, ddlab = 1, ylim=ylim, ...)
 
     a2<-c()
     a2<-a1[a1$Protein.State==state,]
@@ -131,6 +134,7 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ...) {
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
+#' @param ylim y axis limit
 #' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
 #' @return Woods plots with chosen statistically different peptides
 #' @examples
@@ -142,7 +146,7 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ...) {
 #' }
 #' @export
 woods_CI_plot<-function(thP, th, replicates=3,
-                        pv_cutoff=0.01, states, CI_factor=1){
+                        pv_cutoff=0.01, states, CI_factor=1, ylim=c(0,120), ...){
   if(missing(states)) states=unique(thP$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -150,8 +154,8 @@ woods_CI_plot<-function(thP, th, replicates=3,
 
 
   pl1f<-function(){
-    plot(x=1, type = "n", ylim=c(0, 120), xlim=c(min(thP$Start), max(thP$End)), ylab="",
-         xlab="", yaxt="n")
+    plot(x=1, type = "n", xlim=c(min(thP$Start), max(thP$End)), ylab="",
+         xlab="", yaxt="n", ylim=ylim, ...)
     axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
     axis(2, at=seq(-1000, 1000, by=50), cex.axis=1, labels=c(rev(seq(50,1000, by=50)), seq(0,1000, by=50)))
     axis(2, at=seq(-1000, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)

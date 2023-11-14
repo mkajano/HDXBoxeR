@@ -594,6 +594,14 @@ tc_a<-output_tc(filepath = file_nm)
 tc_aP<-output_tc(filepath = file_nm, percent=T)
 
 
+###########################
+##definition of some important variables
+###################
+
+states<-arguments_call1(filepath=file_nm)
+times<-arguments_call2(filepath=file_nm, states=states)
+replicates<-arguments_call3(filepath=file_nm, states=states, times=times)
+
 ######################################
 ## Statistical analysis
 #####################################
@@ -612,6 +620,14 @@ CI_2pts(s1 = sd1[,7], s2=sd1[,8], replicates = 3)
 pv1<-pv_timepoint(a)
 
 ## Plots
+
+##uptake plots
+
+# define the timepoint using in the experiment. Here the times in seconds
+x<-c(4, 60,1800, 72000)
+par(mfrow=c(1,2))
+uptake_plots(tc_aP[1:4,],x)
+
 
 # Boxplots
 boxplot_tp(a, col= c("gold2", "dodgerblue"))
@@ -651,6 +667,22 @@ legend_heat_map_timecourse()
 
 ###Robot plots for the timecourses
 robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff=0.01, CI_factor = 1)
+
+##############Woods plots
+##timecourse and timepoint woods plots
+################
+
+indp<-select_indices(b,  times = c("3.00s", "60.00s"))
+deuteration_woods_timepoints(b[indp,], replicates = 3)
+
+## input for timecourses 
+deuteration_woods_timecourse(tc_aP, replicates=3)
+
+###woods plots
+woods_CI_plot(thP = tc_aP, th=tc_a)
+###USe more stingent parameters to have less peptides drawn. CI_factor is a factor that modifies (multiplicate) Critial interval. 
+woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
+
 
 
 #######################
