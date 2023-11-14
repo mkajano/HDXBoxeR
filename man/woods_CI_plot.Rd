@@ -4,7 +4,16 @@
 \alias{woods_CI_plot}
 \title{Returns a woods plot for comparisons of the timepoints samples}
 \usage{
-woods_CI_plot(thP, th, replicates = 3, pv_cutoff = 0.01, states, CI_factor = 1)
+woods_CI_plot(
+  thP,
+  th,
+  replicates = 3,
+  pv_cutoff = 0.01,
+  states,
+  CI_factor = 1,
+  ylim = c(0, 120),
+  ...
+)
 }
 \arguments{
 \item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
@@ -18,6 +27,10 @@ woods_CI_plot(thP, th, replicates = 3, pv_cutoff = 0.01, states, CI_factor = 1)
 \item{states}{Protein states from the set. As default all states are chosen.}
 
 \item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
+
+\item{ylim}{y axis limit}
+
+\item{...}{other variables}
 }
 \value{
 Woods plots with chosen statistically different peptides

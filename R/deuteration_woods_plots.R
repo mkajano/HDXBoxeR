@@ -135,6 +135,7 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
 #' @param ylim y axis limit
+#' @param ... other variables
 #' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
 #' @return Woods plots with chosen statistically different peptides
 #' @examples

@@ -4,7 +4,13 @@
 \alias{deuteration_woods_timecourse}
 \title{Return woods plots for the timecourse}
 \usage{
-deuteration_woods_timecourse(input_data, states, replicates = 3, ...)
+deuteration_woods_timecourse(
+  input_data,
+  states,
+  replicates = 3,
+  ylim = c(0, 120),
+  ...
+)
 }
 \arguments{
 \item{input_data}{output from function output_tc(..., percent=T)}
@@ -12,6 +18,8 @@ deuteration_woods_timecourse(input_data, states, replicates = 3, ...)
 \item{states}{states, if missing all states used}
 
 \item{replicates}{replicates}
+
+\item{ylim}{y axis limits}
 
 \item{...}{other parameters}
 }

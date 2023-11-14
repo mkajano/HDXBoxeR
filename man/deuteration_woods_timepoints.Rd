@@ -4,7 +4,14 @@
 \alias{deuteration_woods_timepoints}
 \title{Return woods plots for the timepoints}
 \usage{
-deuteration_woods_timepoints(input_data, times, replicates = 3, cola = NA, ...)
+deuteration_woods_timepoints(
+  input_data,
+  times,
+  replicates = 3,
+  cola = NA,
+  ylim = c(0, 120),
+  ...
+)
 }
 \arguments{
 \item{input_data}{output from function output_tp(..., percent=T)}
@@ -14,6 +21,8 @@ deuteration_woods_timepoints(input_data, times, replicates = 3, cola = NA, ...)
 \item{replicates}{replicates}
 
 \item{cola}{colors, default NA}
+
+\item{ylim}{y axis limits}
 
 \item{...}{other parameters}
 }
