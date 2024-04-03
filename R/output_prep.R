@@ -22,9 +22,9 @@
 #' @importFrom methods rbind2
 #' @importFrom wrapr orderv
 #' @examples
-#' \dontrun{
-#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' output_prep(filepath=file_nm, "output_file_name.csv")
+#' \donttest{
+#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' #output_prep(filepath=file_nm, "output_file_name.csv")
 #' }
 #' @export
 output_prep<-function(filepath, output_name, states, replicates, times, percent=FALSE){

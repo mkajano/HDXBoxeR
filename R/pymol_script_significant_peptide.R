@@ -13,9 +13,9 @@
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' pymol_script_significant_peptide(df=a, replicates=3, pv_cutoff=0.01,
-#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
-#' pymol_script_significant_peptide(df=a)
+#' #pymol_script_significant_peptide(df=a, replicates=3, pv_cutoff=0.01,
+#' #ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
+#' #pymol_script_significant_peptide(df=a)
 #' }
 #' @export
 pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10), Inf),

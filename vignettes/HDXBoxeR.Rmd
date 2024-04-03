@@ -28,7 +28,7 @@ HDXBoxeR facilitates multiple aspects of HDX data analysis:
 
 1.	Reprocesses data to the format required for data publication.
 2.	Calculates parameters for a general HDX summary table, such as backexchange, peptide lengths, and statistical information required for data publication.
-3.	Converts the output from HDXExaminer to a format that is easier to handle and analyze.
+3.	Converts the output from HDXExaminer (Sierra Analytics, now Trajan Scientific) to a format that is easier to handle and analyze.
 4.	Using Welch T-tests, it identifies peptides that are significantly different between the sets.
 5.	Generates scripts for Pymol.
 6.	Facilitates easy plot generation, including heat maps, robot plot (modified butterfly plot), significant peptides, volcano plots, and average deuteration.

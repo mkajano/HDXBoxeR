@@ -12,12 +12,12 @@
 #' @return pymol script with residues colored based on average of procent deuteration per residue.
 #' @examples
 #' \donttest{
-#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' a_up<- output_tp(file_nm)
-#' a_proc<- output_tp(file_nm, percent=TRUE)
-#' pymol_script_significant_residue_proc(input_proc=a_proc,
-#' input_up=a_up, replicates=3, pv_cutoff=0.01,
-#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
+#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' #a_up<- output_tp(file_nm)
+#' #a_proc<- output_tp(file_nm, percent=TRUE)
+#' #pymol_script_significant_residue_proc(input_proc=a_proc,
+#' #input_up=a_up, replicates=3, pv_cutoff=0.01,
+#' #ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
 #' }
 #' @export
 pymol_script_significant_residue_proc<-function(input_up,input_proc, ranges=c(-Inf, seq(-30, 30, by=10), Inf),

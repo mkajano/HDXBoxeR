@@ -30,10 +30,10 @@ Residues are being colored by average uptake values from the significant peptide
 }
 \examples{
 \donttest{
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- output_tp(file_nm)
-pymol_script_average_residue(df=a, replicates=3, pv_cutoff=0.01,
-ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
-pymol_script_average_residue(df=a)
+#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#a<- output_tp(file_nm)
+#pymol_script_average_residue(df=a, replicates=3, pv_cutoff=0.01,
+#ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
+#pymol_script_average_residue(df=a)
 }
 }

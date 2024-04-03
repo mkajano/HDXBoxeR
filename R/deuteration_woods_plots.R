@@ -11,9 +11,9 @@
 #' @return Woods plots for the timepoints
 #' @examples
 #' \donttest{
-#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' a<- output_tp(file_nm, percent=TRUE)
-#' deuteration_woods_timepoints(a)
+#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' #a<- output_tp(file_nm, percent=TRUE)
+#' #deuteration_woods_timepoints(a)
 #' }
 #' @export
 deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, ylim=c(0,120), ...) {

@@ -44,7 +44,7 @@ FD<-arg_df_FD(filepath)
 
 
 
-  a<-na.omit(a)
+  a<-na.omit(FD)
   rownames(a)<-1:dim(a)[1] ##name rows
   #### Full deuteration to analysis.
   nbs=0

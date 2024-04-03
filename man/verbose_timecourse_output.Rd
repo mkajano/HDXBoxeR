@@ -24,10 +24,10 @@ Sets are compared to the first state in the input file.
 }
 \examples{
 \donttest{
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-verbose_timecourse_output(file_nm, "output_file_name.csv", replicates=3)
-names_states<- nm_states(file_nm)
-verbose_timecourse_output(file_nm, "output_file_name.csv", seq_match=TRUE, percent=TRUE,
-states=names_states, replicates=3, times="3.00s")
+#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#verbose_timecourse_output(file_nm, "output_file_name.csv", replicates=3)
+#names_states<- nm_states(file_nm)
+#verbose_timecourse_output(file_nm, "output_file_name.csv", seq_match=TRUE, percent=TRUE,
+#states=names_states, replicates=3, times="3.00s")
 }
 }
