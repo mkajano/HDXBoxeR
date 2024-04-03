@@ -1,13 +1,3 @@
-#' Returns average deviation for percent deuteration data for timecourses.
-#'
-#' Calculates average for time course data.
-#'
-#' @param filepath filepath to the All_results input file.
-#' @return Data.frame with standard deviation.
-#' @examples
-#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' average_timecourse_proc(filepath=file_nm)
-#' @export
 
 average_timecourse_proc<-function(filepath){
   Start<-c()
