@@ -3,7 +3,7 @@
 #'  kmezhoud/canceR: A Graphical User Interface for accessing and modeling the Cancer Genomics Data of MSKCC
 #'  https://rdrr.io/github/kmezhoud/canceR/src/R/rbind.na.R
 #'
-#' @usage rbind.na(..., deparse.level = 1)
+#' @usage rbind_na(..., deparse.level = 1)
 #' @param ...  (generalized) vectors or matrices.
 #' @param deparse.level  integer controlling the construction of labels in
 #' the case of non-matrix-like arguments (for the default method):
@@ -17,11 +17,11 @@
 #' \dontrun{
 #' row1 <- c("a","b","c","d")
 #' row2 <- c("A", "B", "C")
-#' row3 <- rbind.na(row1, row2)
+#' row3 <- rbind_na(row1, row2)
 #'}
 #'
 #'
-rbind.na <- function(..., deparse.level = 1)
+rbind_na <- function(..., deparse.level = 1)
 {
   na <- nargs() - (!missing(deparse.level))
   deparse.level <- as.integer(deparse.level)

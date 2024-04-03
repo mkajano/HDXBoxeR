@@ -60,7 +60,7 @@ qpcr.cbind.na<-function (..., deparse.level = 1)
     maxRow <- max(nRow, na.rm = TRUE)
     argl <- lapply(argl, function(x) if (is.null(nrow(x)))
       c(x, rep(NA, maxRow - length(x)))
-      else rbind.na(x, matrix(, maxRow - nrow(x), ncol(x))))
+      else rbind_na(x, matrix(, maxRow - nrow(x), ncol(x))))
     r <- do.call(cbind, c(argl[-1L], list(deparse.level = deparse.level)))
   }
   d2 <- dim(r)
