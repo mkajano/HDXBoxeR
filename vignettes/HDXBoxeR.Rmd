@@ -1,7 +1,7 @@
 ---
 title: "HDXBoxeR"
-author: "Maria K. Janowska, Katherine Reiter, Rachel E. Klevit"
-date: "11/24/2020"
+author: "Maria K. Janowska, Katherine Reiter, Pearl Magala, Miklos Guttman, Rachel E. Klevit"
+date: "4/2/2024"
 output:
   html_document: default
   pdf_document: default
@@ -21,47 +21,50 @@ knitr::opts_chunk$set(
 )
 ```
 
-HDX-MS is a high information content method. It is both a curse and a blessing. A lot can be learned but data analysis is tedious. As each experiment in HDX-MS provides information on hundreds of peptides. Each experiment should be done at least in triplicate. Very often multiple time points for each protein state are performed. Finally, multiple protein states are compared as very often the goal of performing HDX-MS is to compare how ligand binding or mutation affects wild-type apo protein state.  It can easily lead to data set with multiple thousand peptides that need to be matched between the sets compared, and deemed statistically relevant or not. HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states.HDXBoxeR automatically matches and compare sets between each other. It calculates if one protein state is different from another using Welch T-test and Critical interval statistical framework (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). It allows for fast data export and generates scripts for Pymol. Finally, it returns all calculation that is required for publication as recommended in (Masson *et al.* Nature Methods volume 16, pages595–602(2019))
+HDX-MS is a high-information-content method. It is both a curse and a blessing. A lot can be learned, but data analysis is tedious, as each experiment in HDX-MS provides information on hundreds of peptides. Each experiment should be done at least in triplicate. Very often, multiple time points for each protein state are performed. Finally, multiple protein states are compared, as the goal of performing HDX-MS is often to compare how ligand binding or mutation affects the wild-type apo protein state. This can easily lead to a dataset with multiple thousand peptides that need to be matched between the sets compared and deemed statistically relevant or not.
+HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states. HDXBoxeR automatically matches and compares sets with each other. It calculates if one protein state is different from another using Welch's T-test and the Critical Interval statistical framework (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). It allows for fast data export and generates scripts for Pymol. Finally, it returns all the calculations required for publication, as recommended by Masson et al. in Nature Methods volume 16, pages 595–602 (2019).
 
 HDXBoxeR facilitates multiple aspects of HDX data analysis:
 
 1.	Reprocesses data to the format required for data publication.
-2.	Calculates parameters for general HDX-summary table such as backexchange, peptides lengths, and statistical info also required for data publication. 
-3.	It converts the output from HDXExaminer to a format that is easier to handle and analyze.
-4.	Using Welch T-tests it returns peptides that are significantly different between the sets. 
-5.	Returns scripts for Pymol. 
-6.	Easy plot generation: heat maps, robot plot (modified butterfly plot), significant peptides, volcano plots, average deuteration. 
-7.	Generates inputs for ExtReme. 
+2.	Calculates parameters for a general HDX summary table, such as backexchange, peptide lengths, and statistical information required for data publication.
+3.	Converts the output from HDXExaminer to a format that is easier to handle and analyze.
+4.	Using Welch T-tests, it identifies peptides that are significantly different between the sets.
+5.	Generates scripts for Pymol.
+6.	Facilitates easy plot generation, including heat maps, robot plot (modified butterfly plot), significant peptides, volcano plots, and average deuteration.
+7.	Generates inputs for ExtReme.
+The package allows for comparison between different protein states and facilitates the discrimination of peptides that are significantly different between the sets.
 
-The package allows for comparison between the different Protein States and allows for discrimination of peptides that are significantly different between the sets. 
+
 
 # How to use this vignette?
 
-The vignette is divided into a few different sections that will introduce different aspects of analysis. 
+The vignette is divided into several sections that introduce different aspects of analysis:
 
-1.	Input preparation aka how to prepare inputs for HDXBoxeR in HDXExaminer.
-2.	Installation aka how to start the fun. 
-3.	Inputs reprocessing aka how to prepare inputs to be usable in R. 
-4.	Statistical analysis aka which peptides are significant. 
-5.	Plots generation aka let’s look at the peptides that were deemed significant.
-6.	Pymol scripts generation aka make scripts which will list significant peptides and residues.
-7.	Data summary aka how to get general information about the set. 
-8.	Save data in the reprocessed format. 
-9.	Extreme outputs generation aka how to automatically prepare input for bimodal analysis. 
-10.	Proposed workflow aka section for impatient. 
+1.	Input Preparation: Learn how to prepare inputs for HDXBoxeR in HDXExaminer.
+2.	Installation: Get started and set up the necessary components.
+3.	Inputs Reprocessing: Understand how to prepare inputs to be usable in R.
+4.	Statistical Analysis: Explore which peptides are significant.
+5.	Plots Generation: Visualize the peptides deemed significant.
+6.	Pymol Scripts Generation: Create scripts listing significant peptides and residues.
+7.	Data Summary: Obtain general information about the dataset.
+8.	Save Data: Save data in the reprocessed format.
+9.	ExtReme Outputs Generation: Automatically prepare input for bimodal analysis.
+10.	Proposed Workflow: A section for those in a hurry."
+These changes aim to enhance consistency in language and formatting across the different sections.
 
 ## 1.	Input preparation
-Th HDXBoxeR requires data! The package can be tested using the data that is included as a reference and example with the package, so don’t worry. However, to be able to do your analysis you need to import your data into R. **The HDXBoxeR requires a very specific input format!** 
-Input for the HDXBoxeR should be generated using HDXExaminer from Sierra Scientifics. 
+The HDXBoxeR requires data! The package can be tested using the data included as a reference and example with the package, so don’t worry. However, to be able to perform your analysis, you need to import your data into R. Input for the HDXBoxeR should be generated using HDXExaminer from Sierra Scientifics.
 
 ### Input preparation
 
-* Open your HDexaminer file
-* Under Peptides tab > Pool > right click peptide : delete peptides with no usable data
-* Tools > Options > Display > Deuteration Table : Display all columns (we did not select show low-confidence results)
-* Tools > Export > All results table
+Input preparation:
+1.	Open your HDexaminer file.
+2.	Under the Peptides tab > Pool > right-click peptide: delete peptides with no usable data.
+3.	Tools > Options > Display > Deuteration Table: Display all columns (we did not select show low-confidence results).
+4.	Tools > Export > All results table.
 
-HDXBoxeR significantly facilitates the comparison of multiple different Protein States in the time series and number of replicates. We recommend using at least 3 replicates to have good statistical analysis. All the Protein States imported should have the same number of replicates (or it will be trimmed to such). Another recommendation is to use only peptides the User is confident of. There is no point in analyzing bad data. 
+HDXBoxeR significantly facilitates the comparison of multiple Protein States in the time series and the number of replicates. We recommend using at least 3 replicates for a robust statistical analysis. All the Protein States imported are required to have the same number of replicates. Another recommendation is to use only peptides the user is confident in. There is no point in analyzing bad data.
 
 The example looks as follows:
 
@@ -72,27 +75,44 @@ Another thing to make sure of is that the columns are properly aligned, meaning 
 We keep typically just peptides with high and medium confidence. Example data compares two Protein States: Unbound and Bound. Each of the sets has three replicates.  Data also should have one replicate of undeuterated and fully deuterated sets labeled as 0s and FD respectively for allowing full analysis.
 
 ## 2.	Installation & Loading
-The HDXBoxeR package is deposited in GIT.
 
-#Installation requires devtools package, install with command below if missing. 
+
+First, ensure that you have R and RStudio installed on your computer. Then you can proceed with the installation of the HDXBoxeR package. There are two methods to install the HDXBoxeR package:
+
+1. CRAN
+
+To install, use the following command:
+
+install.packages("HDXBoxeR")
+
+2. GitHub
+
+The HDXBoxeR package is available on GitHub and can be installed using the devtools package. If you don't have the devtools package installed, you can install it with the following command (uncomment and run the command below if necessary):
+
 #install.packages("devtools") 
 
+After installing devtools, you can install the HDXBoxeR package with the following command:
+
 library(devtools)
+
 devtools::install_github("mkajano/HDXBoxeR")
+
+Once installed, you can load the HDXBoxeR package using the following command:
+
 library(HDXBoxeR)
 
 
 ## 3.	How to load data into R
-To load data into R you will need input as described in section 1. Example input is provided as a reference, and to start the fun. 
-Data, when it is loaded, will be reprocessed to different formats depending on what kind of analysis will be performed. 
-There are a few options in which input can be processed as listed below. Function names reflect which option is chosen.
+
+To load data into R, you will need input as described in section 1. Example input is provided as a reference, and to start the fun. Data, when loaded, will be reprocessed into different formats depending on the type of analysis to be performed. There are several options in which input can be processed, as listed below. Function names reflect the chosen option.
+
 Input can be formatted to:
-* Analyze time points **or** time courses analysis (output_tp vs output_tc functions).
-* Analyze Deuterons Uptake **or** Percent Deuteration (flag percent=F/T)
-* Use all protein states/deuteration times **or** use selected (options: states and times respectively). 
-* Use a maximum common number of replicates used **or** specify how many replicates should be used (replicates option in the function). 
-* Match Peptide sequence between protein states **or** not. Default set to match peptide sequences to prevent matching use functions with Seq.
-* Save the output to csv format of not (option: csv, if “NA”, no csv saved, otherwise specify the output name).
+
+- Analyze time points *or* time courses analysis (`output_tp` vs `output_tc` functions).
+- Analyze Deuterons Uptake *or* Percent Deuteration (flag `percent=F/T`).
+- Use all protein states/deuteration times *or* use selected (options: `states` and `times`, respectively).
+- Use a maximum common number of replicates used *or* specify how many replicates should be used (`replicates` option in the function).
+- Match Peptide sequence between protein states *or* not. Default is set to match peptide sequences to prevent mismatches; use functions with flag `match_seq`.
 
 Examples:
 
@@ -100,59 +120,66 @@ Examples:
 # Path to example input
 library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+### Later change the path to the path you your data!!!
 
 ##########Deuteration uptake vs percent deuteration file preparation
 #### Input for uptake deuteration. Default will use all common states, all common Deuteration Times, max. common number of replicates, no csv will be written, and peptide sequences will be matched. 
-a<-output_tp(file_nm) 
+input_uptake_timepoint<-output_tp(filepath = file_nm) 
 # input for percent deuteration
-b<-output_tp(file_nm, percent=T) 
+input_deut_timepoint<-output_tp(filepath = file_nm, percent=T) 
 
 #################
 ####Time courses 
 #Deuteration uptake
-d<-output_tc(file_nm) 
+input_uptake_timecourse<-output_tc(file_nm) 
 # Time courses comparisons
-e<-output_tc(file_nm, percent=T)
+input_deut_timecourse<-output_tc(file_nm, percent=T)
 
 #################
 ####Analyze selected protein.states, deuteration times, replicates. 
 names_states<- nm_states(file_nm) ## returns names of the states in file.
-a<-output_tp(filepath=file_nm, replicates=3, states=names_states[c(1,2)], times=c("3.00s", "72000.00s"),  percent=FALSE)
+input_two_states_two_timepoints<-output_tp(filepath=file_nm, replicates=3, states=names_states[c(1,2)], times=c("3.00s", "72000.00s"),  percent=FALSE)
 ###add option to match sequence and to save as csv (here not used)
-a<-output_tp(filepath=file_nm, replicates=3, states=names_states[2], times=c("3.00s", "72000.00s"), percent=FALSE, seq_match=FALSE, csv="NA")
+input_subset_states<-output_tp(filepath=file_nm, replicates=3, states=names_states[2], times=c("3.00s", "72000.00s"), percent=FALSE, seq_match=FALSE, csv="NA")
 
 ```
 
  **Now that the data is loaded let’s start the fun!**
  
-## 4.	Statistical Analysis
-Great! Now the hardest part is done, let’s get to the actual analysis. 
-HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states. To be able to do statistics we recommend providing 3 replicates for each protein state (but duplicate data also work). **Number of replicates and Deut Time will be trimmed to be the same for all Protein States in the analysis.**  
+## 4. Statistical Analysis
+
+Great! Now that the hardest part is done, let’s delve into the actual analysis.
+
+**HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states.** To conduct statistics, we recommend providing at least 3 replicates for each protein state (duplicate data also work). **The number of replicates and Deut Time will be trimmed to be the same for all Protein States in the analysis.**
+
 ### Some theoretical details about statistical analysis
 
-HDXBoxeR uses the hybrid statistical approach using Welch T-test and Critical interval statistical framework as proposed by Hageman and Weis (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016).  For peptides to be deemed significantly different they need to be deemed significant on the level of individual peptides (Welch T-test) and exceed the global critical interval for all peptides in the set. 
+HDXBoxeR employs a hybrid statistical approach using the Welch T-test and Critical interval statistical framework proposed by Hageman and Weis (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). To be deemed significantly different, peptides must meet significance criteria on both the individual peptide level (Welch T-test) and surpass the global critical interval for all peptides in the set.
 
-For details about calculation please refer to the cited paper (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). In short, Welch T-test is used to determine if the Null hypothesis can be rejected (Null hypothesis: the average of two means for individual peptides are equal). If the individual critical interval was below the p-value null hypothesis was rejected – peptides were deemed significant from an individual peptide standpoint. For global significance threshold: propagated standard error of pooled standard deviation of means for all peptides in two sets was calculated and scaled to Student distribution. It means that for pooled standard deviation was calculated for two sets separately. Later by doing error propagation overall standard deviation of these two sets was determined and finally, it was scaled by T-distribution to determine the global critical interval that is the global threshold.  If the peptides passed both criteria for the whole set and individual peptides they were deemed significant. 
+For detailed calculations, please refer to the cited paper (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). In short, the Welch T-test determines if the Null hypothesis can be rejected (Null hypothesis: the average of two means for individual peptides are equal). If the individual critical interval was below the p-value, the null hypothesis was rejected – peptides were deemed significant from an individual peptide standpoint. For the global significance threshold, the propagated standard error of the pooled standard deviation of means for all peptides in two sets was calculated and scaled to the Student distribution. This involves calculating the pooled standard deviation for two sets separately, propagating the error overall standard deviation of these two sets, and finally, scaling it by T-distribution to determine the global critical interval that is the global threshold. If the peptides passed both criteria for the whole set and individual peptides, they were deemed significant.
 
-### Practical tips to doing statistical analysis in HDXBoxeR
+### Practical Tips for Statistical Analysis in HDXBoxeR
 
-Most of the statistical analysis is already implemented in plot and other functions, but it is good to have a way to do it yourself if needed.  HDXBoxeR allows for the facile calculation of averages, the standard deviation for each set. Additionally, it allows for the calculation of global and individual critical intervals. **Individual p-values for each peptide are calculated against the first protein state based from the location from input file. ** If the user desires calculation against different protein states it can be done by loading HDXExaminer taking advantage of **states** parameter in output_tp() or output_tc() functions. 
+Most of the statistical analysis is already implemented in plot and other functions, but it is good to have a way to do it yourself if needed. HDXBoxeR allows for the facile calculation of averages and the standard deviation for each set. Additionally, it allows for the calculation of global and individual critical intervals.
+
+**Individual p-values for each peptide are calculated against the first protein state based on the location from the input file. If the user desires calculation against different protein states, it can be done by loading HDXExaminer, taking advantage of the `states` parameter in `output_tp()` or `output_tc()` functions.**
 
 
 ```{r}
-###load data
 library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
-a<-output_tp(file_nm) 
+input_uptake_timepoint<-output_tp(filepath = file_nm) 
+
+
 
 ###average calculation for all peptides
-av1<-ave_timepoint(a)
+av1<-ave_timepoint(input_uptake_timepoint)
 head(av1)
 ###average differences (against first Protein State in the file)
 da1<-dif_ave(av1)
 
 ###standard deviation calculation for all peptides
-sd1<-sd_timepoint(a)
+sd1<-sd_timepoint(input_uptake_timepoint)
 head(sd1)
 
 ### Global critical interval for 1 protein sets
@@ -161,23 +188,24 @@ CI_single(s1 =sd1[,7], replicates = 3 )
 CI_2pts(s1 = sd1[,7], s2=sd1[,8], replicates = 3)
 
 ##individual peptide p-value calculation against first set in the input file
-pv1<-pv_timepoint(a)
+pv1<-pv_timepoint(input_uptake_timepoint)
 head(pv1)
 
+
+####Analyze selected protein.states, deuteration times, replicates. 
+names_states<- nm_states(file_nm) ## returns names of the states in file.
 ### choosing different state as a control for analysis
-h<-output_tp(file_nm, states=names_states[c(2,1)] )
-pv2<-pv_timepoint(h)
+input_states_reversed<-output_tp(file_nm, states=names_states[c(2,1)] )
+pv2<-pv_timepoint(input_states_reversed)
 head(pv2)
 ```
 
-### States, replicates, timepoints etc
+### States, Replicates, Timepoints, etc.
 
-There are few variables that are going to be useful while analyzing the data. It might be a good idea to have them saved in the memory. One can call them as follows:
+There are a few variables that are going to be useful while analyzing the data. It might be a good idea to have them saved in the memory. One can call them as follows:
 
 ```{r}
 ###load data
-library(HDXBoxeR)
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 
 states<-arguments_call1(filepath=file_nm)
 times<-arguments_call2(filepath=file_nm, states=states)
@@ -185,79 +213,80 @@ replicates<-arguments_call3(filepath=file_nm, states=states, times=times)
 
 ```
 
+### Sub-setting of the Input Table
 
-### Sub-setting of the input table
+Sometimes, we do not want to work on or plot the whole imported dataset. One can either load a smaller subset or choose a part of the subset from the loaded dataset to work on. The already loaded data can be subsetted using the `select_indices` function or by choosing desired columns from the loaded data. In the loaded data, the first 6 columns always describe peptides, and the rest of the columns contain data.
 
-Sometimes we do not want to work on or plot the whole imported data set. One can either load a smaller subset or choose a part of the subset from the loaded data set to work on the subset. The already loaded data can be subsetted using select_indices function or by choosing desired columns from the loaded data. In the loaded data first 6 columns are always the columns that describe peptides, the rest of the columns are data. 
 
 ```{r}
-###load data
-library(HDXBoxeR)
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
-a<-output_tp(file_nm) 
 
-#To choose only the Second state from the loaded data one could simply select desired columns such as:
-a2<-a[,c(1:6, 10:12)]
+
+#################
+####Time courses 
+#Deuteration uptake
+input_uptake_timecourse<-output_tc(file_nm) 
+# Time courses comparisons
+
+small_df1<-input_uptake_timepoint[,c(1:6, 10:12)]
 
 #if one wants to focus just on the few first peptides in the data it is possible to select a few rows from the input data. 
-a2<-a[1:3,]
+small_df2<-input_uptake_timepoint[1:3,]
 
 #To have more control of the selecting one can also use the select_indices functions as follows:
 ##for output_tp function variables that can be used are:
-#below one time of 60s was used for peptides that started at residue 50, ended at residue 100 and were maximum 12 residues long. 
+#below one time of 60s was used for peptides that started at residue 50, ended at residue 100 and  at the max 12 residues long. 
 #not all parameters need to be used.
-inda<-select_indices(a,  times = c("60.00s"),start = 50, end=100, length=12)
+inda<-select_indices(input_uptake_timepoint,  times = c("60.00s"),start = 50, end=100, length=12)
 
 #after the indices are selected the input can be subsetted as normal
 
-a2<-a[inda,]
+small_df3<-input_uptake_timepoint[inda,]
 
 ##for the output_tc function allowed are the following parameters
-b<-output_tc(file_nm) 
-indb<-select_indices(b,  states = "bound",start = 50, end=100, length=12)
+timecourse_output<-output_tc(file_nm) 
+indb<-select_indices(timecourse_output,  states = "bound",start = 50, end=100, length=12)
 
-head(b[indb,1:6])
+head(timecourse_output[indb,1:6])
 
 ```
 
-
 ## 5. Plots
 
-HDXBoxeR boasts with functionality to draw multiple types of plots including volcano plots, heat maps, robot plots (modified butterfly plots). 
-**Info on how to load input to HDXBoxeR can be found in section 3.**
-If the plots that are return have chopped labels adjust the figure sizes. 
+HDXBoxeR features functionality to create various types of plots, including volcano plots, heat maps, and robot plots (modified butterfly plots).
 
+**Information on how to load input into HDXBoxeR can be found in section 3.** If the returned plots have truncated labels, adjust the figure sizes.
 
-### Uptake plots
+### Uptake Plots
 
-Sometimes it is just useful to look at raw-ish data. Uptake plots are the answer here
+Sometimes, it is just useful to look at raw-ish data. Uptake plots are the answer here.
+
 ```{r figuptake, fig.height = 3.5, fig.width = 5}
 ###load data
 library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
-a<-output_tc(file_nm, percent=TRUE) 
+input_deut_timepoint<-output_tc(file_nm, percent=TRUE) 
 
 # define the timepoint using in the experiment. Here the times in seconds
 x<-c(3, 60,1800, 72000)
 par(mfrow=c(1,2))
-uptake_plots(a[1:4,],x)
+uptake_plots(input_deut_timepoint[1:4,],x)
 
 ```
 
-
 ### Boxplots
-Boxplots allow for fast comparisons of average uptake or percent deuteration for all protein states.
+
+Boxplots enable quick comparisons of average uptake or percent deuteration for all protein states.
 
 
 ```{r fig1, fig.height = 5, fig.width = 3.5}
 ###load data
-library(HDXBoxeR)
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
-a<-output_tp(file_nm) 
+# library(HDXBoxeR)
+# file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+# input_uptake_timepoint<-output_tp(file_nm) 
 
 
 ### Returns boxplots for all the time points and all protein states. 
-boxplot_tp(a, col= c("gold2", "dodgerblue"))
+boxplot_tp(input_uptake_timepoint, col= c("gold2", "dodgerblue"))
 ```
 
 
@@ -268,44 +297,50 @@ boxplot_tp(a, col= c("gold2", "dodgerblue"))
 ###load data
 library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
-## input for deuteration uptake
-a<-output_tp(file_nm) 
-# input for procent deuteration
-b<-output_tp(file_nm, percent=T) 
+# ## input for deuteration uptakeinput_uptake_timepoint<-output_tp(file_nm) 
+# # input for procent deuteration
+input_deut_timepoint<-output_tp(file_nm, percent=T) 
 
 ## deuteration uptake for time points
-plots_av_tp(a)
+plots_av_tp(input_uptake_timepoint)
 ### average plots with colors chosen by user. 
-plots_av_tp(a,replicates=3, cola=c(1:10))
+plots_av_tp(input_uptake_timepoint,replicates=3, cola=c(1:10))
 ### average percent deuteration
-plots_av_tp_proc(b)
+plots_av_tp_proc(input_deut_timepoint)
 
 ```
-### Difference uptake or procent deuteration plots per time-point
+### Difference Uptake or Percent Deuteration Plots per Time-point
 
-The average differences plots are plotting deuteration uptake (or percent deuteration) between different Protein states. As a default, the first Protein State from the input file is chosen as a state from which other values are subtracted. For example, if the input file has three Protein States: State1, State2, State2, average difference plots will show two curves for the difference in deuteration uptake: (1) State1-State2, (2) State1-State3. If other permutations are desired, use states parameter in output_tp or output_tc functions. All time-points are drawn on separate plots. The function is useful when comparing the multiple Protein States.
+The average difference plots depict deuteration uptake (or percent deuteration) between different Protein states. By default, the first Protein State from the input file is chosen as a state from which other values are subtracted. For example, if the input file has three Protein States: State1, State2, State2, average difference plots will show two curves for the difference in deuteration uptake: (1) State1-State2, (2) State1-State3. If other permutations are desired, use the `states` parameter in `output_tp` or `output_tc` functions. All time-points are drawn on separate plots. The function is useful when comparing multiple Protein States.
 
 ```{r fig4, fig.height = 5, fig.width = 4}
-###load data
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
-## input for deuteration uptake
-a<-output_tp(file_nm) 
+# ###load data
+# file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+# ## input for deuteration uptake
+# input_uptake_timepoint<-output_tp(file_nm) 
+
+
 ## difference in uptake deuterations between two sets
-plots_diff_tp(a)
+plots_diff_tp(input_uptake_timepoint)
+
+#Load deut data
 # input for procent deuteration
-b<-output_tp(file_nm, percent=T) 
+# input_deut_timepoint<-output_tp(file_nm, percent=T) 
+
 ### difference in procent deuteration
-plots_diff_tp_proc(b,replicates=3, cola=4)
+plots_diff_tp_proc(input_deut_timepoint,replicates=3, cola=4)
+
 #input with different order states
 names_states<- nm_states(file_nm)
-d<-output_tp(file_nm, states = rev(names_states))
+input_reversed_states<-output_tp(file_nm, states = rev(names_states))
 ### average plots for deuteration uptake where control state was chosen differently
-plots_diff_tp(d, col="darkgreen")
+plots_diff_tp(input_reversed_states, col="darkgreen")
 
 ```
+### Volcano Plots
 
-### Volcano plots
-Volcano plots were introduced by Weis laboratory (Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325). The strength of the volcano plots is that they allow for a quick view to see how many peptides are between the sets and provide statistics for the differences. The Volcano plots take advantage of the p-value and critical interval calculation. The p-value is calculated per each peptide using the Welch t-test for the desired number of replicates. The global critical interval is calculated as described in Hageman and Weis (Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325). As the default alpha is set to 0.99. The p-value cut off is marked by horizontal lines and the global critical interval by vertical lines. Significantly different peptides between the sets are located in the shaded area. The volcano plots are only pepared for difefrence in the deuterons uptake. The critical intervals for all time-points are returned in the terminal. 
+Volcano plots were introduced by the Weis laboratory (Analytical Chemistry 2019, 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325). The strength of the volcano plots is that they allow for a quick view to see how many peptides are between the sets and provide statistics for the differences. The Volcano plots take advantage of the p-value and critical interval calculation. The p-value is calculated per each peptide using the Welch t-test for the desired number of replicates. The global critical interval is calculated as described in Hageman and Weis (Analytical Chemistry 2019, 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325). As the default alpha is set to 0.99, the p-value cut off is marked by horizontal lines, and the global critical interval by vertical lines. Significantly different peptides between the sets are located in the shaded area. The volcano plots are only prepared for differences in deuterons uptake. The critical intervals for all time-points are returned in the terminal.
+
 
 ```{r fig5, fig.height = 5, fig.width = 4}
 ###load data
@@ -322,13 +357,15 @@ plots_vol_tp(a, pv_cutoff = 0.1)
 
 ```
 
-### Significant peptides maped along residue sequence
+### Significant Peptides Mapped Along Residue Sequence
 
-The significant peptides plots draw peptides along the covered sequence of the protein. The peptides which were deemed significantly different using the Welch test and the global critical interval criterion are colored in a red-blue scheme. The peptides colored red are more exposed compared control set, blue colors correspond to increased protection compared to the control set. Non-significant peptides are colored black.  The plots can be drawn from using percent deuteration or deuteration uptake input sets. If the percent deuteration input is used the difference between the two sets is colored according to the chosen scheme (function plot_peptide_sig_tp_proc). If using deuteration uptake input data is converted to percents using the equation: (Uptake(state1)-Uptake(state2))/Uptake(state1)*100% (function: plot_peptide_sig_tp). 
+The significant peptides plots draw peptides along the covered sequence of the protein. Peptides deemed significantly different using the Welch test and the global critical interval criterion are colored in a red-blue scheme. Red-colored peptides are more exposed compared to the control set, while blue colors correspond to increased protection compared to the control set. Non-significant peptides are colored black.
 
-Percent differences are divided into ranges to which correspond specific color to the red-blue color scheme. Ranges values can be changed as desired within the red-blue color scheme. In the terminal ranges for each set are returned to help to choose ranges of the color scheme. 
+The plots can be drawn using either percent deuteration or deuteration uptake input sets. If the percent deuteration input is used, the difference between the two sets is colored according to the chosen scheme (function `plot_peptide_sig_tp_proc`). If using deuteration uptake input, data is converted to percents using the equation: `(Uptake(state1) - Uptake(state2)) / Uptake(state1) * 100%` (function: `plot_peptide_sig_tp`).
 
-Plots are generated separately for each time-point and each pair of the difference values (State1-State2, State1-State3…). The plot_peptide_sig_tp generates thus multiple plots, which usually calls for usage plotting parameter “mfrow”. 
+Percent differences are divided into ranges, each corresponding to a specific color in the red-blue color scheme. Range values can be changed as desired within the red-blue color scheme. In the terminal, ranges for each set are returned to help choose ranges of the color scheme.
+
+Plots are generated separately for each time-point and each pair of the difference values (State1-State2, State1-State3…). The `plot_peptide_sig_tp` generates multiple plots, which usually calls for using the plotting parameter `mfrow`.
 
 
 ```{r fig6, fig.height = 5, fig.width = 4}
@@ -359,11 +396,15 @@ legend_sig_peptides(ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf))
 
 ### Differential heat maps
 
-Differential Heat maps are plots where peptides significantly different between the sets are translated into residue-specific information. Heat maps are a fast, highly informative, and elegant way to see which regions are perturbed in the sets. Of course, it means that some information is lost (coverage). There are two options on how these calculations are performed: 1. average uptake of all significant peptides which contain that residues are calculated 2. Maximum uptake value from all peptides classified as significant with that residue in its sequence.
+Differential Heat Maps are plots where peptides significantly different between the sets are translated into residue-specific information. Heat maps are a fast, highly informative, and elegant way to see which regions are perturbed in the sets. However, it means that some information is lost (coverage). There are two options on how these calculations are performed:
 
-Differential heat maps can be calculated using the difference in percent deuteration between two sets or uptake of control- uptake of other sets/uptake of control*100. 
- 
-The example scheme for how average uptake and maximum uptake per residues are generated is shown below. 
+1. Average uptake of all significant peptides containing that residue is calculated.
+2. Maximum uptake value from all peptides classified as significant with that residue in its sequence.
+
+Differential heat maps can be calculated using the difference in percent deuteration between two sets or uptake of (control - other sets) / (uptake of control) * 100.
+
+The example scheme for how average uptake and maximum uptake per residue are generated is shown below.
+
 ![](figures/max_uptake_ave_uptake.png){width=50%}
 
 ```{r fig7, fig.height = 3, fig.width = 5}
@@ -397,9 +438,10 @@ legend_heat_map(ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf))
 
 ```
 
-### Woods plots
+### Woods Plots
 
-Woods plots come in two flavors one that looks at the timecourse or timepoints. Below are example. The usage of the subset_indices is highly recommended. 
+Woods plots come in two flavors: one that looks at the time course or timepoints. Below are examples. The usage of the `subset_indices` is highly recommended.
+
 ```{r fig_woods, fig.height = 5, fig.width = 5}
 ##
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
@@ -417,8 +459,9 @@ deuteration_woods_timecourse(tc_aP, replicates=3)
 
 ```
 
-### Timecourses plots
-Basic plots for timecourse include average deuteration plots and the heatmap. No significant peptide analysis was done in these plots. For the statistical analysis in timepoints, please use robot plots (see next section). 
+### Timecourse Plots
+
+Basic plots for the timecourse include average deuteration plots and the heatmap. No significant peptide analysis was done in these plots. For statistical analysis in timepoints, please use robot plots (see the next section).
 
 ```{r fig9, fig.height = 4, fig.width = 5}
 ##
@@ -435,11 +478,12 @@ legend_heat_map_timecourse()
 
 ```
 
-### Robot plots
+### Robot Plots
 
-The robot plots are a modification of the butterfly plots. The main difference is that while in the butterfly plots peptides were depicted as a single dot in the middle of the peptide in robot plot peptides whole peptide length is drawn which replaces butterfly plots nice curves with hard edges which could not be called delicate butterfly but rather a clinical look of a robotic machine.
+The robot plots are a modification of the butterfly plots. The main difference is that while in the butterfly plots peptides were depicted as a single dot in the middle of the peptide, in robot plot peptides, the whole peptide length is drawn. This replaces butterfly plots' nice curves with hard edges, which could not be called a delicate butterfly but rather the clinical look of a robotic machine.
 
-The robot plots choose only significant peptides to be drawn. If the peptide is significant in one timepoint it will be drawn at all time-points, but only significantly different peptides will be colored. The robot plots compare two different data sets: one is drawn above the x-axis, the other below the x-axis.  
+The robot plots choose only significant peptides to be drawn. If the peptide is significant in one timepoint, it will be drawn at all time-points, but only significantly different peptides will be colored. The robot plots compare two different data sets: one is drawn above the x-axis, the other below the x-axis.
+
 
 ```{r fig8, fig.height = 5, fig.width = 5}
 ###load data
@@ -457,9 +501,7 @@ robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
 
 ```
 
-
-If the robot plots are too crowded we recommend removing peptides from the robot plot by making a p-value and critical interval more stringent. However, even then some areas of the plot are too crowded, so manual removal of peptides is necessary to prepare a final plot. To determine which peptides should be removed (or kept) we recommend first looking at the plot and then running the robot_indexes_df() function which returns all significant peptides in the set. After that one should choose indexes that the user wants to keep and run the robot_2states_indexes() function. A note for all these functions only two states of the proteins should be given not the whole sets (parameter states). 
-
+If the robot plots are too crowded, we recommend removing peptides from the robot plot by making the p-value and critical interval more stringent. However, even then, some areas of the plot are too crowded, so manual removal of peptides is necessary to prepare a final plot. To determine which peptides should be removed (or kept), we recommend first looking at the plot and then running the `robot_indexes_df()` function, which returns all significant peptides in the set. After that, one should choose indexes that the user wants to keep and run the `robot_2states_indexes()` function. A note for all these functions: only two states of the proteins should be given, not the whole sets (parameter `states`).
 
 ```{r fig8a, fig.height = 4, fig.width = 5, echo=FALSE}
 library(HDXBoxeR)
@@ -503,11 +545,9 @@ woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
 
 
 ```
+## 6. Scripts for Pymol
 
-
-## 6.	Scripts for Pymol
-
-HDXBoxeR prepares scripts for Pymol based on the statistical analysis it assigns the colors corresponding to significantly different peptides. For each of the time-point and Protein State separate script is written. Colors assigned for Pymol scripts are the same as used in the plots (sig_peptides and heat maps), which allows for direct comparison between the plots and the structures. The Pymol scripts are being saved in the working directory. Additionally, HDXBoxeR gives an option to color residues on the structures using averaging schemes described in heatmaps plots preparation. Legends generated by default. 
+HDXBoxeR prepares scripts for Pymol based on the statistical analysis, assigning colors corresponding to significantly different peptides. Separate scripts are written for each time-point and Protein State. The colors assigned for Pymol scripts are the same as used in the plots (sig_peptides and heat maps), allowing for a direct comparison between the plots and the structures. The Pymol scripts are saved in the working directory. Additionally, HDXBoxeR gives an option to color residues on the structures using averaging schemes described in heatmaps plots preparation. Legends are generated by default.
 
 ```{r echo = FALSE, fig10a, fig.height = 4, fig.width = 3, eval=FALSE}
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
@@ -526,10 +566,12 @@ pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-In
 pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3)
 
 ```
-## 7.	Summary information generation about data sets. 
+## 7. Summary Information Generation about Data Sets
 
-The HDXBoxeR has the functionality to return summary information about the sets: timepoints, # replicates, # peptides, peptide coverage, average peptide length, average redundancy, standard deviation, critical interval, average back exchange, and back exchange range. Information provided complies with Masson *et al.* Nature Methods volume 16, pages595–602(2019). 
-The all_summary() function requires undeuterated and Fully deuterated sets marked in Deut.time as 0s and FD respectively. Also for calculation of the back exchange Dfact parameter needs to be specified. The Dfact is the fraction of Deuterium/Hydrogen used in the labeling buffer. Default set up to 0.85
+HDXBoxeR has the functionality to return summary information about the sets, including timepoints, number of replicates, number of peptides, peptide coverage, average peptide length, average redundancy, standard deviation, critical interval, average back exchange, and back exchange range. The information provided complies with Masson et al., Nature Methods volume 16, pages 595–602 (2019).
+
+The `all_summary()` function requires undeuterated and fully deuterated sets marked in Deut.time as 0s and FD, respectively. Also, for the calculation of the back exchange, the Dfact parameter needs to be specified. The Dfact is the fraction of Deuterium/Hydrogen used in the labeling buffer, with the default set up to 0.85.
+
 
 ```{r echo = FALSE}
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
@@ -541,7 +583,8 @@ all_summary(file_nm, Dfact=0.85,replicates = 3)
 
 ## 8. Outputs
 
-The HDXBoxeR reprocessed the HDX-MS data and calculates statistical parameters from it. Data can be exported automatically in different outputs depending on user needs. It can prepare a format that would be ready for publication, it can also return a simple .csv with all the peptides matched between the sets or provide a verbose output which includes also peptides standard deviation and p-value per peptide. 
+HDXBoxeR reprocesses the HDX-MS data and calculates statistical parameters from it. Data can be exported automatically in different outputs depending on user needs. It can prepare a format that would be ready for publication. It can also return a simple .csv with all the peptides matched between the sets or provide a verbose output which includes peptides' standard deviation and p-value per peptide.
+
 
 ```{r echo = FALSE, eval=FALSE}
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
@@ -560,9 +603,10 @@ verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv")
 verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv", percent=T)
 
 ```
-## 9. Preparation inputs for bimodal analysis for HX-Express v2
+## 9. Preparation Inputs for Bimodal Analysis for HX-Express v2
 
-To perform bimodal analysis using  HX-Express v2 (J. Am. Soc. Mass Spectrom. 2013, 24, 12, 1906–1912) spectra aligned using MassLynx need to be combined into one input. The input file contains all replicates and all the time points. The HDXBoxeR prepares the inputs for HX-Express v2. The function has to be invoked in the folder where all the directories containing peptides are. HDXBoxeR will loop through all the folders and write outputs for all peptides for which information was provided. 
+To perform bimodal analysis using HX-Express v2 (J. Am. Soc. Mass Spectrom. 2013, 24, 12, 1906–1912), spectra aligned using MassLynx need to be combined into one input. The input file contains all replicates and all the time points. HDXBoxeR prepares the inputs for HX-Express v2. The function has to be invoked in the folder where all the directories containing peptides are. HDXBoxeR will loop through all the folders and write outputs for all peptides for which information was provided.
+
 
 ```{r eval=FALSE}
 # returns empty column if data is missing
@@ -574,6 +618,8 @@ extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 18
 
 
 ## 10. Proposed Workflow. 
+
+
 ```{r eval=FALSE}
 
 library(HDXBoxeR)

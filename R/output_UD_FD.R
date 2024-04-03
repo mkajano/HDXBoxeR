@@ -11,18 +11,38 @@
 #'
 #' @export
   output_FD<- function(filepath){
-  a<-read.csv(file=filepath,  header = F, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = T, row.names = NULL, nrows = 1)###load the header names
-  nm1<-colnames(nm)
-  colnames(a)<-c(nm1) ##assign names to the columns
-  a<-a[,c(1:6,8,9,  21, 22)]
-  if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
-    undeut<-a[which(a$Deut.Time == '0s'),]}
-  if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
-    a<-a[-which(a$Deut.Time == c('0.00s')),]}
-  if (all(a$Deut.Time == 'FD')== FALSE & length(unique(a$Deut.Time == 'FD'))==2){
-    FD<-a[which(a$Deut.Time == 'FD'),]
-    a<-a[-which(a$Deut.Time == c('FD')),]}
+
+
+    arg_df_FD<-function(filepath){
+      a <- read.csv(file = filepath, header = F, skip = 1)
+      nm <- read.csv(file = filepath, header = T, row.names = NULL,
+                     nrows = 1)
+      nm1 <- colnames(nm)
+
+      if(length(unique(nm1=="row.names"))==2){
+        nm1<-nm1[-which(nm1=="row.names")]
+        nm1<-c(nm1, "row.names")}
+
+      colnames(a) <- c(nm1)
+
+      dif_col<- setdiff(c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
+                          "Charge", "Search.RT", "X..Deut", "Deut.."), nm1)
+
+      if (length(dif_col)!=0)
+      {stop(paste("input file missing column(s): ", dif_col, sep=""))}
+
+
+      a <- a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
+                "Charge", "Search.RT", "X..Deut", "Deut..")]
+
+      FD<-a[which(a$Deut.Time == c("FD")), ]
+
+      return(FD)
+    }
+
+FD<-arg_df_FD(filepath)
+
+
 
   a<-na.omit(a)
   rownames(a)<-1:dim(a)[1] ##name rows
