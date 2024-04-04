@@ -5,7 +5,7 @@ Version: 0.0.1
 Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), email="mka.janowska@gmail.com"),
              person("Katherine", "Reiter", role = "ctb"),
              person("Pearl", "Magala", role = "ctb"),
-             person("Miklos.", "Guttman", role = "ctb"),
+             person("Miklos", "Guttman", role = "ctb"),
              person("Rachel E.", "Klevit", role = "ctb"))
 Author: Maria K. Janowska [aut, cre],
   Katherine Reiter [ctb],
