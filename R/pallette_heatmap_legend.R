@@ -20,6 +20,8 @@ pallette_legend<-function(col_pallette){
 #' @return legend for the heatmap
 #' @export
 pallette_ll<-function(pallette, lab){
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
   ppar(c(1,1))
   pallette_legend(pallette)
   yb=1; yt=2

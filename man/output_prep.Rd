@@ -29,7 +29,7 @@ It generates csv file in format ready for publication of the data.
 }
 \examples{
 \donttest{
-#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#output_prep(filepath=file_nm, "output_file_name.csv")
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+output_prep(filepath=file_nm, output_name=tempfile())
 }
 }

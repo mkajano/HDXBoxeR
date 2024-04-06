@@ -45,7 +45,6 @@ peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30
          ylim=c(nb_row, 0), yaxt="n", xaxt="n") ## mock plot, just to have it drawn correct limits set up
 
     for ( i in 1:dim(df)[1]){
-      #print(c(df[i,start_col], df[i,end_col],y1[i], cbr1[si.fv[i,j]] ))
       points(c(df[i,start_col], df[i,end_col]), c(y1[i], y1[i]), type="l",
              col=cbr1[si.fv[i,j]])
 
@@ -78,6 +77,10 @@ peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30
 #' @export
 plot_peptide_sig_tp_proc<-function(input_proc, input_up, nb_pep_row=100, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                    pv_cutoff=0.01, replicates=3){
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   pv1<-pv_timepoint(input_up, replicates)
   s1<-sd_timepoint(input_up, replicates)
   av1<-ave_timepoint(input_proc, replicates)
@@ -85,7 +88,7 @@ plot_peptide_sig_tp_proc<-function(input_proc, input_up, nb_pep_row=100, ranges=
   par(mar = c(1.5, 1.5, 1.5, 1.5), oma=c(3,2.4,2,2), cex.axis=1,
       cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
   for ( i in(unique(av1$Deut.Time))){
-    print(paste("For time point", i))
+    message(paste("For time point", i))
     a1=av1[av1$Deut.Time==i,]
     au=avu[avu$Deut.Time==i,]
     p1=pv1[pv1$Deut.Time==i,]

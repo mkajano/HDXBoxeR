@@ -13,6 +13,9 @@
 #' @export
 
 boxplot_tp<-function(df, replicates=3, ...){
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   pparLM(c(length(unique(df$Deut.Time)),1))
   av1<-ave_timepoint(df, replicates)
   s1<-sd_timepoint(df, replicates)

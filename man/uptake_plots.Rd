@@ -4,7 +4,13 @@
 \alias{uptake_plots}
 \title{Uptake plots}
 \usage{
-uptake_plots(input_data, timepoints, replicates = 3, cola = NA, seq_match = T)
+uptake_plots(
+  input_data,
+  timepoints,
+  replicates = 3,
+  cola = NA,
+  seq_match = TRUE
+)
 }
 \arguments{
 \item{input_data}{output from function output_tp(..., percent=T)}
@@ -15,7 +21,7 @@ uptake_plots(input_data, timepoints, replicates = 3, cola = NA, seq_match = T)
 
 \item{cola}{colors, default NA}
 
-\item{seq_match}{Flag True or False, default True, match sequence of the protein states}
+\item{seq_match}{Flag TRUE or FALSE, default TRUE, match sequence of the protein states}
 }
 \value{
 Uptake plots

@@ -79,7 +79,7 @@ robot_indexes<-function(thP, th, replicates=3,
   if(missing(states)) states=unique(thP$Protein.State)
 
   for ( state in states[2:length(states)]) {
-    print(paste(state, states[1]))
+
     control_df<- thP[thP$Protein.State==states[1],]
     variant_df<- thP[thP$Protein.State==state,]
 

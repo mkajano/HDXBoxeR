@@ -5,22 +5,27 @@
 #' Residues are being colored by average uptake values from the significant peptides per residues.
 #'
 #' @param df output from functions output_tp
+#' @param path output folder
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @return pymol script with residues colored based on average of uptake per residue.
 #' @examples
 #' \donttest{
-#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #a<- output_tp(file_nm)
-#' #pymol_script_average_residue(df=a, replicates=3, pv_cutoff=0.01,
-#' #ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
-#' #pymol_script_average_residue(df=a)
+#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a<- output_tp(file_nm)
+#' pymol_script_average_residue(df=a, replicates=3, pv_cutoff=0.01,
+#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), path=tempdir() )
+#' pymol_script_average_residue(df=a,  path=tempdir())
 #' }
 #' @export
-pymol_script_average_residue<-function(df, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_average_residue<-function(df,path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
 pv_cutoff=0.01, replicates=3){
   #####from HDX get data and
+
+  oldwd<-getwd()
+  on.exit(setwd(oldwd))
+  setwd(path)
 
   for ( deut_time in(unique(df$Deut.Time))){
     pv<-pv_timepoint(df[df$Deut.Time==deut_time,],  replicates)

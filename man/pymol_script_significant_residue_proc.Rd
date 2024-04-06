@@ -7,6 +7,7 @@
 pymol_script_significant_residue_proc(
   input_up,
   input_proc,
+  path = ".",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   pv_cutoff = 0.01,
   replicates = 3
@@ -16,6 +17,8 @@ pymol_script_significant_residue_proc(
 \item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.}
 
 \item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.}
+
+\item{path}{location where the Pymol scripts will be saved}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
 
@@ -33,11 +36,11 @@ Residues are colored by average procent_deuteration from the significant peptide
 }
 \examples{
 \donttest{
-#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#a_up<- output_tp(file_nm)
-#a_proc<- output_tp(file_nm, percent=TRUE)
-#pymol_script_significant_residue_proc(input_proc=a_proc,
-#input_up=a_up, replicates=3, pv_cutoff=0.01,
-#ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a_up<- output_tp(file_nm)
+a_proc<- output_tp(file_nm, percent=TRUE)
+pymol_script_significant_residue_proc(input_proc=a_proc,
+input_up=a_up, path=tempdir(), replicates=3, pv_cutoff=0.01,
+ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
 }
 }

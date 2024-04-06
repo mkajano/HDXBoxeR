@@ -62,6 +62,11 @@ lab_dif_proc<-function(df, cola){
 #' @export
 plots_diff_tp_proc<-function(df,replicates=3, cola){
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1, 1, 1, 7), oma=c(4,4,1,2), cex.axis=1, cex.main=1, cex.lab=1.1,
       mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
 
@@ -76,7 +81,6 @@ plots_diff_tp_proc<-function(df,replicates=3, cola){
   mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE)
   par(mfrow=c(1, 1))
   lab_dif_proc(da1, cola)
-  reset_par()
 }
 
 

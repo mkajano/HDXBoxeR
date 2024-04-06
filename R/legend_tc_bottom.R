@@ -8,6 +8,10 @@
 #' @export
 
 legend_tc_bottom<-function(df, cols){
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   nm1<-str_sub(colnames(df[7:dim(df)[2]]), start = 5, end = -10)
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")

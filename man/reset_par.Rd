@@ -6,6 +6,9 @@
 \usage{
 reset_par()
 }
+\value{
+default plotting window parameters
+}
 \description{
 function by Farid Cheraghi,
 https://stackoverflow.com/questions/9292563/reset-the-graphical-parameters-back-to-default-values-without-use-of-dev-off

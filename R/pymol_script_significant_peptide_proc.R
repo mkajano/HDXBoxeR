@@ -5,6 +5,7 @@
 #'
 #' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=T) function.
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
+#' @param path location where the Pymol scripts will be saved
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
@@ -12,18 +13,23 @@
 #' @return pymol script with colors assigned per peptide
 #' @examples
 #' \donttest{
-#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #a_up<- output_tp(file_nm)
-#' #a_proc<- output_tp(file_nm, percent=TRUE)
-#' #pymol_script_significant_peptide_proc(input_proc=a_proc,
-#' #input_up=a_up, replicates=3, pv_cutoff=0.01,
-#' #ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
+#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a_up<- output_tp(file_nm)
+#' a_proc<- output_tp(file_nm, percent=TRUE)
+#' pymol_script_significant_peptide_proc(input_proc=a_proc,
+#' input_up=a_up,  path=tempdir(),replicates=3, pv_cutoff=0.01,
+#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
 #' }
 #' @export
-pymol_script_significant_peptide_proc<-function(input_proc,input_up, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_peptide_proc<-function(input_proc,input_up, path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 pv_cutoff=0.01, replicates=3, order.pep=TRUE){
   dfup=input_up
   df=input_proc
+
+  oldwd<-getwd()
+  on.exit(setwd(oldwd))
+  setwd(path)
+
   #####from HDX get data and
   for ( deut.time in(unique(df$Deut.Time))){
     pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates)
@@ -85,9 +91,9 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, ranges=c(-I
 
       if (order.pep==T){
         res.txt<-res.txt[rev(order(len.pep))]
-        print("peptides ordered according to peptide length")
+        message("peptides ordered according to peptide length")
       } else if (order.pep==F){
-        print("peptides ordered according to position in sequence")}
+        message("peptides ordered according to position in sequence")}
 
       fileConn<-file(output_name)
       writeLines(c("hide","show cartoon","color black", "bg white",

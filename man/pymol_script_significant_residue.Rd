@@ -6,6 +6,7 @@
 \usage{
 pymol_script_significant_residue(
   df,
+  path = ".",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   pv_cutoff = 0.01,
   replicates = 3
@@ -13,6 +14,8 @@ pymol_script_significant_residue(
 }
 \arguments{
 \item{df}{average data frame. Generated using ave_timepoint() function.}
+
+\item{path}{location where the Pymol scripts will be saved}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
 
@@ -30,10 +33,10 @@ Residues are being colored by maximum uptake from significant peptides per resid
 }
 \examples{
 \donttest{
-#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#a<- output_tp(file_nm)
-#pymol_script_significant_residue(df=a, replicates=3, pv_cutoff=0.01,
-#ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
-#pymol_script_significant_residue(df=a)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a<- output_tp(file_nm)
+pymol_script_significant_residue(df=a, path=tempdir(), replicates=3, pv_cutoff=0.01,
+ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
+pymol_script_significant_residue(df=a, path=tempdir())
 }
 }

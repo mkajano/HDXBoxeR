@@ -42,6 +42,8 @@ pl_gen_ch2<-function(df,  ddlab=1, ...){
 #' @export
 legend_states_PerD_bottom<-function (df, cols)
 {
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
   nm1 <- unique(str_sub(colnames(df[7:dim(df)[2]]), start = 1, end = -11))
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0,
                                                         0, 0, 0), new = TRUE)
@@ -60,6 +62,8 @@ legend_states_PerD_bottom<-function (df, cols)
 #' @export
 legend_nm_bottom<-function (names, cols)
 {
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0,
                                                         0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")

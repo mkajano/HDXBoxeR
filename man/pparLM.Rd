@@ -9,6 +9,9 @@ pparLM(mfrow2)
 \arguments{
 \item{mfrow2}{mfrow: number of Multiple Figures (use ROW-wise).}
 }
+\value{
+modified par function with adjusted parameters
+}
 \description{
 Prepares a plotting window with specified margins with specific number of figure row and columns.
 }

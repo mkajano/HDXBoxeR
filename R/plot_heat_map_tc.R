@@ -84,6 +84,11 @@ heat_map_tc<-function(df, ranges=c(seq(0, 100, by=10), Inf)){
 #' plot_heat_map_tc(df=a)
 #' @export
 plot_heat_map_tc<-function(df, replicates=3, mar_x=3.5, ranges=c(-Inf, seq(0, 100, by=10), Inf)){
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   av1<-ave_timepoint(df, replicates)
   par(mfrow=c(length(unique(av1$Protein.State)),1),
       mar = c(1.5, mar_x, 1, 1.1), oma=c(3,2.4,1,1),

@@ -101,6 +101,11 @@ heat_map_tp_maxuptake<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
 #' @export
 plot_heat_map_max_uptake_tp<-function(df, replicates=3,
                                       mar_x=3.5, ranges=c(-Inf, seq(-30, 30, by=10), Inf), pv_cutoff=0.01){
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   pv1<-pv_timepoint(df, replicates)
   s1<-sd_timepoint(df, replicates)
   av1<-ave_timepoint(df, replicates)
@@ -111,7 +116,7 @@ plot_heat_map_max_uptake_tp<-function(df, replicates=3,
     a1=av1[av1$Deut.Time==i,]
     p1=pv1[pv1$Deut.Time==i,]
     sd1=s1[s1$Deut.Time==i,]
-    print(paste("For timepoint", i))
+    message(paste("For timepoint", i))
     colmp<-heat_map_tp_maxuptake(a1, p1, sd1, ranges, pv_cutoff, replicates)
     legend_heat_map_tp(av1)
     mtext(i, side=3, outer=FALSE, line=0, cex=0.65)}

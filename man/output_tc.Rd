@@ -9,7 +9,7 @@ output_tc(
   replicates,
   states,
   times,
-  seq_match = F,
+  seq_match = FALSE,
   csv = "NA",
   percent = FALSE
 )
@@ -23,11 +23,11 @@ output_tc(
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 
-\item{seq_match}{Flag allows to choose if the peptide sequences should be matched between states. seq_match=F signifies no sequence matching, seq_match=T states that the sequences are matched between the sets.}
+\item{seq_match}{Flag allows to choose if the peptide sequences should be matched between states. seq_match=FALSE signifies no sequence matching, seq_match=TRUE states that the sequences are matched between the sets.}
 
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 
-\item{percent}{Flag allowing to choose output as deteuration uptake (F) or percent deuteration (T). Default deuteration uptake.}
+\item{percent}{Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.}
 }
 \value{
 data frame with reorganized data where in columns is the deuteration uptake for Protein States.
@@ -41,8 +41,10 @@ Protein.States, Deut.times, or number of replicates can be specified.
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tc(filepath=file_nm) ###all default parameters used
-# all possible flags listed & percent deuteration output, with sequences matching
-#  for protein states.
+
+# all possible flags listed & percent deuteration output,
+#with sequences matching for protein states.
+
 a<-output_tc(filepath=file_nm, replicates=3, states=c("bound", "Unbound"),
 times=c("3.00s", "72000.00s"), seq_match=TRUE, csv="NA", percent=TRUE)
 }

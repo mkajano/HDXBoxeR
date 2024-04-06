@@ -11,13 +11,16 @@
 #' @return Woods plots for the timepoints
 #' @examples
 #' \donttest{
-#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #a<- output_tp(file_nm, percent=TRUE)
-#' #deuteration_woods_timepoints(a)
+#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a<- output_tp(file_nm, percent=TRUE)
+#' deuteration_woods_timepoints(a[1:12,])
 #' }
 #' @export
 deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, ylim=c(0,120), ...) {
   if(missing(times)) times=unique(input_data$Deut.Time)
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
 
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
@@ -49,14 +52,12 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, 
       indc=indc+1
       for ( i in 1:dim(a2)[1]){
 
-        #print(c(a2$End[i], a2$Start[i], a2[i,j], indc))
         arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
                angle=90, code=3, col=cola[indc])
         points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
       }}}
   legend_states_PerD_bottom(input_data, cola[1:length(7:dim(a1)[2])])
-  reset_par()
 }
 
 
@@ -83,6 +84,8 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
   if(missing(states)) states=unique(input_data$Protein.State)
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
 
 
   cola<-colorRampPalette(brewer.pal(9,"YlGnBu")[4:9])(length(7:dim(a1)[2]))
@@ -107,14 +110,12 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
       indc=indc+1
       for ( i in 1:dim(a2)[1]){
 
-        #print(c(a2$End[i], a2$Start[i], a2[i,j], indc))
         arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
                angle=90, code=3, col=cola[indc])
         points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
       }}}
   legend_states_PerD_bottom(input_data, cola[1:length(7:dim(a1)[2])])
-  reset_par()
 }
 
 
@@ -140,10 +141,10 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' @return Woods plots with chosen statistically different peptides
 #' @examples
 #' \donttest{
-#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #a<- output_tc(file_nm)
-#' #b<-output_tc(file_nm, percent=TRUE)
-#' #woods_CI_plot(thP=b, th=a, pv_cutoff = 0.005, CI_factor = 1, replicates=3)
+#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a<- output_tc(file_nm)
+#' b<-output_tc(file_nm, percent=TRUE)
+#' woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, CI_factor = 1, replicates=3)
 #' }
 #' @export
 woods_CI_plot<-function(thP, th, replicates=3,
@@ -152,6 +153,8 @@ woods_CI_plot<-function(thP, th, replicates=3,
 
   nm<-colnames(ave_timepoint(th, replicates))
   nm1<-str_sub(nm[7:length(nm)], start=4, end=-10)
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
 
 
   pl1f<-function(){
@@ -227,6 +230,5 @@ woods_CI_plot<-function(thP, th, replicates=3,
 
   }
   legend_nm_bottom(c(states[1], "other state"), c(cola[8], colg[8]))
-  reset_par()
 }
 

@@ -21,13 +21,18 @@
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001)
 #'
-#' # more restictive peptide selection
+#' # more restrictive peptide selection
 #' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, CI_factor=3)
 #'
 #' @export
 robot_plot_All<-function(thP, th, replicates=3,
                          pv_cutoff=0.01, states, CI_factor=1){
   if(missing(states)) states=unique(thP$Protein.State)
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   par(mfrow=c(length(states)-1, 1), mar = c(1.5, 1.5, 1.5, 1.5), oma=c(4,4,2,2), cex.axis=1,
       cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
 
@@ -106,4 +111,5 @@ robot_plot_All<-function(thP, th, replicates=3,
     text(x=(min(thP$Start)+max(thP$End))/2,y=-107.5, state, cex=0.7)
   }
   legend_tc_bottom(sh_avc, cola[2:length(cola)])
-  reset_par()}
+
+  }

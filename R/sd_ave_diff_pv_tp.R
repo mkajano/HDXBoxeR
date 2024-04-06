@@ -47,11 +47,9 @@ ave_timepoint<-function(df, replicates=3) {
   nm_root<-str_sub(nm_root, end = -3)
   ave_nm<-paste("av_", nm_root, sep="")
 
-  #print(nb_sets)
   ave1<-c(); for ( j in 1:nb_sets) {
     for (i in 1:dim(df)[1]) {ave1<-c(ave1, rowMeans(df[i,(6+(j-1)*replicates+1):(6+(j-1)*replicates+replicates)]))}
   }
-  #print(sd1)
   ave2<-data.frame(matrix(ave1, ncol=nb_sets , byrow = FALSE))
   colnames(ave2)<-ave_nm
   ave2<-data.frame(df[,1:6], ave2)

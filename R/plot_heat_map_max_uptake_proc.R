@@ -107,15 +107,23 @@ heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd, ranges=c(-Inf, seq(-30, 3
 #' @export
 plot_heat_map_max_uptake_tp_proc<-function(input_proc, input_up, mar_x=3.5, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            pv_cutoff=0.01, replicates=3){
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   pv1<-pv_timepoint(input_up, replicates)
   s1<-sd_timepoint(input_up, replicates)
   av1<-ave_timepoint(input_proc, replicates)
   avu<-ave_timepoint(input_up, replicates)
+
+
+
   par(mfrow=c(length(unique(av1$Deut.Time)),1),
       mar = c(1.5, mar_x, 1, 1.1), oma=c(3,2.4,1,1),
       cex.axis=1, cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
   for ( i in(unique(av1$Deut.Time))){
-    print(paste("For time point", i))
+    message(paste("For time point", i))
     a1=av1[av1$Deut.Time==i,]
     au=avu[avu$Deut.Time==i,]
     p1=pv1[pv1$Deut.Time==i,]

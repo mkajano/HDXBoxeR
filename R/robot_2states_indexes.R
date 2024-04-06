@@ -36,6 +36,9 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
   if(missing(xlim)) xlim=c(min(thP$Start), max(thP$End))
   if(missing(ylim)) ylim=c(-110, 120)
 
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   control_df<- thP[thP$Protein.State==states[1],]
   variant_df<- thP[thP$Protein.State==states[2],]
 
@@ -128,6 +131,5 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
   legend_tc_bottom(sh_avc, cola[2:length(cola)])
 
 
-  reset_par()
 }
 

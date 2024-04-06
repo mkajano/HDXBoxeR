@@ -11,11 +11,11 @@
 #' @return csv with analysis for uptake file, standard deviation, p-values for all protein states.
 #' @examples
 #' \donttest{
-#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #verbose_timepoint_output(file_nm, "output_file_name.csv")
-#' #names_states<- nm_states(file_nm)
-#' #verbose_timepoint_output(file_nm, "output_file_name.csv", seq_match=TRUE, percent=TRUE,
-#' #states=names_states, replicates=3, times="3.00s")
+#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' verbose_timepoint_output(file_nm, tempfile())
+#' names_states<- nm_states(file_nm)
+#' verbose_timepoint_output(file_nm, tempfile(), seq_match=TRUE, percent=TRUE,
+#' states=names_states, replicates=3, times="3.00s")
 #' }
 #' @export
 verbose_timepoint_output<-function(filepath, output_name, replicates=3, ...){

@@ -3,7 +3,8 @@
 #' Margin coordinates
 #' @param pos position
 #' @param side side of plot
-#' @param input plot or figure posion
+#' @param input plot or figure position
+#' @return  coordinates of margins
 #' @export
 getCoords1<-function (pos = 1.1, side = 1, input = "p")
 {

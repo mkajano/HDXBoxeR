@@ -4,6 +4,7 @@
 #' Combine data of unequal row length avoiding repetition or errors by filling with NAs. In contrast to classical cbind, cbind.na can be used to combine data such as
 #' @param ... vectors
 #' @param deparse.level set to 1 as default
+#' @return data frame with NA
 #' @examples
 #' qpcr.cbind.na(1:10, 1:3)
 #'

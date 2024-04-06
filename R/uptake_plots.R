@@ -6,7 +6,7 @@
 #' @param cola colors, default NA
 #' @param timepoints the labeling times
 #' @param replicates replicates
-#' @param seq_match Flag True or False, default True, match sequence of the protein states
+#' @param seq_match Flag TRUE or FALSE, default TRUE, match sequence of the protein states
 #' @return  Uptake plots
 #' @examples
 #' \donttest{
@@ -16,12 +16,16 @@
 #' uptake_plots(a, x)
 #' }
 #' @export
-uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=T) {
+uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=TRUE) {
   indd<-c()
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
 
-  if (seq_match==T){
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
+  if (seq_match==TRUE){
   indd<-duplicate_sets(input_data[,c(3,4,6,1)])
   } else {
     indd<-duplicate_sets(input_data[,c(3,4,6)])
@@ -29,7 +33,7 @@ uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=T)
 
   states=unique(a1$Protein.State)
 
-  if (is.na(cola[1])==F){
+  if (is.na(cola[1])==FALSE){
 
   } else if (length(7:dim(a1)[2])<9){
     cola<-c(1,brewer.pal(9,"Set1"))

@@ -6,23 +6,29 @@
 #'
 #' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
+#' @param path location where the Pymol scripts will be saved
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @return pymol script with residues colored based on average of procent deuteration per residue.
 #' @examples
 #' \donttest{
-#' #file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' #a_up<- output_tp(file_nm)
-#' #a_proc<- output_tp(file_nm, percent=TRUE)
-#' #pymol_script_significant_residue_proc(input_proc=a_proc,
-#' #input_up=a_up, replicates=3, pv_cutoff=0.01,
-#' #ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
+#' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a_up<- output_tp(file_nm)
+#' a_proc<- output_tp(file_nm, percent=TRUE)
+#' pymol_script_significant_residue_proc(input_proc=a_proc,
+#' input_up=a_up, path=tempdir(), replicates=3, pv_cutoff=0.01,
+#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
 #' }
 #' @export
-pymol_script_significant_residue_proc<-function(input_up,input_proc, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_residue_proc<-function(input_up,input_proc,path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 pv_cutoff=0.01, replicates=3){
-  #####from HDX get data and
+
+  oldwd<-getwd()
+  on.exit(setwd(oldwd))
+  setwd(path)
+
+   #####from HDX get data and
   dfup=input_up
   df=input_proc
   for ( deut.time in(unique(df$Deut.Time))){

@@ -23,7 +23,6 @@ pv_timecourse<-function(df_c,df_v, replicates=3) {
     tt<-c(); tt<-t.test(x1, x2)
     pv1<-c(pv1, tt$p.val)}
   }
-  #print(sd1)
   pv2<-data.frame(matrix(pv1, ncol=nb_sets , byrow = FALSE))
   colnames(pv2)<-pv_nm
   pv2<-data.frame(combined_df[,1:6], pv2)

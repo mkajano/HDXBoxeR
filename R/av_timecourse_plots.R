@@ -15,6 +15,10 @@
 plots_av_tcourse<-function(df, replicates=3,cola){
 
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(ave_timepoint(df))[2]-7), 3), name = "Paired"))
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   av1<-ave_timepoint(df, replicates)
   ppar(c(1,1))
   par(mar = c(1,1,1,1), mfrow=c(length(unique(av1$Protein.State)), 1), oma = c(3.5, 2.75, 1, 1))
@@ -24,7 +28,6 @@ plots_av_tcourse<-function(df, replicates=3,cola){
     mtext(i,  c(South<-1), line=-1, outer=FALSE, cex=0.6)
     }
   legend_raw_ave_tc(av1, cola)
-  reset_par()
 }
 
 
@@ -56,6 +59,9 @@ av_tc<-function(df, cola) {
 legend_raw_ave_tc<-function(df,cola){
   ##draw boxplots ave and sd1
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(ave_timepoint(df))[2]-7), 3), name = "Paired"))
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   mtext(c("Index"),  c(SOUTH<-1),line=0.7, outer=TRUE, cex=0.8)
   mtext("% Deuteration",  c(WEST<-2),line=0.7, outer=TRUE, cex=0.8)
   nm1<-str_sub(colnames(df[7:dim(df)[2]]), start = 4, end = -9)

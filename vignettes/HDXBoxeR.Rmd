@@ -156,7 +156,7 @@ Great! Now that the hardest part is done, let’s delve into the actual analysis
 
 HDXBoxeR employs a hybrid statistical approach using the Welch T-test and Critical interval statistical framework proposed by Hageman and Weis (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). To be deemed significantly different, peptides must meet significance criteria on both the individual peptide level (Welch T-test) and surpass the global critical interval for all peptides in the set.
 
-For detailed calculations, please refer to the cited paper (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). In short, the Welch T-test determines if the Null hypothesis can be rejected (Null hypothesis: the average of two means for individual peptides are equal). If the individual critical interval was below the p-value, the null hypothesis was rejected – peptides were deemed significant from an individual peptide standpoint. For the global significance threshold, the propagated standard error of the pooled standard deviation of means for all peptides in two sets was calculated and scaled to the Student distribution. This involves calculating the pooled standard deviation for two sets separately, propagating the error overall standard deviation of these two sets, and finally, scaling it by T-distribution to determine the global critical interval that is the global threshold. If the peptides passed both criteria for the whole set and individual peptides, they were deemed significant.
+For detailed information, please refer to the cited paper (Hageman and Weis; Anal. Chem. 2019, 91, 13, 8008–8016). In short, the Welch T-test determines if the Null hypothesis can be rejected (Null hypothesis: the average of two means for individual peptides are equal). If the individual critical interval was below the p-value, the null hypothesis was rejected – peptides were deemed significant from an individual peptide standpoint. For the global significance threshold, the propagated standard error of the pooled standard deviation of means for all peptides in two sets was calculated and scaled to the Student distribution. This involves calculating the pooled standard deviation for two sets separately, propagating the error overall standard deviation of these two sets, and finally, scaling it by T-distribution to determine the global critical interval that is the global threshold. If the peptides passed both criteria for the whole set and individual peptides, they were deemed significant.
 
 ### Practical Tips for Statistical Analysis in HDXBoxeR
 
@@ -268,8 +268,7 @@ input_deut_timepoint<-output_tc(file_nm, percent=TRUE)
 
 # define the timepoint using in the experiment. Here the times in seconds
 x<-c(3, 60,1800, 72000)
-par(mfrow=c(1,2))
-uptake_plots(input_deut_timepoint[1:4,],x)
+uptake_plots(input_deut_timepoint[1:2,],x)
 
 ```
 
@@ -375,6 +374,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<-output_tp(file_nm) 
 
 ### significantly different peptides are colored in red-blue scheme. 
+
 par(mfrow=c(4,1))
 plot_peptide_sig_tp(a,replicates = 3) 
 
@@ -557,13 +557,13 @@ a<-output_tp(file_nm)
 b<-output_tp(file_nm, percent=T) 
 
 ### Scripts written for significantly different peptides (uptake data). Color scheme, ranges to be colored and p-value can be changed.
-pymol_script_significant_peptide(a)
-pymol_script_significant_peptide(a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3, order.pep=FALSE)
+pymol_script_significant_peptide(a, path=tempdir())
+pymol_script_significant_peptide(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3, order.pep=FALSE, path=tempdir())
 ###same but for procent deuteration
-pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3)
+pymol_script_significant_peptide_proc(input_proc = b, input_up = a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3)
 
 ###scripts prepared by residue
-pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3)
+pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), path=tempdir(), pv_cutoff = 0.005,replicates = 3)
 
 ```
 ## 7. Summary Information Generation about Data Sets
@@ -591,16 +591,16 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 
 ###final output for the paper 
 ### USAGE output_prep(pathto_allresults.csv, output_name.csv)
-output_prep(filepath = file_nm, output_name = "output.csv")
+output_prep(filepath = file_nm, output_name = tempfile())
 
 ###long version of the uptake data, timepoint
 ### to save file provide a output name to csv flag
-output_tp(filepath =file_nm , csv = "output_test.csv")
+output_tp(filepath =file_nm , csv = tempfile())
 
 
 ### verbose versions of the output functions create csv files with all important data averages, sd, and pvalues for uptake data
-verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv")
-verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv", percent=T)
+verbose_timepoint_output(filepath = file_nm, output_name =tempfile())
+verbose_timepoint_output(filepath = file_nm, output_name = tempfile(), percent=T)
 
 ```
 ## 9. Preparation Inputs for Bimodal Analysis for HX-Express v2
@@ -610,9 +610,13 @@ To perform bimodal analysis using HX-Express v2 (J. Am. Soc. Mass Spectrom. 2013
 
 ```{r eval=FALSE}
 # returns empty column if data is missing
-extreme_input_gap(hm_dir ="filepath", replicates = 3, timepoints =c(3, 60, 1800, 72000))
+path_to_folders<-system.file("extdata",  package = "HDXBoxeR")
+
+extreme_input_gap(hm_dir =path_to_folders, replicates = 3, 
+                  timepoints =c(3, 60, 1800, 72000), output_path=tempdir())
 # if data is missing, it writes there values for undeuterated 
-extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+extreme_input_undeut(hm_dir =path_to_folders, replicates = 2, 
+                     timepoints =c(3, 60, 1800, 72000), output_path=tempdir())
 
 ```
 
@@ -633,7 +637,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #### Input for uptake deuteration
 a<-output_tp(file_nm) 
 # input for percent deuteration
-b<-output_t_proc(file_nm, percent=T) 
+b<-output_tp(file_nm, percent=T) 
 
 # Time courses inputs
 tc_a<-output_tc(filepath = file_nm)
@@ -730,17 +734,16 @@ woods_CI_plot(thP = tc_aP, th=tc_a)
 woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
 
 
-
 #######################
 ##Pymol scripts
 #######################
 
-pymol_script_significant_peptide(a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+pymol_script_significant_peptide(a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
 ###same but for percent deuteration
-pymol_script_significant_peptide_proc(input_proc = b, input_up = a, ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3, order.pep=FALSE)
+pymol_script_significant_peptide_proc(input_proc = b, input_up = a,path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3, order.pep=FALSE)
 
 ###scripts prepared by residue
-pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+pymol_script_significant_residue(a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
 
 ##################
 ##Summary
@@ -753,23 +756,25 @@ all_summary(file_nm, Dfact=0.85,replicates = 3)
 
 ###final output for the paper 
 ### USAGE output_prep(pathto_allresults.csv, output_name.csv)
-output_prep(filepath = file_nm, output_name = "output.csv")
+output_prep(filepath = file_nm, output_name = tempfile())
 
 ###long version of the uptake data, timepoint
 ### USAGE output_tp_csv(pathto_allresults.csv, output_name.csv)
-output_tp(filepath =file_nm , csv = "output_test.csv")
+output_tp(filepath =file_nm , csv = tempfile())
 
 ### verbose versions of the output functions create csv files with all important data averages, sd, and pvalues for uptake data
-verbose_timepoint_output(filepath = file_nm, output_name = "verbose_output.csv", percent=TRUE)
+verbose_timepoint_output(filepath = file_nm, output_name = tempfile(), percent=TRUE)
 
 ###########################
 ##Extreme input preparation
 ###########################
 
 # returns empty column if data is missing
-extreme_input_gap(hm_dir ="filepath", replicates = 3, timepoints =c(3, 60, 1800, 72000))
+extreme_input_gap(hm_dir ="filepath", replicates = 3, 
+                  timepoints =c(3, 60, 1800, 72000), output_path=tempdir())
 # if data is missing, it writes there values for undeuterated 
-extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+extreme_input_undeut(hm_dir ="filepath", replicates = 2,
+                     timepoints =c(3, 60, 1800, 72000), output_path=tempdir())
 
 
 ```

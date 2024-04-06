@@ -4,6 +4,7 @@
 #' Number of colors and corresponding to them ranges can be defined by user.
 #'
 #' @param df output from functions output_tp
+#' @param path location where the scripts will be saved
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
@@ -13,15 +14,17 @@
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' #pymol_script_significant_peptide(df=a, replicates=3, pv_cutoff=0.01,
-#' #ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
-#' #pymol_script_significant_peptide(df=a)
+#' pymol_script_significant_peptide(df=a, replicates=3, path=tempdir(), pv_cutoff=0.01,
+#' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
+#' pymol_script_significant_peptide(df=a, path=tempdir())
 #' }
 #' @export
-pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_peptide<-function(df,path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            pv_cutoff=0.01, replicates=3, order.pep=TRUE){
 
-
+  oldwd<-getwd()
+  on.exit(setwd(oldwd))
+  setwd(path)
   #####from HDX get data and
   for ( deut_time in(unique(df$Deut.Time))){
 
@@ -94,9 +97,9 @@ pymol_script_significant_peptide<-function(df, ranges=c(-Inf, seq(-30, 30, by=10
         sig_pep<-sig_pep[rev(order(len_pep_sig))]
         res.txt<-c(nsig_pep, sig_pep)
 
-        print("peptides ordered according to peptide length")
+        message("peptides ordered according to peptide length")
       } else if (order.pep==F){
-        print("peptides ordered according to position in sequence")}
+        message("peptides ordered according to position in sequence")}
 
 
       fileConn<-file(output_name)

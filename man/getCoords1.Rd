@@ -11,7 +11,10 @@ getCoords1(pos = 1.1, side = 1, input = "p")
 
 \item{side}{side of plot}
 
-\item{input}{plot or figure posion}
+\item{input}{plot or figure position}
+}
+\value{
+coordinates of margins
 }
 \description{
 Margin coordinates

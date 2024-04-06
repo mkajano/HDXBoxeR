@@ -23,7 +23,7 @@ average_timecourse<-function(filepath){
   } else if ((dim(fp)[2]-6) ==1) {
     av_fp=fp
   } else if ((dim(fp)[2]-6) == 0){
-    print("Full deuteration sample not provided")
+    message("Full deuteration sample not provided")
   }
 
   if ((dim(ud)[2]-6) >1){
@@ -31,7 +31,7 @@ average_timecourse<-function(filepath){
   } else if ((dim(ud)[2]-6) ==1) {
     av_ud<-ud
   }  else if ((dim(ud)[2]-6) == 0){
-    print("Non-deuterated sample not provided")
+    message("Non-deuterated sample not provided")
   }
 
   if ((dim(ud)[2]-6) != 0 & (dim(fp)[2]-6) != 0  ){
@@ -81,7 +81,7 @@ sd_timecourse<-function(filepath){
   } else if ((dim(fp)[2]-6) ==1) {
     sd_fp<-sd_timepoint(fp, replicates=(dim(fp)[2]-6))
   } else if ((dim(fp)[2]-6) == 0){
-    print("Full deuteration sample not provided")
+    message("Full deuteration sample not provided")
   }
 
   if ((dim(ud)[2]-6) >1){
@@ -90,7 +90,7 @@ sd_timecourse<-function(filepath){
   } else if ((dim(ud)[2]-6) ==1) {
     sd_ud<-sd_timepoint(ud, replicates=(dim(ud)[2]-6))
   }  else if ((dim(ud)[2]-6) == 0){
-    print("Non-deuterated sample not provided")
+    message("Non-deuterated sample not provided")
   }
 
   if ((dim(ud)[2]-6) != 0 & (dim(fp)[2]-6) != 0  ){

@@ -22,11 +22,7 @@ kmezhoud/canceR: A Graphical User Interface for accessing and modeling the Cance
 https://rdrr.io/github/kmezhoud/canceR/src/R/rbind.na.R
 }
 \examples{
-\dontrun{
 row1 <- c("a","b","c","d")
 row2 <- c("A", "B", "C")
 row3 <- rbind_na(row1, row2)
-}
-
-
 }

@@ -11,6 +11,9 @@ qpcr.cbind.na(..., deparse.level = 1)
 
 \item{deparse.level}{set to 1 as default}
 }
+\value{
+data frame with NA
+}
 \description{
 Combine data of unequal row length avoiding repetition or errors by filling with NAs. In contrast to classical cbind, cbind.na can be used to combine data such as
 }

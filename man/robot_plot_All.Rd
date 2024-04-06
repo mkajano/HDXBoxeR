@@ -43,7 +43,7 @@ tm_df<-output_tc(filepath=file_nm)
 tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001)
 
-# more restictive peptide selection
+# more restrictive peptide selection
 robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, CI_factor=3)
 
 }

@@ -5,6 +5,7 @@
 #' Prepares a plotting window with specified margins with specific number of figure row and columns.
 #'
 #' @param mfrow2 mfrow: number of Multiple Figures (use ROW-wise).
+#' @return  modified par function with adjusted parameters
 #' @examples
 #' ppar(c(2,1))
 #' @export
@@ -19,6 +20,7 @@ ppar<-function(mfrow2){
 #' Prepares a plotting window with specified margins with specific number of figure row and columns.
 #'
 #' @param mfrow2 mfrow: number of Multiple Figures (use ROW-wise).
+#' @return  modified par function with adjusted parameters
 #' @examples
 #' pparLM(c(2,1))
 #' @export
@@ -32,6 +34,7 @@ pparLM<-function(mfrow2){
 #' Prepares a plotting window with specified margins with specific number of figure row and columns.
 #'
 #' @param mfrow2 mfrow: number of Multiple Figures (use ROW-wise).
+#' @return  modified par function with adjusted parameters
 #' @examples
 #' ppar_bottom_legend(c(2,3))
 #' @export
@@ -63,6 +66,7 @@ ppar_wider<-function(mfrow2){
 #'
 #' @examples
 #' reset_par()
+#' @return default plotting window parameters
 #' @export
   reset_par <- function(){
   op <- structure(list(xlog = FALSE, ylog = FALSE, adj = 0.5, ann = TRUE,

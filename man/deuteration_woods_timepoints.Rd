@@ -34,8 +34,8 @@ All the peptides are plotted based on their uptake.
 }
 \examples{
 \donttest{
-#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#a<- output_tp(file_nm, percent=TRUE)
-#deuteration_woods_timepoints(a)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a<- output_tp(file_nm, percent=TRUE)
+deuteration_woods_timepoints(a[1:12,])
 }
 }

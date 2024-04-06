@@ -9,6 +9,7 @@
 
 dif_tp<-function(df, cola) {
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
+
   n1=max((dim(df)[2]-7), 3)
   #cola<-c(brewer.pal(n = n1, name = "Paired"))
   plot(df[,7], type="n", xlab="", ylab="", lwd=2, col=cola[1],
@@ -65,6 +66,10 @@ lab_dif<-function(df, cola){
 #' @export
 plots_diff_tp<-function(df, replicates=3, cola){
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1.4, 1, 1, 9), oma=c(4,4,1,0.1), cex.axis=1, cex.main=1, cex.lab=1.1,
       mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
 
@@ -79,6 +84,5 @@ plots_diff_tp<-function(df, replicates=3, cola){
   mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE)
   par(mfrow=c(1, 1))
   lab_dif(da1, cola)
-  reset_par()
 }
 

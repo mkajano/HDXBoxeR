@@ -50,7 +50,6 @@ peptide_pv_tp<-function(df, pv, sd, nb_row, ranges=c(-Inf, seq(-30, 30, by=10), 
          ylim=c(nb_row, 0), yaxt="n", xaxt="n") ## mock plot, just to have it drawn correct limits set up
 
     for ( i in 1:dim(df)[1]){
-      #print(c(df[i,start_col], df[i,end_col],y1[i], cbr1[si.fv[i,j]] ))
       points(c(df[i,start_col], df[i,end_col]), c(y1[i], y1[i]), type="l",
              col=cbr1[si.fv[i,j]])}
 
@@ -80,7 +79,7 @@ plot_peptide_sig_tp<-function(df1, replicates=3, nb_pep_row=100,
   par(mar = c(1.5, 1.5, 1.5, 1.5), oma=c(3,2.4,2,2), cex.axis=1,
       cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
   for ( k in(unique(av1$Deut.Time))){
-    print(paste("For timepoint", k))
+    message(paste("For timepoint", k))
     a1=av1[av1$Deut.Time==k,]
     p1=pv1[pv1$Deut.Time==k,]
     sd1=s1[s1$Deut.Time==k,]

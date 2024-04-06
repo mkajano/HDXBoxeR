@@ -45,9 +45,9 @@ Peptides ranges are plotted as a line at corresponding \% deuteration values.
 }
 \examples{
 \donttest{
-#file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#a<- output_tc(file_nm)
-#b<-output_tc(file_nm, percent=TRUE)
-#woods_CI_plot(thP=b, th=a, pv_cutoff = 0.005, CI_factor = 1, replicates=3)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a<- output_tc(file_nm)
+b<-output_tc(file_nm, percent=TRUE)
+woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, CI_factor = 1, replicates=3)
 }
 }

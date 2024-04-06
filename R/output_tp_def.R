@@ -11,22 +11,25 @@
 #' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
-#' @param seq_match Flag allows to choose if the peptide sequences should be matched between states. seq_match=F signifies no sequence matching, seq_match=T states that the sequences are matched between the sets.
+#' @param seq_match Flag allows to choose if the peptide sequences should be matched between states. seq_match=FALSE signifies no sequence matching, seq_match=T states that the sequences are matched between the sets.
 #' @param csv Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.
-#' @param percent Flag allowing to choose output as deteuration uptake (F) or percent deuteration (T). Default deuteration uptake.
+#' @param percent Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.
 #' @return data frame with reorganized data where in columns is the deuteration uptake for Protein States.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(filepath=file_nm) ###all default parameters used
-#' # all possible flags listed & percent deuteration output, with sequences matching
-#' #  for protein states.
+#'
+#'
+#' # all possible flags listed & percent deuteration output,
+#' # with sequences matching for protein states.
+#'
 #' a<-output_tp(filepath=file_nm, replicates=3, states=c("bound", "Unbound"),
 #' times=c("3.00s", "72000.00s"), seq_match=TRUE, csv="NA", percent=TRUE)
 #' @export
-output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA", percent=FALSE){
-  if(missing(states)) { states=arguments_call1(filepath); print(c("Protein.States used:", states))}
-  if(missing(times)) times=arguments_call2(filepath, states); print(c("Deut.times used:", times))
-  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); print(c("Number of replicates used:", replicates))
+output_tp<- function(filepath, replicates, states, times, seq_match=FALSE, csv="NA", percent=FALSE){
+  if(missing(states)) { states=arguments_call1(filepath); message(c("Protein.States used:", states))}
+  if(missing(times)) times=arguments_call2(filepath, states); message(c("Deut.times used:", times))
+  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(c("Number of replicates used:", replicates))
 
   a<-arg_df(filepath)
   rownames(a)<-1:dim(a)[1] ##name rows
@@ -45,7 +48,6 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
         temp2<-temp1[which(temp1$Protein.State ==state ),]##creates temporary df, temp2 from one state of protein with the same timepoints
         nb=0
         nbs=nbs+1
-        #print(c(time, state))
         st<-gsub(c(' '),'',state)
         df_nm_st<-paste(st, "_", nbs,sep="")
         st_l<-c(st_l, df_nm_st)
@@ -79,7 +81,7 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
     b<-bp1[,-dim(bp1)[2]]
 
 
-    if (percent==F){
+    if (percent==FALSE){
       tp<-data.frame(b[,1:6], b[,grep("X..Deut", colnames(b))])
     } else if (percent==T){
       tp<-data.frame(b[,1:6], b[,grep("Deut.._", colnames(b))])
@@ -97,7 +99,6 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
         temp2<-temp1[which(temp1$Protein.State ==state ),]##creates temporary df, temp2 from one state of protein with the same timepoints
         nb=0
         nbs=nbs+1
-        #print(c(time, state))
         st<-gsub(c(' '),'',state)
         df_nm_st<-paste(st, "_", nbs,sep="")
         st_l<-c(st_l, df_nm_st)
@@ -156,7 +157,7 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
 
     df_description <- data.frame(b[, 1:6])
 
-    if (percent==F){
+    if (percent==FALSE){
       tp<-data.frame(df_description, b[,grep("X..Deut", colnames(b))])
     } else if (percent==T){
       tp<-data.frame(df_description, b[,grep("Deut.._", colnames(b))])
@@ -168,15 +169,15 @@ output_tp<- function(filepath, replicates, states, times, seq_match=F, csv="NA",
 
 
 
-  if (seq_match==F){
+  if (seq_match==FALSE){
     all1<-uptake_seq_matchF(a, percent)
   } else if (seq_match==T){
     all1<-uptake_seq_matchT(a, percent)
-  } else {print("incorrect seq_match argument provided, halted")
+  } else {warning("incorrect seq_match argument provided, halted")
   }
 
   if (csv=="NA"){
-    print("no csv file written")
+    message("no csv file written")
   } else {
     write.csv(all1, file=csv)}
 

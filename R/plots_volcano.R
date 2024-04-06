@@ -48,7 +48,7 @@ vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
   for ( i in 8:dim(df1)[2]){
     nm_of_state<-c(paste(str_sub(colnames(df1)[7], start = 4, end=-9)), " - ",
             str_sub(colnames(df1)[i], start = 4, end=-9))
-    print(paste(nm_of_state, collapse = ""))
+    #message(paste(nm_of_state, collapse = ""))
 
     cola1<-c("black", cola[i-7])
     c1<-cola1[(col_res[,i-7])+1]
@@ -83,6 +83,10 @@ vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
 #' @export
 plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, cola){
   if(missing(cola)) cola=c(brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
+
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
   par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1, 1, 1, 10), oma=c(2.5,2.5,0.1,0.1), cex.axis=1, cex.main=1, cex.lab=1.1,
       mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
 
@@ -94,13 +98,12 @@ plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, cola){
   for ( i in(unique(df$Deut.Time))){
     CI<-max(CI_tp(s1[s1$Deut.Time==i,], replicates, pv_cutoff))
     vol_tp(da1[da1$Deut.Time==i,], pv1[pv1$Deut.Time==i,], CI, pv_cutoff, cola)
-    print(paste("CI @", i, ":", round(CI, digits = 2)))
+    message(paste("CI @", i, ":", round(CI, digits = 2)))
 
     mtext(i,  c(NORTH<-3),line=-1, outer=FALSE, cex=0.5)
   }
   par(mfrow=c(1, 1))
 
   lab_vol(da1, cola)
-  reset_par()
   }
 

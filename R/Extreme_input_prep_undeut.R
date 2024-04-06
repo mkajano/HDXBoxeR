@@ -6,19 +6,30 @@
 #' @param hm_dir directory in which all the folders which needs to be processed are
 #' @param replicates number of replicates in sample
 #' @param timepoints lists timepoints used in experiments.
+#' @param output_path directory where output should be written
 #' @return Inputs for extreme for all data prepared.
 #' @examples
-#' \dontrun{
-#' extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+#' \donttest{
+#' path_to_folders<-system.file("extdata",  package = "HDXBoxeR")
+
+#' extreme_input_undeut(hm_dir=path_to_folders, replicates = 3,
+#' timepoints =c(3, 60, 1800, 72000), output_path=tempdir())
 #' }
 #' @export
-extreme_input_undeut<-function(hm_dir, replicates,timepoints ){
+extreme_input_undeut<-function(hm_dir, replicates,timepoints, output_path="NA" ){
+
+  oldwd<-getwd()
+  on.exit(setwd(oldwd))
+
+  if (output_path =="NA"){
+    output_path<-hm_dir
+  }
 
   setwd(hm_dir)
   dirs<-list.dirs(full.names = TRUE, recursive = TRUE)
 
   for (directories in dirs){
-    print(directories)
+    message(paste0("processing:", directories))
     nd<-list.files(directories, pattern="Non-D")
     fd<-list.files(directories, pattern="Full-D")
     tp<-c(list.files(directories,pattern="s-"), list.files(directories,pattern="m-"), list.files(directories, pattern="h-"))
@@ -103,11 +114,6 @@ extreme_input_undeut<-function(hm_dir, replicates,timepoints ){
           my.name <- nm1[k]
           # assign the name to the object
           assign(paste(my.name), cur.file)}
-        #print(my.files)
-        #my.files<-my.files[!my.files %in% NA]
-
-
-
 
         #### order the files correctly + add mock dif to lists of files that need to bound together.
 
@@ -151,7 +157,7 @@ extreme_input_undeut<-function(hm_dir, replicates,timepoints ){
 
         dir_nm<-gsub("/", "", directories)
 
-        output_name<-paste(hm_dir,"/", dir_nm,"_", charge,  ".csv", sep="")
+        output_name<-paste(output_path,"/", dir_nm,"_", charge,  ".csv", sep="")
 
         write.table(dfB, output_name,na = "",row.names = FALSE, sep = ",")}}
 

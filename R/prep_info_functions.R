@@ -49,7 +49,6 @@ general_info<- function(filepath){
       temp2<-temp1[which(temp1$Deut.Time ==time ),]##creates temporary df, temp2 from one state of protein with the same timepoints
       nb=0
       nbs=nbs+1
-      #print(c(time, state))
       df_nm_st<-paste(time, "_", nbs,sep="")
       st_l<-c(st_l, df_nm_st)
       bs<-c()

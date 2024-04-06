@@ -4,7 +4,7 @@
 \alias{extreme_input_undeut}
 \title{Makes input for Extreme for bimodal analysis.}
 \usage{
-extreme_input_undeut(hm_dir, replicates, timepoints)
+extreme_input_undeut(hm_dir, replicates, timepoints, output_path = "NA")
 }
 \arguments{
 \item{hm_dir}{directory in which all the folders which needs to be processed are}
@@ -12,6 +12,8 @@ extreme_input_undeut(hm_dir, replicates, timepoints)
 \item{replicates}{number of replicates in sample}
 
 \item{timepoints}{lists timepoints used in experiments.}
+
+\item{output_path}{directory where output should be written}
 }
 \value{
 Inputs for extreme for all data prepared.
@@ -20,7 +22,9 @@ Inputs for extreme for all data prepared.
 If data is missing it returns non-deuterated data in these columns.
 }
 \examples{
-\dontrun{
-extreme_input_undeut(hm_dir ="filepath", replicates = 2, timepoints =c(3, 60, 1800, 72000))
+\donttest{
+path_to_folders<-system.file("extdata",  package = "HDXBoxeR")
+extreme_input_undeut(hm_dir=path_to_folders, replicates = 3,
+timepoints =c(3, 60, 1800, 72000), output_path=tempdir())
 }
 }
