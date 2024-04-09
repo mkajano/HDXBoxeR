@@ -1,14 +1,15 @@
 Type: Package
 Package: HDXBoxeR
-Title: Processing and Analysis of the Hydrogen-Deuterium Mass Spectrometry Data
+Title: An R package for statistical analysis and visualization of multiple Hydrogen-Deuterium Exchange Mass-Spectrometry datasets of different protein states.
 Version: 0.0.1
-Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), email="mka.janowska@gmail.com",
+Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), 
+            email="mka.janowska@gmail.com",
            comment = c(ORCID = "0000-0002-8232-461X")),
              person("Katherine", "Reiter", role = "ctb"),
              person("Pearl", "Magala", role = "ctb"),
              person("Miklos", "Guttman", role = "ctb"),
              person("Rachel E.", "Klevit", role = "ctb"))
-Author: Maria K. Janowska [aut, cre], (<https://orcid.org/0000-0002-8232-461X>)
+Author: Maria K. Janowska [aut, cre] (<https://orcid.org/0000-0002-8232-461X>),
   Katherine Reiter [ctb],
   Pearl Magala [ctb],
   Miklos Guttman [ctb],
@@ -20,8 +21,8 @@ Description: A protocol that facilitates the processing and analysis of Hydrogen
     Additionally, it simplifies data export, generates 'Pymol' scripts, and ensures calculations meet publication standards. 
     'HDXBoxeR' assists in various aspects of hydrogen-deuterium exchange data analysis, including reprocessing data, calculating parameters, identifying significant peptides, 
     generating plots, and facilitating comparison between protein states. 
-    Package based on manuscripts by Hageman and Weis (2019) <doi:10.1021/acs.analchem.9b01325> 
-    and Masson et al. (2019) <doi:10.1038/s41592-019-0459-y>
+    For details check papers by Hageman and Weis (2019) <doi:10.1021/acs.analchem.9b01325> 
+    and Masson et al. (2019) <doi:10.1038/s41592-019-0459-y>.
 License: GPL (>= 2)
 Imports: 
     dplyr,
