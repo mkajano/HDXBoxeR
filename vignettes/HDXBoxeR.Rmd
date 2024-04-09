@@ -108,24 +108,32 @@ There are two methods to install the HDXBoxeR package:
 
 To install, use the following command:
 
-install.packages("HDXBoxeR")
+```{r eval=FALSE}
+####installation using CRAN
+install.packages("HDXBoxeR") #execute only once
+
+```
+
 
 2.  GitHub
 
-The HDXBoxeR package is available on GitHub and can be installed using the devtools package.
-If you don't have the devtools package installed, you can install it with the following command (uncomment and run the command below if necessary):
+The HDXBoxeR package is available on GitHub and can be installed using the devtools package. This method of installation is an alternative to the CRAN method.
 
-#install.packages("devtools")
 
-After installing devtools, you can install the HDXBoxeR package with the following command:
+```{r eval=FALSE}
+####installation using Github. 
+#run only if devtools package is not installed on your machine
+install.packages("devtools") 
 
-library(devtools)
-
+library(devtools) #run next two commends only once
 devtools::install_github("mkajano/HDXBoxeR")
 
-Once installed, you can load the HDXBoxeR package using the following command:
-
+#Once installed, you can load the HDXBoxeR package using the following command:
 library(HDXBoxeR)
+
+```
+
+
 
 ## 3. How to load data into R
 
