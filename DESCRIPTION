@@ -1,6 +1,6 @@
 Type: Package
 Package: HDXBoxeR
-Title: An R package for statistical analysis and visualization of multiple Hydrogen-Deuterium Exchange Mass-Spectrometry datasets of different protein states
+Title: An R Package for Statistical Analysis and Visualization of Multiple Hydrogen-Deuterium Exchange Mass-Spectrometry Datasets of Different Protein States
 Version: 0.0.1
 Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), 
             email="mka.janowska@gmail.com",
