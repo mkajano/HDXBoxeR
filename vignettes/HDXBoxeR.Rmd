@@ -114,11 +114,10 @@ install.packages("HDXBoxeR") #execute only once
 
 ```
 
-
 2.  GitHub
 
-The HDXBoxeR package is available on GitHub and can be installed using the devtools package. This method of installation is an alternative to the CRAN method.
-
+The HDXBoxeR package is available on GitHub and can be installed using the devtools package.
+This method of installation is an alternative to the CRAN method.
 
 ```{r eval=FALSE}
 ####installation using Github. 
@@ -132,8 +131,6 @@ devtools::install_github("mkajano/HDXBoxeR")
 library(HDXBoxeR)
 
 ```
-
-
 
 ## 3. How to load data into R
 
