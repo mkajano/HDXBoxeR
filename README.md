@@ -34,7 +34,7 @@ install.packages("devtools") #if not installed
 library(devtools) #run next two commends only once
 devtools::install_github("mkajano/HDXBoxeR")
 
-#Once installed, you can load the HDXBoxeR package using the following command:
+## Loading
 library(HDXBoxeR)
 
 ## License
