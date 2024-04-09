@@ -3,11 +3,11 @@ bibentry(
      title = "{HDXBoxeR}: An R package for statistical analysis and visualization of multiple Hydrogen-Deuterium Exchange Mass-Spectrometry datasets of different protein states",
      author = c(
        person(c("Maria", "K."), "Janowska", role = c("aut", "cre"),
-         email = "mjano@uw.edu")
+         email = "mka.janowska@gmail.com")
        person("Katherine", "Reiter", role = c("aut"),
          person("Pearl", "Magala", role = c("aut"),
            person(c("Miklos"), "Guttman", role = c("aut"),
            person(c("Rachel", "E."), "Klevit", role = c("aut")
      ),
-     url = url = "https://github.com/mkajano/HDXBoxeR"
+     url =  "https://github.com/mkajano/HDXBoxeR"
    )
