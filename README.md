@@ -22,13 +22,12 @@ There are two methods to install the HDXBoxeR package:
 
 1.  ## CRAN
 To install, use the following command:
-Installation using CRAN
+
 install.packages("HDXBoxeR") #execute only once
 
 2.  ## GitHub
 The HDXBoxeR package is available on GitHub and can be installed using the devtools package.
 This method of installation is an alternative to the CRAN method.
-Installation using Github. 
 
 install.packages("devtools") #if not installed
 library(devtools) #run next two commends only once
