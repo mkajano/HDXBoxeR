@@ -21,7 +21,7 @@
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
 #' }
 #' @export
-pymol_script_significant_residue_proc<-function(input_up,input_proc,path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_residue_proc<-function(input_up,input_proc,path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 pv_cutoff=0.01, replicates=3){
 
   oldwd<-getwd()

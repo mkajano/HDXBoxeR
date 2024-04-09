@@ -7,7 +7,7 @@
 pymol_script_significant_residue_proc(
   input_up,
   input_proc,
-  path = ".",
+  path = "",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   pv_cutoff = 0.01,
   replicates = 3

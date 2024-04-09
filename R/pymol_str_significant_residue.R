@@ -19,7 +19,7 @@
 #' pymol_script_significant_residue(df=a, path=tempdir())
 #' }
 #' @export
-pymol_script_significant_residue<-function(df, path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_residue<-function(df, path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            pv_cutoff=0.01,  replicates=3){
   #####from HDX get data and
 

@@ -6,7 +6,7 @@
 \usage{
 pymol_script_average_residue(
   df,
-  path = ".",
+  path = "",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   pv_cutoff = 0.01,
   replicates = 3
@@ -15,7 +15,7 @@ pymol_script_average_residue(
 \arguments{
 \item{df}{output from functions output_tp}
 
-\item{path}{output folder}
+\item{path}{output folder location}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
 

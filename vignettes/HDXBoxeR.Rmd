@@ -644,7 +644,9 @@ a<-output_tp(file_nm)
 # input for procent deuteration
 b<-output_tp(file_nm, percent=T) 
 
+
 ### Scripts written for significantly different peptides (uptake data). Color scheme, ranges to be colored and p-value can be changed.
+#path where the output files will be written needs to be specified!
 pymol_script_significant_peptide(a, path=tempdir())
 pymol_script_significant_peptide(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3, order.pep=FALSE, path=tempdir())
 ###same but for procent deuteration

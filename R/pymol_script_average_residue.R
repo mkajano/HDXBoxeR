@@ -5,7 +5,7 @@
 #' Residues are being colored by average uptake values from the significant peptides per residues.
 #'
 #' @param df output from functions output_tp
-#' @param path output folder
+#' @param path output folder location
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
@@ -19,7 +19,7 @@
 #' pymol_script_average_residue(df=a,  path=tempdir())
 #' }
 #' @export
-pymol_script_average_residue<-function(df,path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_average_residue<-function(df,path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
 pv_cutoff=0.01, replicates=3){
   #####from HDX get data and
 

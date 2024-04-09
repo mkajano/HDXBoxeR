@@ -21,7 +21,7 @@
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
 #' }
 #' @export
-pymol_script_significant_peptide_proc<-function(input_proc,input_up, path=".", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 pv_cutoff=0.01, replicates=3, order.pep=TRUE){
   dfup=input_up
   df=input_proc
