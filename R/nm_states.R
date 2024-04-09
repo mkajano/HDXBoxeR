@@ -11,7 +11,7 @@
 #' @export
 nm_states<- function(filepath){
   nm_states<-c()
-  a<-read.csv(file=filepath,  header = F, skip = 1)### load the file witout headers
+  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
   nm_states<-unique(a[,1])
   return(nm_states)
 }

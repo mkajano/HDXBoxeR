@@ -13,7 +13,7 @@ deuteration_woods_timecourse(
 )
 }
 \arguments{
-\item{input_data}{output from function output_tc(..., percent=T)}
+\item{input_data}{output from function output_tc(..., percent=TRUE)}
 
 \item{states}{states, if missing all states used}
 

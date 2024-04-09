@@ -92,7 +92,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path=".", r
       if (order.pep==T){
         res.txt<-res.txt[rev(order(len.pep))]
         message("peptides ordered according to peptide length")
-      } else if (order.pep==F){
+      } else if (order.pep==FALSE){
         message("peptides ordered according to position in sequence")}
 
       fileConn<-file(output_name)

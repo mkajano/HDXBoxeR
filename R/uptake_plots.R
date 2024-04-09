@@ -53,16 +53,16 @@ uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=TR
 
     for ( j in 1:length(indd[[i]])){
       coli=coli+1
-      arrows(timepoints, as.numeric(a1[indd[[i]][j], 7:dim(a1)[2]]+s1[indd[[i]][j], 7:dim(a1)[2]]),
+      suppressWarnings(arrows(timepoints, as.numeric(a1[indd[[i]][j], 7:dim(a1)[2]]+s1[indd[[i]][j], 7:dim(a1)[2]]),
              timepoints, as.numeric(a1[indd[[i]][j],7:dim(a1)[2]]-s1[indd[[i]][j], 7:dim(a1)[2]]),
              length=0.05,
-             angle=90, code=3, col=cola[coli])
+             angle=90, code=3, col=cola[coli]))
       points(timepoints, a1[indd[[i]][j], 7:dim(a1)[2]], type = "o", col=cola[coli], pch=20, lwd=4)
     }
   }
 
 
   legend_nm_bottom(states, cola[1:length(states)])
-  reset_par()
+
 }
 

@@ -15,8 +15,8 @@ av_tp<-function(df, cola) {
 
   for ( i in 7:dim(df)[2]){
     points(df[,i], type="l", xlab="", ylab="", col=cola[i-6])}
-  axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
-  axis(2, at=seq(0, 1000, by=5), cex.axis=1, labels=F,tcl=-0.2)}
+  axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
+  axis(2, at=seq(0, 1000, by=5), cex.axis=1, labels=FALSE,tcl=-0.2)}
 
 
 #' Legend for average plot.

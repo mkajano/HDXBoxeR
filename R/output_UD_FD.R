@@ -14,8 +14,8 @@
 
 
     arg_df_FD<-function(filepath){
-      a <- read.csv(file = filepath, header = F, skip = 1)
-      nm <- read.csv(file = filepath, header = T, row.names = NULL,
+      a <- read.csv(file = filepath, header = FALSE, skip = 1)
+      nm <- read.csv(file = filepath, header = TRUE, row.names = NULL,
                      nrows = 1)
       nm1 <- colnames(nm)
 
@@ -95,8 +95,8 @@ FD<-arg_df_FD(filepath)
 #' a<- output_UD(file_nm)
 #' @export
 output_UD<- function(filepath){
-  a<-read.csv(file=filepath,  header = F, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = T, row.names = NULL, nrows = 1)###load the header names
+  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
+  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
   nm1<-colnames(nm)
   colnames(a)<-c(nm1) ##assign names to the columns
   a<-a[,c(1:6,8,9, 21, 22)] ##choose only useful columns
@@ -147,8 +147,8 @@ output_UD<- function(filepath){
 #' a<- output_FD_proc(file_nm)
 #' @export
 output_FD_proc<- function(filepath){
-  a<-read.csv(file=filepath,  header = F, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = T, row.names = NULL, nrows = 1)###load the header names
+  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
+  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
   nm1<-colnames(nm)
   colnames(a)<-c(nm1) ##assign names to the columns
   a<-a[,c(1:6,8,9,  21, 22)]
@@ -209,8 +209,8 @@ output_FD_proc<- function(filepath){
 #' a<- output_UD_proc(file_nm)
 #' @export
 output_UD_proc<- function(filepath){
-  a<-read.csv(file=filepath,  header = F, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = T, row.names = NULL, nrows = 1)###load the header names
+  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
+  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
   nm1<-colnames(nm)
   colnames(a)<-c(nm1) ##assign names to the columns
   a<-a[,c(1:6,8,9,  21, 22)]

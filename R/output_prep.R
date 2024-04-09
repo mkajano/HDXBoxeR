@@ -28,9 +28,9 @@
 #' }
 #' @export
 output_prep<-function(filepath, output_name, states, replicates, times, percent=FALSE){
-  if(missing(states)) { states=arguments_call1(filepath); message(c("Protein.States used:", states))}
-  if(missing(times)) times=arguments_call2(filepath, states); message(c("Deut.times used:", times))
-  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(c("Number of replicates used:", replicates))
+  if(missing(states)) { states=arguments_call1(filepath); message(cat("Protein.States used:", states))}
+  if(missing(times)) times=arguments_call2(filepath, states); message(cat("Deut.times used:", times))
+  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(cat("Number of replicates used:", replicates))
 
   undeut<-arg_UN_FD(filepath)[[1]]
   FD<-arg_UN_FD(filepath)[[2]]

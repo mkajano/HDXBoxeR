@@ -14,7 +14,7 @@ deuteration_woods_timepoints(
 )
 }
 \arguments{
-\item{input_data}{output from function output_tp(..., percent=T)}
+\item{input_data}{output from function output_tp(..., percent=TRUE)}
 
 \item{times}{Deuteration times, if missing all deuteration times used}
 

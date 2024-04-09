@@ -81,7 +81,7 @@ extreme_input_gap<-function(hm_dir, replicates,timepoints, output_path ="NA" ){
         for (k in 1:(length(my.files))){
           full_path=paste(directories,"/", my.files[k], sep="")
           # import the file
-          cur.file <- read.csv(file = full_path, header=F)
+          cur.file <- read.csv(file = full_path, header=FALSE)
           my.name <- nm_nd[k]
           # assign the name to the object
           assign(paste(my.name), cur.file)}
@@ -96,7 +96,7 @@ extreme_input_gap<-function(hm_dir, replicates,timepoints, output_path ="NA" ){
         for (k in 1:(length(my.files))){
           full_path=paste(directories,"/", my.files[k], sep="")
           # import the file
-          cur.file <- read.csv(file = full_path, header=F)
+          cur.file <- read.csv(file = full_path, header=FALSE)
           my.name <- nm_fd[k]
           # assign the name to the object
           assign(paste(my.name), cur.file)}
@@ -111,7 +111,7 @@ extreme_input_gap<-function(hm_dir, replicates,timepoints, output_path ="NA" ){
         for (k in 1:(length(my.files))){
           full_path=paste(directories,"/", my.files[k], sep="")
           # import the file
-          cur.file <- read.csv(file = full_path, header=F)
+          cur.file <- read.csv(file = full_path, header=FALSE)
           my.name <- nm1[k]
           # assign the name to the object
           assign(paste(my.name), cur.file)}

@@ -36,7 +36,10 @@ legend_raw_ave_proc<-function(df, cola) {
 #' @export
 plots_av_tp_proc<-function(df,replicates=3, cola) {
   if(missing(cola)) cola=c(1, brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
-  par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1, 1, 1, 9), oma=c(4,4,1,0.1), cex.axis=1, cex.main=1, cex.lab=1.1,
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+   par(mfrow=c(length(unique(df$Deut.Time)), 1),mar = c(1, 1, 1, 9), oma=c(4,4,1,0.1), cex.axis=1, cex.main=1, cex.lab=1.1,
       mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
   av1<-ave_timepoint(df, replicates)
   for ( i in(unique(df$Deut.Time))){
@@ -49,7 +52,6 @@ plots_av_tp_proc<-function(df,replicates=3, cola) {
   par(mfrow=c(1,1))
   legend_raw_ave_proc(av1, cola)
 
-  reset_par()
 }
 
 

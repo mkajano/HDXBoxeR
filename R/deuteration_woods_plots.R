@@ -2,7 +2,7 @@
 #'
 #' All the peptides are plotted based on their uptake.
 #'
-#' @param input_data output from function output_tp(..., percent=T)
+#' @param input_data output from function output_tp(..., percent=TRUE)
 #' @param cola colors, default NA
 #' @param times Deuteration times, if missing all deuteration times used
 #' @param replicates replicates
@@ -25,7 +25,7 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, 
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
 
-  if (is.na(cola[1])==F){
+  if (is.na(cola[1])==FALSE){
 
   } else if (length(7:dim(a1)[2])<9){
     cola<-c(1,brewer.pal(9,"Set1"))
@@ -52,9 +52,9 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, 
       indc=indc+1
       for ( i in 1:dim(a2)[1]){
 
-        arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
+       suppressWarnings(arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
-               angle=90, code=3, col=cola[indc])
+               angle=90, code=3, col=cola[indc]))
         points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
       }}}
   legend_states_PerD_bottom(input_data, cola[1:length(7:dim(a1)[2])])
@@ -67,7 +67,7 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, 
 #'
 #' All the peptides are plotted based on their uptake.
 #'
-#' @param input_data output from function output_tc(..., percent=T)
+#' @param input_data output from function output_tc(..., percent=TRUE)
 #' @param states states, if missing all states used
 #' @param replicates replicates
 #' @param ylim y axis limits
@@ -110,9 +110,9 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
       indc=indc+1
       for ( i in 1:dim(a2)[1]){
 
-        arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
+        suppressWarnings(arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
-               angle=90, code=3, col=cola[indc])
+               angle=90, code=3, col=cola[indc]))
         points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
       }}}
   legend_states_PerD_bottom(input_data, cola[1:length(7:dim(a1)[2])])
@@ -160,9 +160,9 @@ woods_CI_plot<-function(thP, th, replicates=3,
   pl1f<-function(){
     plot(x=1, type = "n", xlim=c(min(thP$Start), max(thP$End)), ylab="",
          xlab="", yaxt="n", ylim=ylim, ...)
-    axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
+    axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
     axis(2, at=seq(-1000, 1000, by=50), cex.axis=1, labels=c(rev(seq(50,1000, by=50)), seq(0,1000, by=50)))
-    axis(2, at=seq(-1000, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
+    axis(2, at=seq(-1000, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
     exp_ddu<-expression('% Deuteration')
     mtext(c("Residue"),  c(SOUTH<-1),line=0.3, outer=TRUE, cex=0.8)
     mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=0.85)

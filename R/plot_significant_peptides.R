@@ -76,6 +76,10 @@ plot_peptide_sig_tp<-function(df1, replicates=3, nb_pep_row=100,
   pv1<-pv_timepoint(df1,  replicates)
   s1<-sd_timepoint(df1, replicates)
   av1<-ave_timepoint(df1, replicates)
+  oldpar<-par(no.readonly = TRUE)
+  on.exit(par(oldpar))
+
+
   par(mar = c(1.5, 1.5, 1.5, 1.5), oma=c(3,2.4,2,2), cex.axis=1,
       cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
   for ( k in(unique(av1$Deut.Time))){
@@ -87,5 +91,5 @@ plot_peptide_sig_tp<-function(df1, replicates=3, nb_pep_row=100,
     #legend_heat_map_tp(av1)
     mtext(k, side=4, outer=FALSE, line=0.2, cex=0.7)}
   mtext(c("Residues"),  c(NORTH<-3),line=0, outer=TRUE, cex=0.7)
-  reset_par()
+
   }

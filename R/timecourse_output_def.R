@@ -26,9 +26,9 @@
 #' times=c("3.00s", "72000.00s"), seq_match=TRUE, csv="NA", percent=TRUE)
 #' @export
 output_tc<- function(filepath, replicates, states, times, seq_match=FALSE, csv="NA", percent=FALSE){
-  if(missing(states)) { states=arguments_call1(filepath); message(c("Protein.States used:", states))}
-  if(missing(times)) times=arguments_call2(filepath, states); message(c("Deut.times used:", times))
-  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(c("Number of replicates used:", replicates))
+  if(missing(states)) { states=arguments_call1(filepath); message(cat("Protein.States used:", states))}
+  if(missing(times)) times=arguments_call2(filepath, states); message(cat("Deut.times used:", times))
+  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(cat("Number of replicates used:", replicates))
 
   a<-arg_df(filepath)
   rownames(a)<-1:dim(a)[1] ##name rows

@@ -45,8 +45,8 @@ av_tc<-function(df, cola) {
        col=cola[1], ylim=c(-5, max(df[,7:dim(df)[2]])+10))
   for ( i in 7:dim(df)[2]){
     points(df[,i], type="l", xlab="", ylab="", col=cola[i-6])}
-  axis(1, at=seq(0, 1000, by=10), cex.axis=0.75, labels=F,tcl=-0.2)
-  axis(2, at=seq(0, 1000, by=5), cex.axis=0.75, labels=F,tcl=-0.2)}
+  axis(1, at=seq(0, 1000, by=10), cex.axis=0.75, labels=FALSE,tcl=-0.2)
+  axis(2, at=seq(0, 1000, by=5), cex.axis=0.75, labels=FALSE,tcl=-0.2)}
 
 #' Legend for average deuteration plot for timecourse.
 #'

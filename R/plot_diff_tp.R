@@ -17,8 +17,8 @@ dif_tp<-function(df, cola) {
   abline(h=0)
   for ( i in 8:dim(df)[2]){
     points(df[,i], type="l", xlab="", ylab="", col=cola[i-7])}
-  axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
-  axis(2, at=seq(-1000, 1000, by=1), cex.axis=1, labels=F,tcl=-0.2)
+  axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
+  axis(2, at=seq(-1000, 1000, by=1), cex.axis=1, labels=FALSE,tcl=-0.2)
 
 }
 

@@ -98,7 +98,7 @@ pymol_script_significant_peptide<-function(df,path=".", ranges=c(-Inf, seq(-30, 
         res.txt<-c(nsig_pep, sig_pep)
 
         message("peptides ordered according to peptide length")
-      } else if (order.pep==F){
+      } else if (order.pep==FALSE){
         message("peptides ordered according to position in sequence")}
 
 
