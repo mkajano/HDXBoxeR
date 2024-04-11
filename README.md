@@ -30,7 +30,9 @@ The HDXBoxeR package is available on GitHub and can be installed using the devto
 This method of installation is an alternative to the CRAN method.
 
 install.packages("devtools") #if not installed
+
 library(devtools) #run next two commends only once
+
 devtools::install_github("mkajano/HDXBoxeR")
 
 ## Loading
