@@ -38,6 +38,17 @@ devtools::install_github("mkajano/HDXBoxeR")
 ## Loading
 library(HDXBoxeR)
 
+## vignette and examples
+Please access the vignette with examples at:
+
+https://cran.r-project.org/web//packages/HDXBoxeR/vignettes/HDXBoxeR.html
+
+## test data location:
+
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+
+
+
 ## License
 
 This project is licensed under the  GPL (>= 2) licence
