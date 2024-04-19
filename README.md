@@ -48,6 +48,8 @@ Please access the vignette with examples at:
 https://cran.r-project.org/web//packages/HDXBoxeR/vignettes/HDXBoxeR.html
 
 ## test data location:
+After HDXBoxeR package installation the test data will be located in system files of the HDXBoxeR. 
+The path to the input table is shown below:
 
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 
