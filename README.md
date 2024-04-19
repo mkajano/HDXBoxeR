@@ -1,5 +1,7 @@
 # HDXBoxeR
 
+![figure_bioinformatics2](https://github.com/mkajano/HDXBoxeR/assets/11892713/2b16a28f-dcfa-40d6-af04-08704dfd3c32)
+
 HDXBoxeR is a tool designed to streamline various aspects of HDX (Hydrogen-Deuterium Exchange) data analysis:
 
 1. **Data Reprocessing:** Reprocesses data to the format required for data publication.
@@ -36,6 +38,8 @@ library(devtools) #run next two commends only once
 devtools::install_github("mkajano/HDXBoxeR")
 
 ## Loading
+After installing HDXBoxeR in R, load the package using following command:
+
 library(HDXBoxeR)
 
 ## vignette and examples
