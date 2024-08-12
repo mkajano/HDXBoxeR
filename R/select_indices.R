@@ -20,13 +20,13 @@
 select_indices<-function(df, start=NA, end=NA, length=NA,
                          times=NA, states=NA){
   if(is.na(start)==FALSE){
-    condition1<-c(df$Start > start)
+    condition1<-c(df$Start >= start)
   } else (condition1<-1:dim(df)[1])
   if(is.na(end)==FALSE){
-    condition2<-df$End <end
+    condition2<-df$End <= end
   } else (condition2<-1:dim(df)[1])
   if(is.na(length)==FALSE){
-    condition3<-c((df$End -df$Start) <length)
+    condition3<-c((df$End -df$Start) <= length)
   } else (condition3<-1:dim(df)[1])
   if(is.na(times)[1]==FALSE){
     condition4<- rowSums(sapply(times, function(x) df$Deut.Time==x))

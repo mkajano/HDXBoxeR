@@ -1,7 +1,7 @@
 Type: Package
 Package: HDXBoxeR
 Title: Analysis of Hydrogen-Deuterium Exchange Mass-Spectrometry Data
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), 
             email="mka.janowska@gmail.com",
            comment = c(ORCID = "0000-0002-8232-461X")),
@@ -23,6 +23,7 @@ Description: A protocol that facilitates the processing and analysis of Hydrogen
     generating plots, and facilitating comparison between protein states. 
     For details check papers by Hageman and Weis (2019) <doi:10.1021/acs.analchem.9b01325> 
     and Masson et al. (2019) <doi:10.1038/s41592-019-0459-y>.
+    HDXBoxeR citation: Janowska et al. (2024) <doi:10.1093/bioinformatics/btae479>
 License: GPL (>= 2)
 Imports: 
     dplyr,

@@ -1,5 +1,5 @@
 bibentry(
-     bibtype = "Misc",
+     bibtype = "Article",
      title = "{HDXBoxeR}: An R package for statistical analysis and visualization of multiple Hydrogen-Deuterium Exchange Mass-Spectrometry datasets of different protein states",
      author = c(
        person(c("Maria", "K."), "Janowska", role = c("aut", "cre"),
@@ -9,5 +9,15 @@ bibentry(
            person(c("Miklos"), "Guttman", role = c("aut")),
            person(c("Rachel", "E."), "Klevit", role = c("aut"))
      ),
-     url =  "https://github.com/mkajano/HDXBoxeR"
+    journal = "Bioinformatics",
+    volume = "40",
+    number = "8",
+    pages = "btae479",
+    year = "2024",
+    month = "07",
+    issn = "1367-4811",
+    doi = "10.1093/bioinformatics/btae479",
+    url = "https://doi.org/10.1093/bioinformatics/btae479"
    )
+
+
