@@ -1,11 +1,11 @@
 #' Number of exchangeable protons
 #'
 #' Provides a vector with number of exchangeable protons, calculated from the input table.
-#' Number of protons calculated as peptide_length - 1 - number of Prolines in the peptide
+#' Number of protons calculated as peptide_length - 2 - number of Prolines in the peptide
 #' that are not in the first position
 #'
-#' @param s1 standard deviation from one sample
-#' @return vector with number of exchanable protons
+#' @param df standard deviation from one sample
+#' @return vector with number of exchangeable protons
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
