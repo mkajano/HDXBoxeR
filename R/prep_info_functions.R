@@ -12,6 +12,9 @@
 #' @export
 general_info<- function(filepath){
 
+  states=arguments_call1(filepath)
+  times=arguments_call2(filepath, states)
+  replicates=arguments_call3(filepath, states, times)
 
   a<-arg_df(filepath)
   rownames(a)<-1:dim(a)[1] ##name rows
@@ -24,7 +27,7 @@ general_info<- function(filepath){
   summ<-c()
   b<-c()
   ##creates temporary df, temp1, with Protein states going through all unique protein states
-  for (state in unique(a$Protein.State)){
+  for (state in states){
     temp1<-a[which(a$Protein.State ==state),]
     summ<-c(summ, state)
     st_l<-c()
@@ -42,7 +45,7 @@ bp2<-c()
       st_l<-c(st_l, df_nm_st)
       bs<-c()
 
-      for (exp in unique(temp2$Experiment)){
+      for (exp in unique(temp2$Experiment)[1:replicates]){
         nb=nb+1
         df_nm<-paste("b",nb,sep="")
         temp3<-temp2[which(temp2$Experiment == exp),]
