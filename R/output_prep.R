@@ -16,7 +16,7 @@
 #' @importFrom stats df na.omit qt sd t.test
 #' @importFrom utils head read.csv tail type.convert write.csv write.table
 #' @importFrom dplyr arrange %>%
-#' @importFrom stringr str_sub
+#' @importFrom stringr str_sub str_count
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom tidyr separate
 #' @importFrom methods rbind2

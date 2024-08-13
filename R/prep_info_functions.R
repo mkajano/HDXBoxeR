@@ -11,20 +11,9 @@
 #' a<- general_info(file_nm)
 #' @export
 general_info<- function(filepath){
-  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
-  nm1<-colnames(nm)
-  colnames(a)<-c(nm1) ##assign names to the columns
-  a<-a[,c(1:6,8,9,  21, 22)]
-  if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
-    undeut<-a[which(a$Deut.Time == '0s'),]}
-  if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
-    a<-a[-which(a$Deut.Time == c('0.00s')),]}
-  if (all(a$Deut.Time == 'FD')== FALSE & length(unique(a$Deut.Time == 'FD'))==2){
-    FD<-a[which(a$Deut.Time == 'FD'),]
-    a<-a[-which(a$Deut.Time == c('FD')),]}
 
-  a<-na.omit(a)
+
+  a<-arg_df(filepath)
   rownames(a)<-1:dim(a)[1] ##name rows
 
   ##loop below will go through Protein states, timepoints and Experiments to get replicates
@@ -42,7 +31,7 @@ general_info<- function(filepath){
     nbs=0
     tmps<-paste(as.vector(unique(temp1$Deut.Time)),collapse=" ")
     summ<-c(summ, tmps)
-
+bp2<-c()
     summ<-c(summ, length(unique(temp1$Experiment))/length(as.vector(unique(temp1$Deut.Time))))
     for (time in unique(temp1$Deut.Time)){##
 
