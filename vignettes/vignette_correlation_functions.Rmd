@@ -1,0 +1,55 @@
+---
+title: "Correlation Plot"
+author: "Maria K. Janowska, Mia Cervantes, Miklos Guttman, Rachel E. Klevit"
+date: "8/12/2024"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+vignette: |
+  %\VignetteIndexEntry{correlation_plots} 
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown} 
+    \usepackage[UTF-8]{inputenc}
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align="center"
+)
+```
+
+
+## 1. Correlation functions
+
+```{r}
+# Path to example input
+library(HDXBoxeR)
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+### Later change the path to the path you your data!!!
+
+input_uptake_timepoint<-output_tp(filepath = file_nm) 
+# input for percent deuteration
+input_deut_timepoint<-output_tp(filepath = file_nm, percent=T) 
+
+#################
+####Time courses 
+#Deuteration uptake
+input_uptake_timecourse<-output_tc(file_nm) 
+# Time courses comparisons
+input_deut_timecourse<-output_tc(file_nm, percent=T)
+
+#################
+####Analyze selected protein.states, deuteration times, replicates. 
+names_states<- nm_states(file_nm) ## returns names of the states in file.
+input_two_states_two_timepoints<-output_tp(filepath=file_nm, replicates=3, states=names_states[c(1,2)], times=c("3.00s", "72000.00s"),  percent=FALSE)
+###add option to match sequence and to save as csv (here not used)
+input_subset_states<-output_tp(filepath=file_nm, replicates=3, states=names_states[2], times=c("3.00s", "72000.00s"), percent=FALSE, seq_match=FALSE, csv="NA")
+
+```
+

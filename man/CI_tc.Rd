@@ -4,7 +4,7 @@
 \alias{CI_tc}
 \title{Critial interval calculation two sets of timecourses}
 \usage{
-CI_tc(sd_c, sd_v, replicates = 3, pv_cutoff = 0.01)
+CI_tc(sd_c, sd_v, replicates = 3, alpha = 0.01)
 }
 \arguments{
 \item{sd_c}{dataframe of control}
@@ -13,7 +13,7 @@ CI_tc(sd_c, sd_v, replicates = 3, pv_cutoff = 0.01)
 
 \item{replicates}{number of replicates. Default set to 3.}
 
-\item{pv_cutoff}{pvalue cutoff. Default set to 0.01}
+\item{alpha}{pvalue cutoff. Default set to 0.01}
 }
 \value{
 Critical interval for 2 sets

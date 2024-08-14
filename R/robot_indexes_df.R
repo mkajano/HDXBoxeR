@@ -8,19 +8,21 @@
 #' @param pvalue p-value cutoff. Default set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
-#' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
-#' @return Returns dataframe listing peptides that are significantly different between sets.
+#' @param alpha cutoff for Critical interval. Default=0.01
+#'@return Returns dataframe listing peptides that are significantly different between sets.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' tm_df<-output_tc(filepath=file_nm)
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #'
 #' # more restictive peptide selection
-#' robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
+
+#' robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01)
+
 #' @export
 
 robot_indexes_df<-function(thP, th, replicates=3,
-                           pvalue=0.01, states, CI_factor=1){
+                           pvalue=0.01, alpha=0.01, states){
   if(missing(states)) states=unique(thP$Protein.State)
 
   for ( state in states[2:length(states)]) {
@@ -40,8 +42,9 @@ robot_indexes_df<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3, pv_cutoff=pvalue)
-    CI_all<-CI_all*CI_factor
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3,
+                                    alpha=alpha)
+
     peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {
       peptide_all<-c(peptide_all, which(pv1[, i]<pvalue &
@@ -64,7 +67,7 @@ robot_indexes_df<-function(thP, th, replicates=3,
 #' @param pvalue p-value cutoff. Default set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
-#' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
+#' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @return Returns indexes of significant peptides
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -72,10 +75,12 @@ robot_indexes_df<-function(thP, th, replicates=3,
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #'
 #'  # more restictive peptide selection
-#' robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
+
+#' robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01)
+
 #' @export
 robot_indexes<-function(thP, th, replicates=3,
-                        pvalue=0.01, states, CI_factor=1){
+                        pvalue=0.01, states, alpha=0.01){
   if(missing(states)) states=unique(thP$Protein.State)
 
   for ( state in states[2:length(states)]) {
@@ -95,8 +100,8 @@ robot_indexes<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3, pv_cutoff = pvalue)
-    CI_all<-CI_all*CI_factor
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up,
+                                    replicates=replicates,  alpha)
     peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {
       peptide_all<-c(peptide_all, which(pv1[, i]<pvalue &

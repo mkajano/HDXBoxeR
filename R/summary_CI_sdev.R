@@ -6,19 +6,20 @@
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
 #' @param replicates number of replicates. Default set to 3.
+#' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @return Returns summary table.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' a<- summary_sd_CI(file_nm, replicates=3)
+#' a<- summary_sd_CI(file_nm, replicates=3, alpha=0.01)
 #' @export
-summary_sd_CI<-function(filepath, replicates=3){
+summary_sd_CI<-function(filepath, replicates=3, alpha=0.01){
 a<- output_tp(filepath)
 sd1<-sd_timepoint(a,replicates)
 sds<-c()
 cis<-c()
 for ( i in 7:dim(sd1)[2]){
   sds<-c(sds,(mean(sd1[,i])))
-  cis<-c(cis, CI_single(sd1[,i], replicates) )
+  cis<-c(cis, CI_single(sd1[,i], replicates, alpha) )
 }
 nm1<-names(sd1)[7:dim(sd1)[2]]
 nm1<-str_sub(nm1, start=4, end=-9)

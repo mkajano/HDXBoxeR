@@ -4,7 +4,7 @@
 \alias{robot_indexes}
 \title{Returns indexes for peptides with significant difference between two sets}
 \usage{
-robot_indexes(thP, th, replicates = 3, pvalue = 0.01, states, CI_factor = 1)
+robot_indexes(thP, th, replicates = 3, pvalue = 0.01, states, alpha = 0.01)
 }
 \arguments{
 \item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
@@ -17,7 +17,7 @@ robot_indexes(thP, th, replicates = 3, pvalue = 0.01, states, CI_factor = 1)
 
 \item{states}{Protein states from the set. As default all states are chosen.}
 
-\item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 }
 \value{
 Returns indexes of significant peptides
@@ -31,5 +31,7 @@ tm_df<-output_tc(filepath=file_nm)
 tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 
  # more restictive peptide selection
-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
+
+robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01)
+
 }

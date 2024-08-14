@@ -4,7 +4,7 @@
 \alias{all_summary}
 \title{Returns full summary table.}
 \usage{
-all_summary(filepath, replicates = 3, Dfact = 0.85)
+all_summary(filepath, replicates = 3, Dfact = 0.85, alpha = 0.01)
 }
 \arguments{
 \item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
@@ -12,6 +12,8 @@ all_summary(filepath, replicates = 3, Dfact = 0.85)
 \item{replicates}{number of replicates. Default set to 3.}
 
 \item{Dfact}{Dfact is the fraction of D/H in the labeling buffer used. Default set up to 0.85}
+
+\item{alpha}{Critical interval, level of stringency}
 }
 \value{
 Returns summary table.

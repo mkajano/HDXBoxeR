@@ -4,12 +4,14 @@
 \alias{summary_sd_CI}
 \title{Provides summary table with Critical interval and standard deviation within the set.}
 \usage{
-summary_sd_CI(filepath, replicates = 3)
+summary_sd_CI(filepath, replicates = 3, alpha = 0.01)
 }
 \arguments{
 \item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
 
 \item{replicates}{number of replicates. Default set to 3.}
+
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 }
 \value{
 Returns summary table.
@@ -20,5 +22,5 @@ Function returns: Protein states, timepoints, number of replicates,  # peptides,
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- summary_sd_CI(file_nm, replicates=3)
+a<- summary_sd_CI(file_nm, replicates=3, alpha=0.01)
 }

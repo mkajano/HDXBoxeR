@@ -8,7 +8,7 @@ prep_timecourse_plot_sd(
   control_df_up,
   variant_df_up,
   replicates = 3,
-  pv_cutoff = 0.01
+  alpha = 0.01
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ prep_timecourse_plot_sd(
 
 \item{replicates}{number of replicates. Default set to 3.}
 
-\item{pv_cutoff}{cut off of pvalue used in calculation of critical interval. Default set to 0.01}
+\item{alpha}{cut off of pvalue used in calculation of critical interval. Default set to 0.01}
 }
 \value{
 Critial interval for all sets

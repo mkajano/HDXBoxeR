@@ -14,9 +14,9 @@
 #' @param pvalue p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Need to choose only two protein states
-#' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
 #' @param xlim x-axis range. Set as default from max and minimum residues for the protein
 #' @param ylim y-axis range
+#' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @import RColorBrewer
 #' @return Robot maps for timecourses for 2 protein states and selected indexes.
 #' @examples
@@ -24,14 +24,13 @@
 #' tm_df<-output_tc(filepath=file_nm)
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #' names_states<- nm_states(file_nm) ### returns states names
-#' ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3, states=names_states[1:2])
+#' ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01, states=names_states[1:2])
 #' robot_2states_indexes(thP = tmP_df, th=tm_df,
-#'  states=names_states[1:2],indexes =ind1, pvalue=0.001, CI_factor=3)
+#'  states=names_states[1:2],indexes =ind1, pvalue=0.001, alpha=0.001)
 #' @export
 
 robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
-                                pvalue=0.01,  ylim, xlim,
-                                CI_factor=1){
+                                pvalue=0.01, alpha=0.01, ylim, xlim){
 
   if(missing(xlim)) xlim=c(min(thP$Start), max(thP$End))
   if(missing(ylim)) ylim=c(-110, 120)
@@ -54,8 +53,8 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
   sh_avc_up<-lav.proc_up[[1]]
   sh_avv_up<-lav.proc_up[[2]]
 
-  CI_all<-prep_timecourse_plot_sd( control_df_up, variant_df_up, replicates=3, pv_cutoff = pvalue)
-  CI_all=CI_all*CI_factor
+  CI_all<-prep_timecourse_plot_sd( control_df_up, variant_df_up,
+                                   replicates=replicates,alpha=alpha)
 
   cola<-brewer.pal(n = length(7:dim(sh_avc)[2])+1, name = "Oranges")
   par(mfrow = c(1, 1), mar = c(1.5, 1.5, 1.5,

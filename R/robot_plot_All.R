@@ -13,7 +13,7 @@
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
-#' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
+#' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @return Robot maps for timecourses
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -22,11 +22,11 @@
 #' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001)
 #'
 #' # more restrictive peptide selection
-#' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, CI_factor=3)
+#' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, alpha=0.001)
 #'
 #' @export
 robot_plot_All<-function(thP, th, replicates=3,
-                         pv_cutoff=0.01, states, CI_factor=1){
+                         pv_cutoff=0.01, alpha=0.01, states){
   if(missing(states)) states=unique(thP$Protein.State)
 
   oldpar<-par(no.readonly = TRUE)
@@ -53,8 +53,9 @@ robot_plot_All<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3, pv_cutoff = pv_cutoff)
-    CI_all<-CI_all*CI_factor
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up,
+                                    replicates=3,  alpha=alpha)
+
 
     cola<-(brewer.pal(n = length(7:dim(sh_avc)[2])+1, name = "Oranges"))
 

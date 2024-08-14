@@ -34,11 +34,12 @@ coverage_residue<-function(df1, start_col, end_col){
 #' @param pv data.frame with pvalues created using pv_timepoint() function
 #' @param sd data.frame with standard deviations created using sd_timepoint() function
 #' @param replicates number of replicates as default set to 3.
-#' @param pv_cutoff cuttoff for Critical interval. Default=0.01
+#' @param alpha cutoff for Critical interval. Default=0.01
+#' @param pv_cutoff cuttoff for pval. Default=0.01
 #' @return ranges per set
 #' @export
-significant_peptide_uptake<-function(df_av, pv, sd, pv_cutoff=0.01, replicates=3){
-  CI=CI_tp(sd, replicates,pv_cutoff)
+significant_peptide_uptake<-function(df_av, pv, sd, alpha=0.01, pv_cutoff=0.01, replicates=3){
+  CI=CI_tp(sd, replicates,alpha)
   abs.a<-c()
   for ( i in 8:dim(df_av)[2]){
     abs1<-abs(df_av[,i])>CI[i-7]

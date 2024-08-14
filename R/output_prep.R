@@ -21,6 +21,7 @@
 #' @importFrom tidyr separate
 #' @importFrom methods rbind2
 #' @importFrom wrapr orderv
+#' @importFrom DescTools DrawEllipse
 #' @examples
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

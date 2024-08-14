@@ -4,7 +4,7 @@
 \alias{plots_vol_tp}
 \title{Returns volcano plots for timepoints in the data frame}
 \usage{
-plots_vol_tp(df, replicates = 3, pv_cutoff = 0.01, cola)
+plots_vol_tp(df, replicates = 3, pv_cutoff = 0.01, alpha = 0.01, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp}
@@ -12,6 +12,8 @@ plots_vol_tp(df, replicates = 3, pv_cutoff = 0.01, cola)
 \item{replicates}{number of replicates in set as default set to 3.}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
+
+\item{alpha}{cutoff for Critical interval. Default=0.01}
 
 \item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
 }
@@ -28,6 +30,6 @@ pvalues calculated using Welch t-test.
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-plots_vol_tp(df=a, replicates=3, cola=c(1:4), pv_cutoff=0.01 )
+plots_vol_tp(df=a, replicates=3, cola=c(1:4), pv_cutoff=0.01, alpha=0.01 )
 plots_vol_tp(df=a, pv_cutoff=0.05)
 }
