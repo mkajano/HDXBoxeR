@@ -46,7 +46,7 @@ robot_plot_All<-function(thP, th, replicates=3,
 
     pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
     lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
-    lav.proc_up<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
+    lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 
     sh_avc<-lav.proc[[1]]
     sh_avv<-lav.proc[[2]]
