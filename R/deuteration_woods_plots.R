@@ -150,7 +150,7 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' @export
 woods_CI_plot<-function(thP, th, replicates=3,
                         pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,120), ...){
-  if(missing(states)) states=unique(thP$Protein.State)
+  if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
   nm1<-str_sub(nm[7:length(nm)], start=4, end=-10)
@@ -184,7 +184,7 @@ woods_CI_plot<-function(thP, th, replicates=3,
 
     pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
     lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
-    lav.proc_up<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
+    lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 
     sh_avc<-lav.proc[[1]]
     sh_avv<-lav.proc[[2]]

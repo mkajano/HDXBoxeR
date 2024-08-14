@@ -46,7 +46,7 @@ CI_2pts<-function(s1, s2, replicates=3, alpha=0.01){
 #' @export
 CI_tp<-function(df, replicates=3, alpha=0.01 ){
   CI_all<-c()
-  tvalue=abs(qt(alpha/2, replicates*2-2))
+  tvalue=abs(qt(alpha, replicates*2-2))
   for ( i in 8:dim(df)[2]){
     sp1<-sqrt(sum(df[,7]^2*(replicates-1))/((replicates-1)*length(df[,7])))
     sp2<-sqrt(sum(df[,i]^2*(replicates-1))/((replicates-1)*length(df[,i])[1]))
