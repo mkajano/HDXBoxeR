@@ -4,14 +4,7 @@
 \alias{robot_plot_All}
 \title{Returns a robot plot for comparisons of the timepoints samples}
 \usage{
-robot_plot_All(
-  thP,
-  th,
-  replicates = 3,
-  pv_cutoff = 0.01,
-  states,
-  CI_factor = 1
-)
+robot_plot_All(thP, th, replicates = 3, pv_cutoff = 0.01, alpha = 0.01, states)
 }
 \arguments{
 \item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
@@ -22,9 +15,9 @@ robot_plot_All(
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
-\item{states}{Protein states from the set. As default all states are chosen.}
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 
-\item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
+\item{states}{Protein states from the set. As default all states are chosen.}
 }
 \value{
 Robot maps for timecourses
@@ -44,6 +37,6 @@ tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001)
 
 # more restrictive peptide selection
-robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, CI_factor=3)
+robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, alpha=0.001)
 
 }

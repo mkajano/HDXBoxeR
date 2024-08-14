@@ -4,7 +4,7 @@
 \alias{CI_2pts}
 \title{Global confidence interval treshold from experimental standard deviation for 2 samples.}
 \usage{
-CI_2pts(s1, s2, replicates = 3)
+CI_2pts(s1, s2, replicates = 3, alpha = 0.01)
 }
 \arguments{
 \item{s1}{standard deviation from one sample}
@@ -12,6 +12,8 @@ CI_2pts(s1, s2, replicates = 3)
 \item{s2}{standard deviation from seconda sample}
 
 \item{replicates}{number of replicates. Default set to 3.}
+
+\item{alpha}{probability to calculate t-value in Welch test. Default 0.01}
 }
 \value{
 treshold for determining significance.
@@ -26,5 +28,5 @@ calculations for alpha 0.99
 \examples{
 sd1<-data.frame(c(0.1, 0.12, 0.13, 0.09, 0.11, 0.10))
 sd2<-data.frame(c(0.18, 0.11, 0.13, 0.08, 0.11, 0.06))
-CI_2pts(s1=sd1, s2=sd2, replicates=3)
+CI_2pts(s1=sd1, s2=sd2, replicates=3, alpha=0.01)
 }

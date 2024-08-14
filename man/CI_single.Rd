@@ -4,12 +4,14 @@
 \alias{CI_single}
 \title{Global confidence interval treshold from experimental standard deviation for 1 sample}
 \usage{
-CI_single(s1, replicates = 3)
+CI_single(s1, replicates = 3, alpha = 0.01)
 }
 \arguments{
 \item{s1}{standard deviation from one sample}
 
 \item{replicates}{number of replicates. Default set to 3.}
+
+\item{alpha}{probability to calculate t-value in Welch test. Default 0.01}
 }
 \value{
 treshold for determining significance.
@@ -23,5 +25,5 @@ calculations for alpha 0.99
 }
 \examples{
 sd1<-data.frame(c(0.1, 0.12, 0.13, 0.09, 0.11, 0.10))
-CI_single(s1=sd1, replicates=3)
+CI_single(s1=sd1, replicates=3, alpha=0.01)
 }

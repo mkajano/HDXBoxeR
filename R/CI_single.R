@@ -8,13 +8,14 @@
 #'
 #' @param s1 standard deviation from one sample
 #' @param replicates number of replicates. Default set to 3.
+#' @param alpha probability to calculate t-value in Welch test. Default 0.01
 #' @return treshold for determining significance.
 #' @examples
 #' sd1<-data.frame(c(0.1, 0.12, 0.13, 0.09, 0.11, 0.10))
-#' CI_single(s1=sd1, replicates=3)
+#' CI_single(s1=sd1, replicates=3, alpha=0.01)
 #' @export
-CI_single<-function(s1, replicates=3){
-  tvalue=abs(qt(0.01/2, replicates*2-2))
+CI_single<-function(s1, replicates=3, alpha=0.01){
+  tvalue=abs(qt(alpha/2, replicates*2-2))
   sp1<-sqrt(sum(s1^2*(replicates-1))/((replicates-1)*length(s1)))
   spa<-sqrt((sp1^2)/replicates)
   CI<-spa*tvalue ###

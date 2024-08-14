@@ -226,9 +226,9 @@ sd1<-sd_timepoint(input_uptake_timepoint)
 head(sd1)
 
 ### Global critical interval for 1 protein sets
-CI_single(s1 =sd1[,7], replicates = 3 )
+CI_single(s1 =sd1[,7], replicates = 3 , alpha=0.01)
 ##Global critical interval for 2 protein sets
-CI_2pts(s1 = sd1[,7], s2=sd1[,8], replicates = 3)
+CI_2pts(s1 = sd1[,7], s2=sd1[,8], replicates = 3, alpha=0.01)
 
 ##individual peptide p-value calculation against first set in the input file
 pv1<-pv_timepoint(input_uptake_timepoint)
@@ -572,9 +572,9 @@ tc_a<-output_tc(filepath = file_nm)
 tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 
 ###All peptides drawn 
-robot_plot_All(thP = tc_aP, th=tc_a)
-###USe more stingent parameters to have less peptides drawn. CI_factor is a factor that modifies (multiplicate) Critial interval. 
-robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
+robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff = 0.01,alpha=0.01)
+###USe more stingent parameters to have less peptides drawn. alpha modifies the CI values (works similarly to p-value)
+robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff = 0.001, alpha=0.01)
 
 
 ```
@@ -593,18 +593,18 @@ tc_a<-output_tc(filepath = file_nm)
 tc_aP<-output_tc(filepath = file_nm, percent=T)
 names_states<- nm_states(file_nm) ## only two protein states should be used in functions below. 
 
-## returns dataframe with all significant peptides with pvalue=0.01, CI_factor=2
+## returns dataframe with all significant peptides with pvalue=0.01, and alpha of 0.001 
 robot_indexes_df(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2], 
-                    pvalue = 0.005, CI_factor=1.5)
+                    pvalue = 0.005, alpha=0.001)
 
 #list of indexes 
 inds<-robot_indexes(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2], 
-                    pvalue = 0.005, CI_factor=1.5) ###return indexes of peptide
+                    pvalue = 0.005, alpha=0.001) ###return indexes of peptide
 
 inds2=inds[c(1,4, 7,8, 9, 11,13,14, 15,16, 20,21, 24)] ### pick which peptides you want to keep 
 
 # Make a final robot plot. Above the plot there is bar that showing lack of coverage in the sets (grey), no coverage on plot (blue), coverage on plot (orange). 
-robot_2states_indexes(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2],indexes = inds2, pvalue=0.001, CI_factor = 2, ylim=c(-120, 120), xlim=c(50, 230))
+robot_2states_indexes(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2],indexes = inds2, pvalue=0.001, alpha=0.001, ylim=c(-120, 120), xlim=c(50, 230))
 
 ```
 
@@ -622,8 +622,8 @@ tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 
 ###All peptides drawn 
 woods_CI_plot(thP = tc_aP, th=tc_a)
-###USe more stingent parameters to have less peptides drawn. CI_factor is a factor that modifies (multiplicate) Critial interval. 
-woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
+###USe more stingent parameters to have less peptides drawn. alpha modifies the Critial interval. 
+woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, alpha=0.001)
 
 
 ```
@@ -669,7 +669,7 @@ The Dfact is the fraction of Deuterium/Hydrogen used in the labeling buffer, wit
 ```{r echo = FALSE}
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 
-all_summary(file_nm, Dfact=0.85,replicates = 3)
+all_summary(file_nm, Dfact=0.85,replicates = 3, alpha=0.01)
 
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "HDXBoxeR -- correlation function"
+title: "Correlation Plot"
 author: "Maria K. Janowska, Mia Cervantes, Miklos Guttman, Rachel E. Klevit"
 date: "8/12/2024"
 output:
@@ -7,7 +7,7 @@ output:
   pdf_document: default
   word_document: default
 vignette: |
-  %\VignetteIndexEntry{HDXBoxeR} 
+  %\VignetteIndexEntry{correlation_plots} 
   %\VignetteEncoding{UTF-8}
   %\VignetteEngine{knitr::rmarkdown} 
     \usepackage[UTF-8]{inputenc}

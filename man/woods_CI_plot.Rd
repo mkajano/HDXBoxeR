@@ -10,7 +10,7 @@ woods_CI_plot(
   replicates = 3,
   pv_cutoff = 0.01,
   states,
-  CI_factor = 1,
+  alpha = 0.01,
   ylim = c(0, 120),
   ...
 )
@@ -26,7 +26,7 @@ woods_CI_plot(
 
 \item{states}{Protein states from the set. As default all states are chosen.}
 
-\item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 
 \item{ylim}{y axis limit}
 
@@ -48,6 +48,6 @@ Peptides ranges are plotted as a line at corresponding \% deuteration values.
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tc(file_nm)
 b<-output_tc(file_nm, percent=TRUE)
-woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, CI_factor = 1, replicates=3)
+woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
 }
 }

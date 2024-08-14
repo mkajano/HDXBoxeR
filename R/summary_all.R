@@ -9,13 +9,15 @@
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
 #' @param replicates number of replicates. Default set to 3.
 #' @param Dfact Dfact is the fraction of D/H in the labeling buffer used. Default set up to 0.85
+#' @param alpha Critical interval, level of stringency
 #' @return Returns summary table.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- all_summary(file_nm, replicates=3, Dfact=0.85)
 #' @export
-all_summary<-function(filepath, replicates=3, Dfact=0.85){
-  sum<-cbind(general_info(filepath), summary_sd_CI(filepath, replicates), backHX_calculations(filepath, Dfact))
+all_summary<-function(filepath, replicates=3, Dfact=0.85, alpha=0.01){
+  sum<-cbind(general_info(filepath), summary_sd_CI(filepath, replicates, alpha=alpha),
+             backHX_calculations(filepath, Dfact))
   return(sum)
 }
 

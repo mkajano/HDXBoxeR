@@ -11,9 +11,9 @@ robot_2states_indexes(
   states,
   replicates = 3,
   pvalue = 0.01,
+  alpha = 0.01,
   ylim,
-  xlim,
-  CI_factor = 1
+  xlim
 )
 }
 \arguments{
@@ -29,11 +29,11 @@ robot_2states_indexes(
 
 \item{pvalue}{p-value cutoff here set up to 0.01}
 
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
+
 \item{ylim}{y-axis range}
 
 \item{xlim}{x-axis range. Set as default from max and minimum residues for the protein}
-
-\item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
 }
 \value{
 Robot maps for timecourses for 2 protein states and selected indexes.
@@ -51,7 +51,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 tm_df<-output_tc(filepath=file_nm)
 tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 names_states<- nm_states(file_nm) ### returns states names
-ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3, states=names_states[1:2])
+ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01, states=names_states[1:2])
 robot_2states_indexes(thP = tmP_df, th=tm_df,
- states=names_states[1:2],indexes =ind1, pvalue=0.001, CI_factor=3)
+ states=names_states[1:2],indexes =ind1, pvalue=0.001, alpha=0.001)
 }

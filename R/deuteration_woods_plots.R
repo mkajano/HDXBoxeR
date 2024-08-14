@@ -16,7 +16,8 @@
 #' deuteration_woods_timepoints(a[1:12,])
 #' }
 #' @export
-deuteration_woods_timepoints<-function(input_data,times, replicates=3, cola=NA, ylim=c(0,120), ...) {
+deuteration_woods_timepoints<-function(input_data,times, replicates=3,
+                                       cola=NA, ylim=c(0,120), ...) {
   if(missing(times)) times=unique(input_data$Deut.Time)
 
   oldpar<-par(no.readonly = TRUE)
@@ -137,18 +138,18 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' @param states Protein states from the set. As default all states are chosen.
 #' @param ylim y axis limit
 #' @param ... other variables
-#' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
+#' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @return Woods plots with chosen statistically different peptides
 #' @examples
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tc(file_nm)
 #' b<-output_tc(file_nm, percent=TRUE)
-#' woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, CI_factor = 1, replicates=3)
+#' woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
 #' }
 #' @export
 woods_CI_plot<-function(thP, th, replicates=3,
-                        pv_cutoff=0.01, states, CI_factor=1, ylim=c(0,120), ...){
+                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,120), ...){
   if(missing(states)) states=unique(thP$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -190,8 +191,9 @@ woods_CI_plot<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3, pv_cutoff = pv_cutoff)
-    CI_all<-CI_all*CI_factor
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3,
+                                  alpha=alpha)
+
 
     cola<-(brewer.pal(n = 9, name = "Reds"))
     colg<-(brewer.pal(n = 9, name = "Blues"))

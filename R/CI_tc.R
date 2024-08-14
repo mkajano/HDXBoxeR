@@ -6,12 +6,12 @@
 #' @param sd_c dataframe of control
 #' @param sd_v dataframe for variant
 #' @param replicates number of replicates. Default set to 3.
-#' @param pv_cutoff pvalue cutoff. Default set to 0.01
+#' @param alpha pvalue cutoff. Default set to 0.01
 #' @return Critical interval for 2 sets
 #' @export
-CI_tc<-function(sd_c, sd_v, replicates=3, pv_cutoff=0.01 ){
+CI_tc<-function(sd_c, sd_v, replicates=3, alpha=0.01 ){
   CI_all<-c()
-  tvalue=abs(qt(pv_cutoff/2, replicates*2-2))
+  tvalue=abs(qt(alpha/2, replicates*2-2))
 
   for ( i in 7:dim(sd_c)[2]){
     sp1<-sqrt(sum(sd_c[,i]^2*(replicates-1))/((replicates-1)*length(sd_c[,i])))

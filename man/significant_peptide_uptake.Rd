@@ -4,7 +4,14 @@
 \alias{significant_peptide_uptake}
 \title{Function returns which peptides are significantly based of pv_cutoff and Critial interval}
 \usage{
-significant_peptide_uptake(df_av, pv, sd, pv_cutoff = 0.01, replicates = 3)
+significant_peptide_uptake(
+  df_av,
+  pv,
+  sd,
+  alpha = 0.01,
+  pv_cutoff = 0.01,
+  replicates = 3
+)
 }
 \arguments{
 \item{df_av}{data.frame with averages created using ave_timepoint() function}
@@ -13,7 +20,9 @@ significant_peptide_uptake(df_av, pv, sd, pv_cutoff = 0.01, replicates = 3)
 
 \item{sd}{data.frame with standard deviations created using sd_timepoint() function}
 
-\item{pv_cutoff}{cuttoff for Critical interval. Default=0.01}
+\item{alpha}{cutoff for Critical interval. Default=0.01}
+
+\item{pv_cutoff}{cuttoff for pval. Default=0.01}
 
 \item{replicates}{number of replicates as default set to 3.}
 }
