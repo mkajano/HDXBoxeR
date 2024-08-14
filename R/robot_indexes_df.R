@@ -16,7 +16,7 @@
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #'
 #' # more restictive peptide selection
-#' robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3)
+#' robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
 #' @export
 
 robot_indexes_df<-function(thP, th, replicates=3,
@@ -33,7 +33,7 @@ robot_indexes_df<-function(thP, th, replicates=3,
 
     pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
     lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
-    lav.proc_up<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
+    lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 
     sh_avc<-lav.proc[[1]]
     sh_avv<-lav.proc[[2]]
@@ -72,7 +72,7 @@ robot_indexes_df<-function(thP, th, replicates=3,
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 #'
 #'  # more restictive peptide selection
-#' robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3)
+#' robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
 #' @export
 robot_indexes<-function(thP, th, replicates=3,
                         pvalue=0.01, states, CI_factor=1){

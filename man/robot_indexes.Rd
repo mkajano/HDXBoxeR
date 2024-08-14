@@ -31,5 +31,5 @@ tm_df<-output_tc(filepath=file_nm)
 tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 
  # more restictive peptide selection
-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, CI_factor=3)
+robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
 }
