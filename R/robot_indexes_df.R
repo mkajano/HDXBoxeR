@@ -9,7 +9,7 @@
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
 #' @param alpha cutoff for Critical interval. Default=0.01
-#'@return Returns dataframe listing peptides that are significantly different between sets.
+#' @return Returns dataframe listing peptides that are significantly different between sets.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' tm_df<-output_tc(filepath=file_nm)
@@ -42,8 +42,7 @@ robot_indexes_df<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3,
-                                    alpha=alpha)
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3, alpha )
 
     peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {

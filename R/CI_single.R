@@ -15,7 +15,7 @@
 #' CI_single(s1=sd1, replicates=3, alpha=0.01)
 #' @export
 CI_single<-function(s1, replicates=3, alpha=0.01){
-  tvalue=abs(qt(alpha, replicates*2-2))
+  tvalue=abs(qt(alpha/2, replicates*2-2))
   sp1<-sqrt(sum(s1^2*(replicates-1))/((replicates-1)*length(s1)))
   spa<-sqrt((sp1^2)/replicates)
   CI<-spa*tvalue ###

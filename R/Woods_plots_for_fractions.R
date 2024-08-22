@@ -1,13 +1,10 @@
-
-
-#' Returns a woods plot for comparisons of the timepoints samples
+#' Returns a woods plot for comparisons of the timecourse samples
 #'
-#' Modification of butterfly plot. x axis residues.
-#' y axis % deuteration for
 #' Peptides are compared between the sets for the significance change between sets.
+#' The y-axis is fraction deuteration: that is uptake divided by number of exchangeable protons
 #' If there is significant change beteween sets peptides are plotted for all timepoints.
 #' Significanty different timepoints for the peptides are colored.
-#' Peptides ranges are plotted as a line at corresponding % deuteration values.
+#' Peptides ranges are plotted as a line at corresponding fraction deuteration values.
 #'
 #'
 #' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
@@ -15,6 +12,7 @@
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
 #' @param ylim y axis limit
+#' @param method options either uptake or fraction
 #' @param ... other variables
 #' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @return Woods plots with chosen statistically different peptides
@@ -22,31 +20,13 @@
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tc(file_nm)
-#' b<-output_tc(file_nm, percent=TRUE)
-#' woods_CI_plot(th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
+#' woods_CI_plot_frac(th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
 #' }
 #' @export
 #'
-
-
-
-path="C:/Users/mkaja/Dropbox/sHsp/mj_results/results/HDXMS/mia/all_data.csv"
-
-path=system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-
-names_states<- nm_states(path)
-th<-output_tc(path,replicates=3, states = names_states[c(2,3)], seq_match = F )
-
-th<-output_tc(path )
-thP<-output_tc(path, percent = T )
-
-st1<-sd_timepoint(th)
-
-sp1<-sqrt(sum(sd_c[,i]^2*(replicates-1))/((replicates-1)*length(sd_c[,i])))
-sp2<-sqrt(sum(sd_v[,i]^2*(replicates-1))/((replicates-1)*length(sd_v[,i])[1]))
-
 woods_CI_plot_frac<-function(th, replicates=3,
-                        pv_cutoff=0.01, states, alpha=0.1, ylim=c(0,1.2), ...){
+                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,5),
+                        method="fraction", ...){
   if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -55,16 +35,35 @@ woods_CI_plot_frac<-function(th, replicates=3,
   on.exit(par(oldpar))
 
 
+  if (method=="fraction"){
+  thP<-data.frame(th[,1:6],th[,7:dim(th)[2]]/nb_exch_deut(th))
+
+
   pl1f<-function(){
-    plot(x=1, type = "n", xlim=c(min(thP$Start), max(thP$End)), ylab="",
+    xlim1=c(min(thP$Start), max(thP$End))
+    plot(x=1, type = "n", xlim=xlim1, ylab="",
          xlab="", yaxt="n", ylim=ylim, ...)
-    axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
-    #axis(2, at=seq(-10, 10, by=0.2), cex.axis=1, labels=c(rev(seq(50,1000, by=50)), seq(0,1000, by=50)))
-    axis(2, at=seq(-10, 10, by=0.1), cex.axis=1, labels=FALSE,tcl=-0.2)
-    exp_ddu<-expression('% Deuteration')
+    axis(1,at=pretty(xlim1, n=5), cex.axis=1, labels=FALSE,tcl=-0.2)
+    axis(2, at=pretty(ylim, n=3), cex.axis=1, labels=pretty(ylim, n=3))
+    axis(2, at=pretty(ylim, n=10), cex.axis=1, labels=FALSE,tcl=-0.2)
+    exp_ddu<-expression('Fraction deuterated')
     mtext(c("Residue"),  c(SOUTH<-1),line=0.3, outer=TRUE, cex=0.8)
     mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=0.85)
-  }
+  }} else {
+    thP<-th
+
+
+    pl1f<-function(){
+      xlim1=c(min(thP$Start), max(thP$End))
+      plot(x=1, type = "n", xlim=xlim1, ylab="",
+           xlab="", yaxt="n", ylim=ylim, ...)
+      axis(1, at=pretty(xlim1, n=5), cex.axis=1, labels=FALSE,tcl=-0.2)
+      axis(2, at=pretty(ylim, n=3), cex.axis=1, labels=pretty(ylim, n=3))
+      axis(2, at=pretty(ylim, n=10), cex.axis=1, labels=FALSE,tcl=-0.2)
+      exp_ddu<-expression('Fraction deuterated')
+      mtext(c("Residue"),  c(SOUTH<-1),line=0.3, outer=TRUE, cex=0.8)
+      mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=0.85)
+  }}
 
 
   par(mfcol=c(length(nm1),length(states)-1), mar = c(1.5, 1.5, 1.5, 1.5),
@@ -73,7 +72,6 @@ woods_CI_plot_frac<-function(th, replicates=3,
       bg="white", font.lab=2, font.axis=2)
 
 
-  thP<-data.frame(th[,1:6],th[,7:dim(th)[2]]/nb_exch_deut(th))
 
 
 
@@ -98,7 +96,6 @@ woods_CI_plot_frac<-function(th, replicates=3,
                                     alpha=alpha)
 
     print(CI_all)
-
 
     cola<-(brewer.pal(n = 9, name = "Reds"))
     colg<-(brewer.pal(n = 9, name = "Blues"))
@@ -133,9 +130,62 @@ woods_CI_plot_frac<-function(th, replicates=3,
       points(c(sh_avc$Start[peptide_all]+sh_avc$End[peptide_all])/2, c(sh_avv[peptide_all,j]), type="p", col="grey65",pch=20, lwd=2)
 
       points(c(sh_avc$Start[peptide_index]+sh_avc$End[peptide_index])/2, c(sh_avv[peptide_index,j]), type="p", col=colg[8],pch=20, lwd=2)
-      text(x=(min(thP$Start)+max(thP$End))/2,y=1.15, paste(states[1], "vs", state,";", nm1[nb1-1]), cex=0.7)}
+      text(x=(min(thP$Start)+max(thP$End))/2,y=ylim[2]-0.1, paste(states[1], "vs", state,";", nm1[nb1-1]), cex=0.7)}
 
   }
   legend_nm_bottom(c(states[1], "other state"), c(cola[8], colg[8]))
 }
 
+
+
+
+
+
+path="C:/Users/mkaja/Dropbox/sHsp/mj_results/results/HDXMS/mia/all_data.csv"
+
+path="C:/Users/mkaja/Dropbox/sHsp/mj_results/results/HDXMS/heterooligomers/B1_heterooligomers_Allresults_culled.csv"
+
+
+#path=system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+
+names_states<- nm_states(path)
+th<-output_tc(path,replicates=3, states =names_states[c(1:3)], seq_match = F )
+woods_CI_plot_frac(th, alpha=0.01, pv_cutoff = 0.01, ylim=c(0,1.1))
+woods_CI_plot_frac(th, alpha=0.1, pv_cutoff = 0.01, method="uptake", ylim=c(0,16))
+
+
+thP<-data.frame(th[,1:6],th[,7:dim(th)[2]]/nb_exch_deut(th))
+h<-output_tp(path,replicates=3, states =names_states[c(1:3)], seq_match = F )
+
+
+h1<-output_tp(path,replicates=3, states =names_states[c(3)], seq_match = F,
+              times ="300.00s"  )
+h2<-output_tp(path,replicates=3, states =names_states[c(2)], seq_match = F ,
+              times ="300.00s" )
+
+
+
+plot_peptide_sig_tp(h, pv_cutoff = 0.01)
+
+plots_av_tp(h)
+plots_diff_tp(h)
+
+plot_heat_map_max_uptake_tp(h)
+
+
+prep_timecourse_plot_sd(h1, h2, replicates=3,
+                        alpha=0.01)
+
+s1<-sd_timepoint(h1)
+s2<-sd_timepoint(h2)
+
+s<-sd_timepoint(h)
+
+
+
+
+which(s1[,7]> 0.1)
+
+
+s1[which(s1[,7]> 0.15),]
+s2[which(s2[,7]> 0.1),]
