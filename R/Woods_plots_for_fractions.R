@@ -1,5 +1,3 @@
-
-
 #' Returns a woods plot for comparisons of the timepoints samples
 #'
 #' Modification of butterfly plot. x axis residues.
@@ -28,25 +26,8 @@
 #' @export
 #'
 
-
-
-path="C:/Users/mkaja/Dropbox/sHsp/mj_results/results/HDXMS/mia/all_data.csv"
-
-path=system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-
-names_states<- nm_states(path)
-th<-output_tc(path,replicates=3, states = names_states[c(2,3)], seq_match = F )
-
-th<-output_tc(path )
-thP<-output_tc(path, percent = T )
-
-st1<-sd_timepoint(th)
-
-sp1<-sqrt(sum(sd_c[,i]^2*(replicates-1))/((replicates-1)*length(sd_c[,i])))
-sp2<-sqrt(sum(sd_v[,i]^2*(replicates-1))/((replicates-1)*length(sd_v[,i])[1]))
-
 woods_CI_plot_frac<-function(th, replicates=3,
-                        pv_cutoff=0.01, states, alpha=0.1, ylim=c(0,1.2), ...){
+                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,1.2), ...){
   if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -96,9 +77,6 @@ woods_CI_plot_frac<-function(th, replicates=3,
 
     CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3,
                                     alpha=alpha)
-
-    print(CI_all)
-
 
     cola<-(brewer.pal(n = 9, name = "Reds"))
     colg<-(brewer.pal(n = 9, name = "Blues"))
