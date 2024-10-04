@@ -9,6 +9,7 @@ plot_peptide_sig_tp(
   replicates = 3,
   nb_pep_row = 100,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
+  alpha = 0.01,
   pv_cutoff = 0.01
 )
 }
@@ -20,6 +21,8 @@ plot_peptide_sig_tp(
 \item{nb_pep_row}{number of peptides in each row. Plotting parameter. Default set to 100.}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
+
+\item{alpha}{cutoff for critical interval}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 }

@@ -5,17 +5,20 @@
 #' @param df average data frame for procent deuteration. Generated using ave_timepoint() function.
 #' @param dfup average data frame for deuteration uptake. Generated using ave_timepoint() function.
 #' @param pv pvalues dataframes calculated using pv_timepoint() function
+#' @param alpha cutoff for critical interval
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param sd standard deviation data.frame generated using sd_timepoint function
 #' @return Maximum uptake heat map for timepoints
 #' @export
-heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd,
+                                     ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+                                     alpha=0.01,
                                      pv_cutoff=0.01, replicates=3){
   #####
   #preparation significance per residue & coverage
-  cl1<-significant_peptide_uptake(dfup, pv, sd, pv_cutoff, replicates)
+  cl1<-significant_peptide_uptake(dfup, pv, sd,alpha, pv_cutoff, replicates)
 
   start_col<-which(colnames(df)=='Start')
   end_col<-which(colnames(df)=='End')
@@ -93,6 +96,7 @@ heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd, ranges=c(-Inf, seq(-30, 3
 #' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
 #' @param mar_x margin x width. Default=3.5
+#' @param alpha cutoff for critical interval
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
@@ -105,7 +109,9 @@ heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd, ranges=c(-Inf, seq(-30, 3
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 #' plot_heat_map_max_uptake_tp_proc(input_proc=a_proc, input_up=a_up)
 #' @export
-plot_heat_map_max_uptake_tp_proc<-function(input_proc, input_up, mar_x=3.5, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+plot_heat_map_max_uptake_tp_proc<-function(input_proc, input_up, mar_x=3.5,
+                                           ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+                                           alpha=0.01,
                                            pv_cutoff=0.01, replicates=3){
 
   oldpar<-par(no.readonly = TRUE)
@@ -128,7 +134,7 @@ plot_heat_map_max_uptake_tp_proc<-function(input_proc, input_up, mar_x=3.5, rang
     au=avu[avu$Deut.Time==i,]
     p1=pv1[pv1$Deut.Time==i,]
     sd=s1[s1$Deut.Time==i,]
-    colmp<-heat_map_tp_maxuptake_proc(a1, au, p1, sd, ranges, pv_cutoff, replicates)
+    colmp<-heat_map_tp_maxuptake_proc(a1, au, p1, sd, ranges,alpha, pv_cutoff, replicates)
     legend_heat_map_tp_proc(av1)
     mtext(i, side=3, outer=FALSE, line=0, cex=0.65)}
   mtext(c("Residues"),  c(NORTH<-1),line=0.7, outer=TRUE, cex=0.8)

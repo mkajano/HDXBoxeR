@@ -11,6 +11,7 @@ peptide_pv_tp_proc(
   sd,
   nb_row = 100,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
+  alpha = 0.01,
   pv_cutoff = 0.01,
   replicates = 3
 )
@@ -27,6 +28,8 @@ peptide_pv_tp_proc(
 \item{nb_row}{number of peptides in each row. Plotting parameter.}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
+
+\item{alpha}{cutoff for Critical interval}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 

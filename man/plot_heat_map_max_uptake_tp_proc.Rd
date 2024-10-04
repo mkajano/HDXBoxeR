@@ -9,6 +9,7 @@ plot_heat_map_max_uptake_tp_proc(
   input_up,
   mar_x = 3.5,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
+  alpha = 0.01,
   pv_cutoff = 0.01,
   replicates = 3
 )
@@ -21,6 +22,8 @@ plot_heat_map_max_uptake_tp_proc(
 \item{mar_x}{margin x width. Default=3.5}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
+
+\item{alpha}{cutoff for critical interval}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 

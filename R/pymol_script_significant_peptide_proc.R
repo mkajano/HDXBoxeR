@@ -7,6 +7,7 @@
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
 #' @param path location where the Pymol scripts will be saved
 #' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param alpha cutoff for critical interval
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param order.pep flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.
@@ -17,11 +18,13 @@
 #' a_up<- output_tp(file_nm)
 #' a_proc<- output_tp(file_nm, percent=TRUE)
 #' pymol_script_significant_peptide_proc(input_proc=a_proc,
-#' input_up=a_up,  path=tempdir(),replicates=3, pv_cutoff=0.01,
+#' input_up=a_up,  path=tempdir(),replicates=3, alpha=0.01, pv_cutoff=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
 #' }
 #' @export
-pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="",
+                                                ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+                                                alpha=0.01,
                                                 pv_cutoff=0.01, replicates=3, order.pep=TRUE){
   dfup=input_up
   df=input_proc
@@ -38,7 +41,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="", ra
     df1<-ave_timepoint(df[df$Deut.Time==deut.time,], replicates)
 
     #preparation significance per residue & coverage
-    cl1<-significant_peptide_uptake(dfu, pv, sd, pv_cutoff, replicates)
+    cl1<-significant_peptide_uptake(dfu, pv, sd,alpha, pv_cutoff, replicates)
     start_col<-which(colnames(df1)=='Start')
     end_col<-which(colnames(df1)=='End')
 

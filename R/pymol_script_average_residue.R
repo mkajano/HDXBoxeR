@@ -6,6 +6,7 @@
 #'
 #' @param df output from functions output_tp
 #' @param path output folder location
+#' @param alpha cutoff for critical interval
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
@@ -14,13 +15,14 @@
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' pymol_script_average_residue(df=a, replicates=3, pv_cutoff=0.01,
+#' pymol_script_average_residue(df=a, replicates=3, alpha=0.01, pv_cutoff=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), path=tempdir() )
 #' pymol_script_average_residue(df=a,  path=tempdir())
 #' }
 #' @export
-pymol_script_average_residue<-function(df,path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-pv_cutoff=0.01, replicates=3){
+pymol_script_average_residue<-function(df,path="",
+                                       ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+ alpha=0.01, pv_cutoff=0.01, replicates=3){
   #####from HDX get data and
 
   oldwd<-getwd()
@@ -34,7 +36,7 @@ pv_cutoff=0.01, replicates=3){
 
 
     #preparation significance per residue & coverage
-    cl1<-significant_peptide_uptake(df1, pv, sd, pv_cutoff, replicates)
+    cl1<-significant_peptide_uptake(df1, pv, sd,alpha,  pv_cutoff, replicates)
 
     start_col<-which(colnames(df1)=='Start')
     end_col<-which(colnames(df1)=='End')

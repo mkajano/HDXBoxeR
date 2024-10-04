@@ -21,7 +21,7 @@
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tc(file_nm)
 #' b<-output_tc(file_nm, percent=TRUE)
-#' woods_CI_plot(th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
+#' woods_CI_plot_frac(th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
 #' }
 #' @export
 #'
@@ -42,7 +42,7 @@ woods_CI_plot_frac<-function(th, replicates=3,
     axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
     #axis(2, at=seq(-10, 10, by=0.2), cex.axis=1, labels=c(rev(seq(50,1000, by=50)), seq(0,1000, by=50)))
     axis(2, at=seq(-10, 10, by=0.1), cex.axis=1, labels=FALSE,tcl=-0.2)
-    exp_ddu<-expression('% Deuteration')
+    exp_ddu<-expression('Fraction Deuterated')
     mtext(c("Residue"),  c(SOUTH<-1),line=0.3, outer=TRUE, cex=0.8)
     mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=0.85)
   }

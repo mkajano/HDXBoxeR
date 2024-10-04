@@ -8,6 +8,7 @@ pymol_script_significant_peptide(
   df,
   path = "",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
+  alpha = 0.01,
   pv_cutoff = 0.01,
   replicates = 3,
   order.pep = TRUE
@@ -19,6 +20,8 @@ pymol_script_significant_peptide(
 \item{path}{location where the scripts will be saved}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
+
+\item{alpha}{cutoff for critical interval}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
@@ -37,7 +40,8 @@ Number of colors and corresponding to them ranges can be defined by user.
 \donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-pymol_script_significant_peptide(df=a, replicates=3, path=tempdir(), pv_cutoff=0.01,
+pymol_script_significant_peptide(df=a, replicates=3, path=tempdir(),
+alpha=0.01, pv_cutoff=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
 pymol_script_significant_peptide(df=a, path=tempdir())
 }

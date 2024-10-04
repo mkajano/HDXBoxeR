@@ -2,14 +2,18 @@
 #'
 #' Correlation of two states, the st.dev are shown as ellipsoids.
 #'
-#' @param s1 standard deviation from one sample
-#' @param replicates number of replicates. Default set to 3.
-#' @return treshold for determining significance.
-#' @examples
-#' sd1<-data.frame(c(0.1, 0.12, 0.13, 0.09, 0.11, 0.10))
-#' CI_single(s1=sd1, replicates=3)
-#' @export
-#'
+#' @param df input from tp function
+#' @param replicates number of replicates in sample. Default set to 3.
+#' @param times times to be used
+#' @param state1 First state
+#' @param state2 second state
+#' @param ylim y-axis range
+#' @param xlim x-axis range
+#' @param position_col default NA, flag that allows to color based on domain,
+#' if TRUE then the length1 vector needs to be provided
+#' @param length1 vector of numeric
+#' @param ... other plotting parameters
+#' @return Correlation plot
 
 plot_cor_pts_elps<-function(df, replicates=3, times, state1, state2,
                             position_col=NA, length1=NA,  xlim = NULL, ylim = NULL, ...){
@@ -52,17 +56,30 @@ plot_cor_pts_elps<-function(df, replicates=3, times, state1, state2,
 }
 
 
-
-plot_correlation_functions<-function(df, replicates=3){
+#' Plot correlated states
+#'
+#' Correlation of two states, the st.dev are shown as ellipsoids.
+#'
+#' @param df standard deviation from one sample
+#' @param replicates number of replicates. Default set to 3.
+#' @param ranges ylim range and and how often ticks
+#' @param mar_x x margin variable to be changed if needed
+#' @return plot for the correlation
+#' @examples
+#' sd1<-data.frame(c(0.1, 0.12, 0.13, 0.09, 0.11, 0.10))
+#' CI_single(s1=sd1, replicates=3)
+#' @export
+#'
+plot_correlation_functions<-function(df, replicates=3, ranges, mar_x=1){
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
 
-
   av1<-ave_timepoint(df, replicates)
   par(mfrow=c(length(unique(av1$Protein.State)),1),
       mar = c(1.5, mar_x, 1, 1.1), oma=c(3,2.4,1,1),
-      cex.axis=1, cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
+      cex.axis=1, cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0),
+      ps=14, font=2, bg="white", font.lab=2, font.axis=2)
   for ( i in(unique(df$Protein.State))){
     a1=av1[av1$Protein.State==i,]
     colmp<-heat_map_tc(a1, ranges)

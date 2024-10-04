@@ -9,6 +9,7 @@ plot_heat_map_tp_proc(
   input_up,
   mar_x = 3.5,
   ranges = c(-Inf, -3, -2, -1, 0, 1, 2, 3, Inf),
+  alpha = 0.01,
   pv_cutoff = 0.01,
   replicates = 3
 )
@@ -21,6 +22,8 @@ plot_heat_map_tp_proc(
 \item{mar_x}{margin x width. Default=3.5}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
+
+\item{alpha}{cutoff for critical interval}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
@@ -36,7 +39,8 @@ Returns heat map with average values for significant uptake per residue.
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a_up<- output_tp(file_nm)
 a_proc<- output_tp(file_nm, percent=TRUE)
-plot_heat_map_tp_proc(input_proc=a_proc, input_up=a_up, replicates=3, pv_cutoff=0.01,
+plot_heat_map_tp_proc(input_proc=a_proc, input_up=a_up,
+replicates=3, pv_cutoff=0.01, alpha=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 plot_heat_map_tp_proc(input_proc=a_proc, input_up=a_up)
 }

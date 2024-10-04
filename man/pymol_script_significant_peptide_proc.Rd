@@ -9,6 +9,7 @@ pymol_script_significant_peptide_proc(
   input_up,
   path = "",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
+  alpha = 0.01,
   pv_cutoff = 0.01,
   replicates = 3,
   order.pep = TRUE
@@ -22,6 +23,8 @@ pymol_script_significant_peptide_proc(
 \item{path}{location where the Pymol scripts will be saved}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
+
+\item{alpha}{cutoff for critical interval}
 
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
@@ -42,7 +45,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a_up<- output_tp(file_nm)
 a_proc<- output_tp(file_nm, percent=TRUE)
 pymol_script_significant_peptide_proc(input_proc=a_proc,
-input_up=a_up,  path=tempdir(),replicates=3, pv_cutoff=0.01,
+input_up=a_up,  path=tempdir(),replicates=3, alpha=0.01, pv_cutoff=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
 }
 }

@@ -599,9 +599,9 @@ robot_indexes_df(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2],
 
 #list of indexes 
 inds<-robot_indexes(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2], 
-                    pvalue = 0.005, alpha=0.001) ###return indexes of peptide
+                    pvalue = 0.005, alpha=0.01) ###return indexes of peptide
 
-inds2=inds[c(1,4, 7,8, 9, 11,13,14, 15,16, 20,21, 24)] ### pick which peptides you want to keep 
+inds2=inds[seq(1,16, by=2)] ### pick which peptides you want to keep 
 
 # Make a final robot plot. Above the plot there is bar that showing lack of coverage in the sets (grey), no coverage on plot (blue), coverage on plot (orange). 
 robot_2states_indexes(thP = tc_aP, th=tc_a, states=rev(names_states)[1:2],indexes = inds2, pvalue=0.001, alpha=0.001, ylim=c(-120, 120), xlim=c(50, 230))
