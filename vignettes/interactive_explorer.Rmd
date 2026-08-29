@@ -1,0 +1,147 @@
+---
+title: "Interactive Volcano, Fissure, and Woods Plots"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Interactive Volcano, Fissure, and Woods Plots}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+has_deps <- requireNamespace("plotly", quietly = TRUE) &&
+  requireNamespace("crosstalk", quietly = TRUE) &&
+  requireNamespace("DT", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  eval = has_deps
+)
+```
+
+```{r, echo = FALSE, eval = !has_deps, results = "asis"}
+cat("This vignette renders interactive `htmlwidgets` and needs the **plotly**, ",
+    "**crosstalk**, and **DT** packages, which are not installed in the environment ",
+    "that built this copy of the vignette. Install them with ",
+    "`install.packages(c(\"plotly\", \"crosstalk\", \"DT\"))` and re-knit to see the ",
+    "live widgets - the code below is unchanged either way.", sep = "")
+```
+
+## Why these exist alongside the static plots
+
+`plot_fissure_vent()` and `plots_vol_tp()` are static, base-R plots - reliable, dependency-light, and exactly what you want for a figure headed into a manuscript.
+They are not what you want while you're still *exploring* a dataset: finding a peptide's row in the raw data after spotting it on a plot, or checking whether the same peptide looks interesting on the volcano plot, the fissure plot, and the Woods plot all at once, means flipping between a plot window and a spreadsheet by hand.
+
+The five functions in this vignette are an interactive companion, not a replacement, built on `plotly` and `crosstalk`.
+They share one core idea: build the peptide-level comparison **once**, wrap it in a `crosstalk::SharedData` object, and hand that same object to every plot and table you want linked together.
+Hover over a point on any scatter plot (or a segment on the Woods plot), or select rows in the table, and the same peptides highlight everywhere else that shares that object - the highlight follows your cursor live; double-click a plot to clear it.
+
+These are intentionally **not** part of the package's core dependencies.
+`plotly`, `crosstalk`, and `DT` are listed under `Suggests`, and every function here checks for them at call time with an informative error if they're missing - calling any other function in this package never pulls them in.
+
+## The five functions
+
+| Function | Shows |
+|---|---|
+| `interactive_volcano()` | The classic delta-vs-p-value view, plotly version of `plots_vol_tp()` |
+| `interactive_fissure_vent()` | State1-vs-state2 with per-peptide CI ellipses, plotly version of `plot_fissure_vent()` - see `vignette("fissure_vent")` for what the ellipse actually means |
+| `interactive_woods()` | Per-peptide segments across sequence position, same layout convention as `woods_CI_plot()` |
+| `significant_peptides_table()` | A sortable, searchable `DT` table of every peptide in the comparison |
+| `interactive_fissure_explorer()` | All four of the above, combined and linked |
+
+All five compute the *exact same* hybrid significance criterion as the rest of the package (Hageman & Weis pooled CI + per-peptide Welch p-value) - nothing about the statistics changes here, only the interactivity.
+
+## Worked example
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a <- output_tp(file_nm)
+```
+
+### Standalone: just the fissure plot
+
+Any of the four plot/table functions works on its own - pass no `shared_data` argument and one is built for you automatically.
+
+```{r}
+interactive_fissure_vent(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+```
+
+Hover over a peptide to see its sequence, both states' deuteration, delta, and p-value.
+The ellipse construction is identical to the static `plot_fissure_vent()` - touching the diagonal itself means that peptide's own p-value did not clear the cutoff.
+
+### Comparing `alpha`/`pvalue` choices with a dropdown
+
+`alpha` and `pvalue` can each be a vector instead of a single number.
+Peptide *positions* never depend on either parameter (the deuteration values and the raw Welch p-value are fixed once the data is fixed) - only which peptides count as significant, the pooled-CI band's width, and each ellipse's size do.
+That means every combination can be pre-computed once, and a native `plotly` dropdown (top-right of the plot, no R session needed after the page is rendered) can swap between them:
+
+```{r}
+interactive_fissure_vent(a, state1 = "Unbound", state2 = "bound", times = "1800.00s",
+                          alpha = c(0.01, 0.05), pvalue = c(0.01, 0.05))
+```
+
+`alpha` and `pvalue` are paired element-wise (first with first, second with second - recycled to a common length if they differ), not crossed into every combination.
+`interactive_volcano()` supports the same dropdown, recoloring its points and moving the p-value threshold line.
+
+### Linked: the combined explorer
+
+`interactive_fissure_explorer()` builds one shared dataset and lays out the volcano plot, the fissure plot, the Woods plot, and the peptide table together.
+
+```{r fig.height = 9}
+interactive_fissure_explorer(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+```
+
+Pass vectors for `alpha`/`pvalue` here too, and the volcano and fissure_vent panels each get their own dropdown:
+
+```{r fig.height = 9}
+interactive_fissure_explorer(a, state1 = "Unbound", state2 = "bound", times = "1800.00s",
+                              alpha = c(0.01, 0.05), pvalue = c(0.01, 0.05))
+```
+
+Each panel's dropdown is independent - switching the volcano plot's dropdown doesn't move the fissure_vent plot's dropdown, and neither one changes the Woods plot or the table (a `plotly` dropdown is native to that one `htmlwidget`; reaching into a sibling `htmlwidget` would need custom JavaScript, which this package doesn't add). The Woods plot and table always reflect the first `alpha`/`pvalue` pair - the same one the cross-widget hover-highlighting is built from.
+
+Try selecting a few rows in the table (or hovering over a point on any scatter plot, or a segment on the Woods plot) - the corresponding peptides highlight on every other panel.
+That's the entire point of building the comparison once and sharing it: you can go from "this point looks interesting" to "here's its sequence and where it sits in the Woods plot" without leaving the page.
+
+### Linking your own combination of plots
+
+If you don't want all four panels, build the shared object yourself and pass it to just the functions you want linked:
+
+```{r}
+sd_obj <- HDXBoxeR:::.hdx_shared(a, "Unbound", "bound", "1800.00s",
+                                  replicates = 3, alpha = 0.01, pvalue = 0.01,
+                                  shared_data = NULL, group_prefix = "my_explorer")
+volcano <- interactive_volcano(a, "Unbound", "bound", "1800.00s", shared_data = sd_obj)
+table <- significant_peptides_table(a, "Unbound", "bound", "1800.00s", shared_data = sd_obj)
+crosstalk::bscols(widths = c(6, 6), volcano, table)
+```
+
+(`.hdx_shared()` is internal - not exported - since the intended entry point is passing `shared_data = NULL` to any of the five main functions and letting each build its own if you only need one. Use `:::` as above only if you want fine-grained control over which panels are linked.)
+
+## Saving a standalone file
+
+`interactive_fissure_vent()`, `interactive_volcano()`, and `interactive_woods()` each return a single `plotly` htmlwidget - save any of them with `htmlwidgets::saveWidget()`.
+
+`interactive_fissure_explorer()` is different: it returns a *layout* of several widgets (an `htmltools` tag list from `crosstalk::bscols()`), not a single widget, so it needs `htmltools::save_html()` instead:
+
+```{r, eval = FALSE}
+explorer <- interactive_fissure_explorer(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+htmltools::save_html(explorer, "fissure_explorer.html")   # NOT htmlwidgets::saveWidget()
+```
+
+Passing a `bscols()` layout to `saveWidget()` will error - it expects exactly one widget.
+
+## What this is not
+
+- **Not a replacement for the static plots.** A manuscript figure still wants `plot_fissure_vent()`/`plots_vol_tp()` - reproducible from a script with no browser involved, and no risk of an interactive widget failing to render wherever the figure ends up.
+- **Not a Shiny app.** There's no live R session behind these once rendered - `interactive_fissure_explorer()`'s output is a static HTML file you can email, embed in a report, or host anywhere a plain web page works. That also means the linking is client-side JavaScript (via `crosstalk`), not an R callback - fast and shareable, but it can't run new R code in response to a click.
+- **One timepoint at a time.** Like `plot_fissure_vent()`, each call covers a single `times` value. Build one explorer per timepoint you care about rather than expecting one widget to facet across all of them.
+- **Ellipses are an approximation on screen.** The per-peptide ellipse is drawn as a 48-point polygon (plotly has no native ellipse shape), which is visually indistinguishable from a true ellipse at any normal zoom level, but is worth knowing if you export the underlying path data for something else.
