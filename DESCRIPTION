@@ -37,8 +37,14 @@ Imports:
     methods, 
     wrapr,
     DescTools
-Suggests: 
+Suggests:
+    bio3d,
+    crosstalk,
+    DT,
+    htmltools,
     knitr,
+    NGLVieweR,
+    plotly,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: 

@@ -1,0 +1,98 @@
+---
+title: "Mapping HDX Data onto a 3D Structure"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Mapping HDX Data onto a 3D Structure}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+has_deps <- requireNamespace("bio3d", quietly = TRUE) &&
+  requireNamespace("NGLVieweR", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  eval = has_deps
+)
+```
+
+```{r, echo = FALSE, eval = !has_deps, results = "asis"}
+cat("This vignette renders an interactive 3D structure widget and needs the ",
+    "**bio3d** and **NGLVieweR** packages, which are not installed in the ",
+    "environment that built this copy of the vignette. Install them with ",
+    "`install.packages(c(\"bio3d\", \"NGLVieweR\"))` and re-knit to see the ",
+    "live viewer - the code below is unchanged either way.", sep = "")
+```
+
+## Why this exists alongside the PyMOL scripts
+
+`HDXBoxeR` already has a way to color a structure by HDX data: the `pymol_script_*()` family (`pymol_script_average_residue()`, `pymol_script_significant_residue()`, `pymol_script_significant_peptide()`, and their `_proc` percent-deuteration variants) write a text file of PyMOL `color`/`set_color` commands.
+That's a real, working path - it's almost certainly what produced any published tubulin-on-structure figure from this package - but it has two practical costs: you need PyMOL installed separately, and you have to open the right PDB yourself before running the script.
+
+`plot_hdx_structure()` is an R-native alternative for the same idea: it renders directly as an interactive `NGLVieweR` `htmlwidget` (built on `NGL.js`), the same "just an object you can view, embed, or save" style as the `interactive_*()` plots in `vignette("interactive_explorer")`.
+No external application, and the PDB can be a local file or fetched by ID directly.
+
+Like the interactive plots, `bio3d` and `NGLVieweR` are optional - listed under `Suggests`, not required to install or use the rest of the package, and `plot_hdx_structure()` checks for both at call time with an install hint if either is missing.
+
+## What it colors, and by what
+
+`plot_hdx_structure()` takes **residue-level** HDX data - the output of [`residue_level_average()`](https://en.wikipedia.org/wiki/Hydrogen%E2%80%93deuterium_exchange) or `residue_deconvolution()` (either works; `vignette("HDXBoxeR")` covers how they differ), not the raw peptide-level table `output_tp()` returns directly.
+For one chosen `Deut.Time`, it computes `state2 - state1` per residue and bins it into the same red/blue diverging palette (`color_ranges_Blue_Red_heat_map()`) used by this package's 2D heat maps, then paints those bins onto the structure as separate cartoon representations layered over a grey "no data" base.
+
+## Worked example
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a <- output_tp(file_nm, percent = TRUE)
+res <- residue_level_average(a, protein_length = 225)
+```
+
+**The structure below is not the protein this HDX dataset was measured on.**
+This package doesn't ship a PDB for its own example data, so this vignette borrows a small, fast-loading structure that `bio3d` bundles for its own examples - hen egg-white lysozyme, `1HEL`, chain `A`, residues 1-129 - purely to demonstrate the mechanics offline, with no PDB download required to build this vignette.
+The colors are real numbers from the real `residue_level_average()` call above; only the structure they're painted onto is a stand-in.
+For your own data, pass the PDB that actually matches your protein.
+
+```{r fig_structure_basic}
+pdb_demo <- system.file("examples", "1hel.pdb", package = "bio3d")
+plot_hdx_structure(res, pdb = pdb_demo, state1 = "Unbound", state2 = "bound",
+                    times = "1800.00s", chain = "A")
+```
+
+Residue numbers past 129 (this HDX dataset's protein is 225 residues) simply have nowhere to render on a 129-residue structure and are silently skipped - `plot_hdx_structure()` only warns when *none* of the numbers match anywhere in the PDB, which usually means `resno_offset` needs setting, not that every residue is expected to be present.
+
+A legend for the color scale isn't drawn inside the 3D widget itself - draw it separately with `plot_hdx_structure_legend()`, passing the same `ranges` (left as `NULL` above, so reconstruct the auto-scaled version to label it correctly):
+
+```{r fig_structure_legend, fig.width = 3, fig.height = 4}
+res_1800 <- res[res$Deut.Time == "1800.00s", ]
+unbound_mean <- rowMeans(res_1800[, grep("^Unbound", colnames(res_1800))], na.rm = TRUE)
+bound_mean <- rowMeans(res_1800[, grep("^bound", colnames(res_1800))], na.rm = TRUE)
+delta <- bound_mean - unbound_mean
+m <- max(abs(delta), na.rm = TRUE); step <- m / 3
+auto_ranges <- c(-Inf, -3*step, -2*step, -step, 0, step, 2*step, 3*step, Inf)
+plot_hdx_structure_legend(auto_ranges, unit_label = "% Deut")
+```
+
+## Matching HDX numbering to PDB numbering
+
+HDX peptide numbering and PDB residue numbering frequently disagree - constructs with expression tags, a crystallized construct that starts partway into the full-length numbering, and so on.
+`resno_offset` is a single constant shift applied to every `res_df$residue` value before matching against the PDB (`pdb_resno <- res_df$residue + resno_offset`).
+That covers the common case; a construct that differs from its PDB by something other than one constant offset (e.g. an internal deletion) needs `res_df$residue` remapped by hand first.
+
+`plot_hdx_structure()` validates the match when `pdb` is a local file: it reads the structure with `bio3d::read.pdb()`, and if `chain` is supplied but absent from the structure, or if *none* of the (offset-adjusted) residue numbers appear anywhere in it, you get an error or warning naming the problem rather than a silently all-grey structure.
+
+## What this is not
+
+- **Not a replacement for the PyMOL scripts.** If you already have a PyMOL-based figure pipeline, `pymol_script_average_residue()` and friends still work exactly as before - this is an additional, dependency-heavier path for when you want an embeddable/viewable widget instead of a script to run in a separate application.
+- **Not a per-peptide view.** Like `residue_level_average()`/`residue_deconvolution()`, this is residue-resolution. For peptide-level significance on a sequence axis, see `plot_fissure_vent()` (`vignette("fissure_vent")`) or the Woods plots.
+- **Not aware of peptide-level significance by default.** Coloring is by raw `state2 - state1` magnitude, not gated by the package's hybrid CI+p-value significance test the way `pymol_script_significant_residue()` is - every residue with data gets colored, whether or not the change there would count as significant elsewhere in this package.
+- **One timepoint, one state pair at a time**, same convention as `plot_fissure_vent()` and the interactive plots.
