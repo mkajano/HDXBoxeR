@@ -160,6 +160,7 @@ legend_nm_bottom(nms_dt, cola[1:nb_datasets])
 #' @param ylim y axis limits
 #' @param ... other parameters
 #' @return Woods plots for the timecourse
+#' @export
 deuteration_woods_timecourse_frac<-function(input_data, states,
                                             replicates=3, ylim=c(0,1.2), ...) {
   if(missing(states)) states=unique(input_data$Protein.State)

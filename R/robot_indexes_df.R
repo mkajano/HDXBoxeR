@@ -23,6 +23,12 @@ robot_indexes_df<-function(thP, th, replicates=3,
                            pvalue=0.01, alpha=0.01, states){
   if(missing(states)) states=unique(thP$Protein.State)
 
+  ## peptide_all accumulates across all variant states (vs. the shared
+  ## control, states[1]); sh_avc is control-derived and, for a well-formed
+  ## input where every state was measured on the same peptide set, has the
+  ## same row identity/order across iterations, so row indices found for one
+  ## variant remain valid to index into the last iteration's sh_avc below.
+  peptide_all<-c()
   for ( state in states[2:length(states)]) {
 
     control_df<- thP[thP$Protein.State==states[1],]
@@ -33,17 +39,16 @@ robot_indexes_df<-function(thP, th, replicates=3,
 
     pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
     lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
-    lav.proc_up<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
+    lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 
     sh_avc<-lav.proc[[1]]
     sh_avv<-lav.proc[[2]]
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3,
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=replicates,
                                     alpha=alpha)
 
-    peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {
       peptide_all<-c(peptide_all, which(pv1[, i]<pvalue &
                                           abs(sh_avc_up[, i]-sh_avv_up[, i]) > CI_all[i-6]))
@@ -79,6 +84,8 @@ robot_indexes<-function(thP, th, replicates=3,
                         pvalue=0.01, states, alpha=0.01){
   if(missing(states)) states=unique(thP$Protein.State)
 
+  ## see robot_indexes_df() for the same accumulate-across-states pattern
+  peptide_all<-c()
   for ( state in states[2:length(states)]) {
 
     control_df<- thP[thP$Protein.State==states[1],]
@@ -98,7 +105,6 @@ robot_indexes<-function(thP, th, replicates=3,
 
     CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up,
                                     replicates=replicates,  alpha)
-    peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {
       peptide_all<-c(peptide_all, which(pv1[, i]<pvalue &
                                           abs(sh_avc_up[, i]-sh_avv_up[, i]) > CI_all[i-6]))

@@ -19,5 +19,6 @@ data frame with standard deviation calculated from the CI
 \description{
 Calculate the CI to standard devaation, that can be used for the ellipsoid function
 Calculate standard deviation from the CI using the equation as shown in:
-SD=sqrt(replicates)*(uper_limit-lower_limit)/t
+SD=sqrt(replicates)\emph{(uper_limit-lower_limit)/(2}t), t=qt(alpha/2, df) for
+the two-sided (1-alpha) CI returned by t.test()
 }

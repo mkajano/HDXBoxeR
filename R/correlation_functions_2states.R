@@ -14,6 +14,7 @@
 #' @param length1 vector of numeric
 #' @param ... other plotting parameters
 #' @return Correlation plot
+#' @export
 
 plot_cor_pts_elps<-function(df, replicates=3, times, state1, state2,
                             position_col=NA, length1=NA,  xlim = NULL, ylim = NULL, ...){
@@ -21,7 +22,7 @@ plot_cor_pts_elps<-function(df, replicates=3, times, state1, state2,
   sd1<-sd_timepoint(df, replicates)
 
 
-  plot(av1[,7], av1[,7], type="n", xlab="", ylab="", xlim, ylim, ...)
+  plot(av1[,state1], av1[,state2], type="n", xlab="", ylab="", xlim, ylim, ...)
   mtext(c("Deuteration (state 1)", "Deuteration (state 2)"),  c(SOUTH<-1, WEST<-2),line=0.7, outer=TRUE)
   points(c(-10, 110), c(-10, 110), type="l")
 
@@ -35,8 +36,8 @@ plot_cor_pts_elps<-function(df, replicates=3, times, state1, state2,
       points(c(-10, 110), c(-10, 110)-ci/2, type="l", col="grey")
 
       for ( i in ind1){
-        DrawEllipse(av1[i,state1],av1[i,state2]/2, sd1[i,state1]/2,
-                    sd1[i,state2], ...)
+        DrawEllipse(av1[i,state1],av1[i,state2], sd1[i,state1]/2,
+                    sd1[i,state2]/2, ...)
       }
     }
   } else {

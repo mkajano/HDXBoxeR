@@ -1,0 +1,171 @@
+---
+title: "Fissure Vent Plots: reading peptide significance without a subtraction step"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+  pdf_document: default
+vignette: |
+  %\VignetteIndexEntry{Fissure Vent Plots}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 6,
+  fig.height = 6
+)
+```
+
+## Why this plot exists
+
+The standard way to show which peptides differ significantly between two HDX-MS states is a volcano plot: compute a delta (state2 - state1), put it on the x-axis, put the p-value on the y-axis (usually log-scaled), and draw a "not significant" box in the middle.
+`HDXBoxeR` already has this - see `plots_vol_tp()` - and it works well.
+
+But a volcano plot throws away the raw deuteration values the moment it subtracts them.
+You lose the sense of *where on the uptake curve* a peptide sits - whether a flagged peptide is barely deuterated in both states or fully deuterated in both, information that matters for interpreting *why* a region moved.
+And every peptide gets exactly one point, with its uncertainty either invisible or relegated to a separate error bar.
+
+`plot_fissure_vent()` is a different way of drawing the same hybrid significance decision (Hageman & Weis 2019, *Anal. Chem.* 91, 8008-8016) that keeps the raw data in view and encodes uncertainty geometrically rather than as a bolted-on error bar.
+Nothing about the underlying statistics changes - it is still exactly the two-part Hageman & Weis test used everywhere else in this package.
+What changes is how much of the calculation you can read directly off the picture instead of trusting a color-coded label.
+
+## The construction, piece by piece
+
+### 1. Raw axes, not a delta column
+
+`plot_fissure_vent()` puts state1's average deuteration on the x-axis and state2's on the y-axis - the actual measured values, nothing subtracted.
+A diagonal line (y = x) marks "no change between states."
+
+A peptide's perpendicular distance from that diagonal is mathematically identical to the delta a volcano plot computes explicitly.
+It is just never stored as a number in this construction - it is read off the plot geometrically, the same way you'd eyeball a Bland-Altman or MA-plot in another field.
+This is what "no subtraction" means here: the information a subtraction would give you is still there, it has been moved into distance-from-a-line instead of a stored column.
+
+### 2. A pooled band answers "is this bigger than the noise floor of my whole experiment?"
+
+Two lines parallel to the diagonal, offset by a constant `CI`, mark the practical-significance threshold from `CI_2pts()`: the replicate standard deviations of *every* peptide at this timepoint are pooled into one number, scaled by the appropriate t-value.
+A peptide clears this test if its point sits outside the band - `abs(state2 - state1) > CI`.
+
+This is deliberately a *pooled, dataset-wide* threshold, not a peptide-specific one.
+It answers "is this peptide's change bigger than the kind of noise I typically see across this whole experiment" - robust to any one peptide's replicates happening to be unusually tight or loose, at the cost of not being tailored to that specific peptide.
+
+### 3. An ellipse that is, exactly, that one peptide's own p-value test
+
+This is the part that makes the plot more than a relabeled volcano plot.
+Each peptide is drawn as an ellipse, not a point.
+The ellipse is built from the *same* Welch t-test that produces that peptide's p-value - run at `conf.level = 1 - pvalue`, using that peptide's own replicates for state1 and state2, nothing pooled.
+
+That choice of confidence level matters: for a two-sided test, "the confidence interval excludes zero" and "the p-value is below that same alpha" are the *same statement* - not an approximation, a algebraic identity.
+So if the ellipse is built so that its reach along the delta direction (perpendicular to the diagonal) equals that interval's half-width, then:
+
+> **whether the ellipse still touches the diagonal line itself is an exact geometric readout of whether that one peptide's own p-value clears `pvalue`.**
+
+Concretely, the half-width `h` of the peptide's own Welch CI is split across the plot's two axes in proportion to each state's own standard error,
+
+$$
+r_x = t_{\text{crit}} \cdot \frac{s_1}{\sqrt{n_1}}, \qquad
+r_y = t_{\text{crit}} \cdot \frac{s_2}{\sqrt{n_2}},
+$$
+
+and because the two axes are orthogonal, the ellipse's extent along the delta direction is $\sqrt{r_x^2 + r_y^2}$, which is exactly $h$ by construction (Pythagoras, not an approximation).
+An ellipse that still overlaps the diagonal after that construction means zero is still inside this peptide's own confidence interval - it did not clear its own p-value cutoff.
+An ellipse that clears the diagonal means it did.
+
+### 4. Two tests, two visual elements, one combined color
+
+A peptide gets a **solid black outline** only when both criteria pass: its point clears the pooled band, *and* its ellipse clears the diagonal.
+Everything else is drawn in grey - visible, but not flagged.
+This is the same two-part standard used by `diff_peptides_prep()` and `plots_vol_tp()` elsewhere in the package; `plot_fissure_vent()` does not relax or change the statistical decision anywhere, it only makes both halves of it visible in the same picture instead of one being a hidden calculation behind a color.
+
+## Reading the plot in practice
+
+Given a rendered plot, the correct way to eyeball significance is:
+
+1. **Is the point outside the grey band?** That is the pooled/practical-significance half of the test.
+2. **Does the peptide's ellipse still touch the diagonal (the black y = x line, not the grey band)?** If yes, that peptide's own p-value did not clear the cutoff - regardless of how big or small its ellipse looks. If the ellipse clears the diagonal, it did.
+3. **Both together give the outline color** - solid black requires both (1) and (2); grey means at least one failed.
+
+A tight ellipse and a fat ellipse can both cross the diagonal or both fail to - ellipse *size* is telling you how precisely a peptide was measured, not directly whether it's significant. What determines significance is whether the ellipse's edge, at this peptide's own position, has been pushed clear of the diagonal.
+
+## Worked example
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a <- output_tp(file_nm)
+```
+
+`plot_fissure_vent()` manages its own margins internally, but the aspect ratio of the figure is set by the chunk's `fig.width`/`fig.height` - left unequal, the diagonal stops looking like an actual 45-degree line and the ellipses get visually stretched, which matters here since the whole plot is built on reading distance-from-the-diagonal by eye. Setting `fig.width = fig.height` on the chunk keeps it square:
+
+```{r fig_fissure_basic, fig.width = 6, fig.height = 6}
+plot_fissure_vent(df = a, replicates = 3, times = "3.00s", alpha = 0.01, pvalue = 0.01,
+                   state1 = "Unbound", state2 = "bound")
+title(main = "Unbound vs bound, t = 3.00s")
+```
+
+A few things to notice in this rendering of the package's own example data:
+
+- Most peptides sit close to the diagonal - little to no change between states at this early timepoint - and their ellipses straddle the line, correctly reading as "not significant."
+- The handful of red peptides sit clearly above the diagonal *and* their ellipses have visibly cleared it - both halves of the test agree.
+- Ellipse size varies a lot across peptides. A peptide with three tightly-agreeing replicates gets a small ellipse; one with noisier replicates gets a bigger one. That size difference is real measurement precision, not a plotting artifact - and it is exactly what lets two peptides sitting at a similar distance from the diagonal end up on opposite sides of the significance line.
+- The grey CI band is drawn dashed and lighter than the solid diagonal on purpose - an ellipse edge can cross the *band* while its peptide is still significant (the band is a separate, pooled-SD threshold; see "What this plot is not" below), and the dashing keeps that line from being mistaken for the diagonal itself, which is what the significance test actually reads against.
+
+Comparing a later timepoint shows the band and the population of significant peptides both move as expected:
+
+```{r fig_fissure_late, fig.width = 6, fig.height = 6}
+plot_fissure_vent(df = a, replicates = 3, times = "1800.00s", alpha = 0.01, pvalue = 0.01,
+                   state1 = "Unbound", state2 = "bound")
+title(main = "Unbound vs bound, t = 1800.00s")
+```
+
+Colors and fill transparency are customizable via `sig_col`, `nonsig_col`, and `fill_alpha`:
+
+```{r fig_fissure_colors, fig.width = 6, fig.height = 6}
+plot_fissure_vent(df = a, replicates = 3, times = "1800.00s", alpha = 0.01, pvalue = 0.01,
+                   state1 = "Unbound", state2 = "bound",
+                   sig_col = "darkorange", nonsig_col = "steelblue", fill_alpha = 0.5)
+title(main = "Unbound vs bound, t = 1800.00s (custom colors)")
+```
+
+## Is this actually new?
+
+Short answer: the synthesis is, the underlying geometric tricks individually are not - and it's worth knowing the difference before presenting this to anyone.
+
+No current HDX-MS tool plots raw state-vs-state deuteration as its primary differential display.
+A survey of Deuteros/Deuteros 2.0, HDfleX, HD-eXplosion, HaDeX/HaDeX2, HDgraphiX, and the recent HydroBot (which independently implements the same Hageman & Weis hybrid test) turned up Woods plots, volcano plots, chiclet plots, and butterfly plots - never a raw-axis scatter against an identity line.
+MEMHDX has a superficially similar "logit plot," but its two axes are two different p-values from a mixed-effects model, not the two states' deuteration - a different object entirely.
+So the *state-vs-state framing as a differential HDX display*, and *drawing the pooled and per-peptide halves of a hybrid significance test as two distinct geometric elements on the same panel*, both appear to be new to HDX-MS.
+
+The two geometric building blocks are not new on their own, and citing them upfront is the honest move:
+
+- **Diagonal-distance-as-delta** is an unrotated Bland-Altman/MA plot (Bland & Altman, *Lancet* 1986; Yang et al. 2002). An MA plot is the 45-degree rotation of exactly this scatter. Keeping the untransformed axes rather than rotating to M/A coordinates is a reasonable choice for HDX-MS - uptake is bounded, so position along the diagonal is physically meaningful here in a way it often isn't for the expression-ratio data MA plots were built for - but the core idea of reading a difference as distance from an identity line is not new.
+- **A per-point confidence interval calibrated so that crossing the identity line is the significance test** has direct prior art: Schütz & Gegenfurtner, "Within-subject confidence intervals for pairwise differences in scatter plots," *Psychonomic Bulletin & Review* (PMC7618193), draw exactly this - a per-point interval projected perpendicular to the identity line, in a completely different field (vision science). They use a line segment; this package's contribution is drawing it as an axis-aligned ellipse with the two semi-axes split proportional to each state's own standard error, which additionally shows *which state* is contributing the imprecision - a detail a segment can't carry, but an elaboration of their idea, not a new one.
+
+Net: this is a legitimate, useful synthesis and apparently the first HDX-MS-specific version of it, not a new statistical device. Worth saying so plainly in any presentation of it, since the Bland-Altman lineage is easy for a reviewer to spot.
+
+## What this plot is not
+
+- **The ellipse is not a joint 2D confidence region at level `1 - pvalue`.** Only its projection along the delta direction (perpendicular to the diagonal) is a valid interval, by construction. Reading its horizontal or vertical extent alone as "the confidence interval on state 1" or "on state 2" is not correct - the two semi-axes are a proportional split of one delta-interval, not two independent per-state intervals.
+- **It is not a per-residue view.** Like a volcano plot, this is peptide-level. For residue-resolution, pair it with `residue_deconvolution()` or `residue_level_average()`.
+- **It does not scale cleanly past two states at once.** Comparing more than two states means looping over `plot_fissure_vent()` calls (see `@details`), the same way the rest of the package's two-state functions work - there is no built-in multi-state layout.
+- **The pooled band assumes the replicate noise is reasonably homogeneous across peptides at that timepoint.** A dataset with wildly heteroscedastic peptide quality will make the pooled band less meaningful, though the per-peptide ellipse test is unaffected since it never pools across peptides.
+- **A peptide with identical replicate values in both states cannot be drawn.** The underlying t-test's variance is undefined for that peptide (R's `t.test()` returns `NaN` there rather than erroring), so it is silently skipped with a console message rather than crashing the plot.
+
+## Relationship to the rest of the package
+
+| Question you're asking | Use |
+|---|---|
+| "Show me the classic delta-vs-p-value picture" | `plots_vol_tp()` |
+| "Just give me the list of significant peptides" | `diff_peptides_prep()` |
+| "Show me raw vs raw with uncertainty and significance geometrically combined" | `plot_fissure_vent()` (this vignette) |
+| "What's happening at single-residue resolution" | `residue_deconvolution()`, `residue_level_average()` |
+
+All of these are reading the *same* Hageman & Weis hybrid criterion under the hood; they differ in what they choose to show you and how much of the arithmetic is left visible in the geometry versus collapsed into a single pass/fail color.

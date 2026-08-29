@@ -15,7 +15,9 @@ vector with number of exchangeable protons
 \description{
 Provides a vector with number of exchangeable protons, calculated from the input table.
 Number of protons calculated as peptide_length - 2 - number of Prolines in the peptide
-that are not in the first position
+that are not in the first position. Note: if the peptide's \emph{second} residue is a
+Proline, it is excluded both by the generic "-2" and by the Proline count, so the
+result is one lower than \code{peptide_exch_residues()}'s residue count for that peptide.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

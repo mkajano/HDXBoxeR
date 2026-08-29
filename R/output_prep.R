@@ -75,7 +75,15 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
 
   ###calculate means +sd and write to out dataframe. Later assign names, choose only important
 
-  FD2<-data.frame(FD[,c(1,2,4:6,8,7,9)], rep(0,times=dim(FD)[1]), rep(0,times=dim(FD)[1]), rep(0,times=dim(FD)[1]))
+  ## FD's "mean" column is not a real average (FD/undeut rows are not merged
+  ## across replicates the way `b` is), so: undeut is defined as 0 exchange in
+  ## both modes; FD uses its own measured X..Deut (Da) in uptake mode, or the
+  ## conventional 100% in percent mode. SD is not available at this
+  ## granularity and stays 0 in all cases (kept out of `out` for the
+  ## Peptide_Mass slot anyway).
+  FD2<-data.frame(FD[,c(1,2,4:6,8,7,9)], rep(0,times=dim(FD)[1]),
+                  if (percent==FALSE) as.numeric(FD[,10]) else rep(100,times=dim(FD)[1]),
+                  rep(0,times=dim(FD)[1]))
   undeut2<-data.frame(undeut[,c(1,2,4:6,8,7,9)], rep(0,times=dim(undeut)[1]),  rep(0,times=dim(undeut)[1]), rep(0,times=dim(undeut)[1]))
 
   if (percent==FALSE){
