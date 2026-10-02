@@ -103,7 +103,7 @@
 #' \donttest{
 #' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' # the shipped example only has two states; compare_states_tp() needs 3+.
-#' # See vignette("multi_state_comparison") for a worked example that
+#' # See vignette("anova") for a worked example that
 #' # constructs a synthetic third state to demonstrate this function.
 #' }
 #' @export
@@ -137,10 +137,21 @@ compare_states_tp <- function(filepath, times, states = NULL,
   }
   region_list <- if (is.null(regions)) list(all = NULL) else regions
 
+  ## output_tp() is called once per pair below (plus once for the omnibus) -
+  ## deliberately (see "Available-case, not complete-case, matching" above),
+  ## not something to collapse into a single call. What CAN be shared is the
+  ## raw file parse itself: arg_df(filepath) is a pure function of the file
+  ## and doesn't depend on which states/pair are being extracted, so reading
+  ## and parsing it once here and passing it into every output_tp() call
+  ## (its .arg_df argument) turns N(N-1)/2 + 1 full re-reads of the same
+  ## file into exactly one, with identical results - a real cost for
+  ## several states or a large file, and pure overhead otherwise.
+  raw_arg_df <- arg_df(filepath)
+
   ## omnibus: needs the peptide present in every requested state at once -
   ## the one place complete-case is statistically unavoidable (see Details)
   omni_df <- output_tp(filepath, replicates = replicates, states = states, times = times,
-                        seq_match = TRUE, percent = percent)
+                        seq_match = TRUE, percent = percent, .arg_df = raw_arg_df)
   omni_df <- omni_df[omni_df$Deut.Time == times, ]
   peptide_id_omni <- paste(omni_df$Start, omni_df$End, omni_df$Sequence, sep = "_")
 
@@ -148,7 +159,7 @@ compare_states_tp <- function(filepath, times, states = NULL,
   if (nrow(omni_df) > 0) {
     value_cols_omni <- colnames(omni_df)[7:ncol(omni_df)]
     state_of_col_omni <- sub("_(X\\.\\.Deut|Deut\\.\\.)_[0-9]+$", "", value_cols_omni)
-    cols_for_omni <- function(s) value_cols_omni[state_of_col_omni == s]
+    cols_for_omni <- function(s) value_cols_omni[state_of_col_omni == .state_column_prefix(s)]
     p_omnibus_raw <- vapply(seq_len(nrow(omni_df)), function(r) {
       vals <- unlist(lapply(states, function(s) as.numeric(omni_df[r, cols_for_omni(s)])))
       grp  <- rep(states, each = replicates)
@@ -168,14 +179,18 @@ compare_states_tp <- function(filepath, times, states = NULL,
   build_pair <- function(pr) {
     s1 <- pr[1]; s2 <- pr[2]
     pair_df <- output_tp(filepath, replicates = replicates, states = c(s1, s2), times = times,
-                          seq_match = TRUE, percent = percent)
+                          seq_match = TRUE, percent = percent, .arg_df = raw_arg_df)
     pair_df <- pair_df[pair_df$Deut.Time == times, ]
     if (nrow(pair_df) == 0) return(NULL)
 
     value_cols <- colnames(pair_df)[7:ncol(pair_df)]
     state_of_col <- sub("_(X\\.\\.Deut|Deut\\.\\.)_[0-9]+$", "", value_cols)
-    raw1 <- value_cols[state_of_col == s1]
-    raw2 <- value_cols[state_of_col == s2]
+    raw1 <- value_cols[state_of_col == .state_column_prefix(s1)]
+    raw2 <- value_cols[state_of_col == .state_column_prefix(s2)]
+    if (length(raw1) == 0 || length(raw2) == 0) {
+      stop(sprintf("could not match state '%s' or '%s' to any column among: %s - this should not happen, please file a bug report",
+                    s1, s2, paste(value_cols, collapse = ", ")))
+    }
 
     sd1 <- apply(as.matrix(pair_df[, raw1]), 1, stats::sd, na.rm = TRUE)
     sd2 <- apply(as.matrix(pair_df[, raw2]), 1, stats::sd, na.rm = TRUE)
@@ -201,10 +216,15 @@ compare_states_tp <- function(filepath, times, states = NULL,
     )
   }
 
+  ## build_pair() (a full output_tp() call plus a t-test per peptide) does
+  ## not depend on `region` at all - only the filter below does - so it is
+  ## computed exactly once per pair here and reused across every region,
+  ## rather than once per region-by-pair combination.
+  pair_results <- lapply(pairs, build_pair)
+
   out_all <- lapply(names(region_list), function(rname) {
     region <- region_list[[rname]]
-    pair_out <- lapply(pairs, function(pr) {
-      d <- build_pair(pr)
+    pair_out <- lapply(pair_results, function(d) {
       if (is.null(d)) return(NULL)
       d[in_region(d, region), ]
     })

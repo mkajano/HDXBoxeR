@@ -1,0 +1,92 @@
+---
+title: "Data Quality: Coverage, Redundancy, and Back-Exchange"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Data Quality: Coverage, Redundancy, and Back-Exchange}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 6
+)
+```
+
+Before asking whether two states differ (`vignette("anova")`, `vignette("fissure_vent")`), it's worth asking a more basic question: is the data itself good enough to support that comparison?
+Two states can only be meaningfully compared where both were actually measured with enough redundancy to trust the numbers, and a low-coverage gap or a lopsided peptide map between states is a real, common confound - `compare_states_unmatched()`'s own `coverage` diagnostic exists specifically because of it (see `vignette("anova")`).
+This vignette covers the tools for checking that *before* running any significance test: summary tables (`general_info()`, `backHX_calculations()`) and a coverage map plot (`plot_peptide_coverage_map()`).
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+```
+
+## Summary tables
+
+`general_info()` reports, per state: how many peptides were identified, what percent of the sequence they cover, their mean length, and mean redundancy (how many peptides overlap the average residue):
+
+```{r}
+general_info(file_nm)
+```
+
+A coverage percentage well below 100% means part of the sequence has no data at all in that state - not necessarily a problem (some regions may be poorly digested or simply not ionize well), but worth knowing before interpreting the *absence* of a significant result there as "nothing happens" rather than "nothing was measured."
+Low mean redundancy means individual residues are typically covered by very few peptides, so an unusual value from one bad peptide isn't cross-checked by neighbors - exactly what `residue_regions()`'s `min_peptides` corroboration requirement (`vignette("anova")`) is designed to guard against downstream.
+
+`backHX_calculations()` reports back-exchange - deuterium lost during sample handling/LC before the mass measurement, calculated from the undeuterated (`0s`) and fully-deuterated (`FD`) controls:
+
+```{r}
+backHX_calculations(file_nm)
+```
+
+High or wildly different back-exchange between states can distort a direct comparison between them (see `?backHX_calculations` for the calculation itself) - this is a single global number per state, not something a plot adds much to, which is why it stays table-only here.
+
+## Peptide coverage map
+
+The two tables above summarize coverage as single numbers; they can't show *where* a gap is or *which* residues are over- or under-represented.
+`plot_peptide_coverage_map()` draws that directly: a per-residue redundancy strip above a peptide map (one block per unique peptide), one panel-pair per state, sharing one residue axis so states are directly comparable:
+
+```{r, fig.height = 7}
+plot_peptide_coverage_map(file_nm)
+```
+
+Read this alongside `general_info()`'s numbers above: the ~94% coverage for each state shows up here as the mostly-continuous colored strip, with the few visible gaps (e.g. right around residue 0-40) being the missing ~6%.
+Redundancy (the height of the top strip) is not uniform - some stretches are covered by a dozen overlapping peptides, others by only one or two - and a region singled out as significant by `residue_regions()` sitting in a low-redundancy stretch here is worth a second look, since it has less independent corroboration behind it.
+
+Comparing the two states side by side is also a direct visual check on the exact confound `compare_states_unmatched()`'s `coverage`/`frac_shared_all_states` diagnostic quantifies (`vignette("anova")`): a gap present in one state's map but not the other's marks a region where an unmatched, pooled comparison could be picking up peptide-map differences rather than real biology.
+
+### Customizing the plot
+
+Every visual choice above is a parameter, not a fixed style - useful both for matching a house style and for making a specific feature (a gap, a redundancy dip) easier to spot:
+
+```{r, fig.height = 4}
+plot_peptide_coverage_map(file_nm, states = "Unbound", palette = "steelblue",
+                           bg = "white", show_grid = FALSE, block_height = 0.9)
+```
+
+```{r, fig.height = 4}
+plot_peptide_coverage_map(file_nm, states = "bound", palette = "Dark2",
+                           row_gap = 3, block_border = "grey20")
+```
+
+- `palette`: a single color, or an `RColorBrewer` qualitative palette name (one color per state).
+- `bg`/`grid_col`/`show_grid`: panel shading and gridlines - set `show_grid = FALSE` for a plain white background.
+- `row_gap`: minimum residue spacing enforced between two peptides sharing a map row (visual only).
+- `block_height`/`block_border`: peptide block thickness and outline.
+- `cex_main`/`font_family`: title text size and font.
+
+## What this is not
+
+- **Not a significance test.** Nothing here compares states statistically - that's `vignette("anova")` and `vignette("fissure_vent")`.
+- **Coverage is about identification, not deuteration.** A well-covered region can still show no real exchange difference between states, and a gap doesn't imply one exists there either - it only means there's no data to check.

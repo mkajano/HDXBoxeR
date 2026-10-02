@@ -9,6 +9,7 @@ compare_states_unmatched(
   times,
   regions,
   states = NULL,
+  value = c("raw", "percent", "frac_deut"),
   method = c("peptide", "classic", "resample"),
   reference = NULL,
   replicates = 3,
@@ -32,6 +33,9 @@ whole-protein pooling isn't offered.}
 \item{states}{character vector of states to compare. Default \code{NULL}
 uses every state found in \code{filepath}.}
 
+\item{value}{one of \code{"raw"} (default), \code{"percent"}, \code{"frac_deut"} - which
+column drives the comparison. See "What gets compared: \code{value}".}
+
 \item{method}{one of \code{"peptide"} (default), \code{"classic"}, \code{"resample"} -
 see Details.}
 
@@ -40,12 +44,16 @@ each other state is tested, instead of every pair.}
 
 \item{replicates}{number of replicates per state. Default \code{3}.}
 
-\item{pvalue}{significance cutoff - informational only here (this
-function does not compute \code{is_sig}); provided so callers can filter
-\code{p_adj < pvalue} themselves. Default \code{0.01}.}
+\item{pvalue}{significance cutoff. This function does not compute
+\code{is_sig} for the pooled \code{shift_hl}/\code{p_value} result itself (callers can
+filter \code{p_adj < pvalue} there themselves), but \code{pvalue} does gate the
+per-peptide \code{frac_peptides_significant} diagnostic - see "Pooled
+significance is not peptide significance". Default \code{0.01}.}
 
 \item{p_adjust_method}{passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}, applied across
-every region-by-pair test together. Default \code{"BH"}.}
+every region-by-pair test together (and separately across every
+region-by-pair-by-peptide test for \code{frac_peptides_significant}).
+Default \code{"BH"}.}
 
 \item{n_perm}{number of label permutations for \code{method = "resample"}.
 Default \code{1000}.}
@@ -54,17 +62,21 @@ Default \code{1000}.}
 confidence interval. Default \code{1000}.}
 }
 \value{
-a list with three data.frames: \code{summary} (one row per
-region-by-state-pair: \code{region}, \code{state1}, \code{state2}, \code{n1}, \code{n2},
+a list with \code{value} (the \code{value} argument actually used, echoed
+back for plotting/labeling) and three data.frames: \code{summary} (one row
+per region-by-state-pair: \code{region}, \code{state1}, \code{state2}, \code{n1}, \code{n2},
 \code{shift_hl}, \code{ci_low}, \code{ci_high} - \code{NA} unless \code{method = "resample"} -
-\code{p_value}, \code{p_omnibus}, \code{p_adj}), \code{coverage} (one row per
+\code{p_value}, \code{p_omnibus}, \code{p_adj}, \code{n_peptides_tested},
+\code{n_peptides_significant}, \code{frac_peptides_significant} - see "Pooled
+significance is not peptide significance"), \code{coverage} (one row per
 region-by-state: \code{n_peptides}, \code{mean_length}, and
 \code{frac_shared_all_states} - the fraction of that region's peptide
 identities, by Start/End/Sequence, present in \emph{every} state being
 compared, a diagnostic for how much the matched-vs-unmatched confound
-applies here), and \code{data} (the pooled values the tests actually ran
-on - one row per region-by-state-by-peptide, or per replicate under
-\code{method = "classic"} - for plotting with \code{\link[=plot_compare_states_unmatched]{plot_compare_states_unmatched()}}).
+applies here), and \code{data} (the pooled \code{deut_value} values the tests
+actually ran on - one row per region-by-state-by-peptide, or per
+replicate under \code{method = "classic"} - for plotting with
+\code{\link[=plot_compare_states_unmatched]{plot_compare_states_unmatched()}}).
 }
 \description{
 A deliberately different tool from \code{\link[=compare_states_tp]{compare_states_tp()}}: instead of
@@ -98,6 +110,59 @@ governed mostly by which peptides happened to be identified (composition
 has more sequence available in exposed regions to fully deuterate),
 not by biology. Restricting to one structurally coherent region at a
 time keeps the pooled distribution closer to unimodal and interpretable.
+}
+
+\section{Pooled significance is not peptide significance}{
+
+The pooled test above answers "does this region's \emph{typical} exchange
+shift" - it says nothing about whether \emph{some} peptides in the region
+shift while others don't. A real, spatially localized effect (e.g. a
+binding interface covering a handful of peptides inside an otherwise
+unaffected 200-residue domain) gets averaged against every unaffected
+peptide riding along in the same region and can come back completely
+non-significant even though individual peptides in it clearly differ.
+To surface this, \code{summary} also reports \code{n_peptides_tested},
+\code{n_peptides_significant}, and \code{frac_peptides_significant}: for every
+peptide identity shared between that pair's two states in that region, a
+per-peptide matched Welch t-test (replicates of that one peptide, state1
+vs. state2 - the same kind of test \code{\link[=compare_states_tp]{compare_states_tp()}} and
+\code{plot_fissure_vent()} use), with p-values adjusted together across every
+peptide-by-pair test in this call (same family as \code{p_adj} above) and
+called significant at \code{p_adj < pvalue}. A region with a flat/non-significant
+pooled result but \code{frac_peptides_significant > 0} means real, localized
+signal exists in there - shrink \code{regions} to isolate it, or use
+peptide-matched testing directly instead of pooling.
+}
+
+\section{What gets compared}{
+ \code{value}:
+\code{filepath}'s raw \verb{# Deut} column (Da uptake, read as \code{X..Deut}) is used
+directly by default (\code{value = "raw"}) - no per-peptide size correction of
+any kind. Two other options exist, off by default:
+\describe{
+\item{\code{"raw"}}{Default. Raw deuterium uptake in Da, exactly the \verb{# Deut}
+column from the input file - the most direct reading of the data, and
+what \code{compare_states_tp()}/\code{plot_fissure_vent()}/\code{diff_peptides_prep()}
+use as well (their \code{percent = FALSE} default).}
+\item{\code{"percent"}}{HDX Examiner's own \verb{Deut \%} column - uptake already
+expressed relative to that peptide's theoretical maximum.}
+\item{\code{"frac_deut"}}{This package's own derived metric: \verb{# Deut}
+divided by the peptide's number of exchangeable protons (see
+\code{\link[=nb_exch_deut]{nb_exch_deut()}}) - a finer-grained per-residue normalization than
+\code{"percent"}. Useful specifically when pooling peptides of very
+different lengths together in one region and the \emph{length} difference
+itself would otherwise dominate the pooled comparison (a longer
+peptide mechanically carries a larger raw Da value regardless of its
+intrinsic exchange rate) - trades that off against normalizing away
+part of the signal, which is why it is opt-in, not the default.}
+}
+Whichever is chosen, the per-peptide diagnostic
+(\code{n_peptides_significant}/\code{frac_peptides_significant}, see below) is
+unaffected by this choice for peptides tested individually: dividing one
+peptide's own two states by the same per-peptide constant does not change
+a paired t-test's p-value. Only the \emph{pooled} result
+(\code{shift_hl}/\code{p_value}/\code{p_omnibus}, which pools values across different
+peptides) depends on \code{value}.
 }
 
 \section{\code{method}}{

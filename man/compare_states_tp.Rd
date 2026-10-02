@@ -140,7 +140,7 @@ reported alongside for context, not enforced.
 \donttest{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 # the shipped example only has two states; compare_states_tp() needs 3+.
-# See vignette("multi_state_comparison") for a worked example that
+# See vignette("anova") for a worked example that
 # constructs a synthetic third state to demonstrate this function.
 }
 }

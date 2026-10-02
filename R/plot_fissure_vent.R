@@ -112,6 +112,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   # and "bound" ("bound" is a substring of "Unbound") - caught by testing
   # this fix against that real example data, not assumed safe.
   resolve_col <- function(state, cols, known_prefixes = character(0)) {
+    state <- .state_column_prefix(state)
     root <- cols
     for (p in known_prefixes) root <- sub(paste0("^", p), "", root)
     hits <- cols[startsWith(root, state)]
@@ -156,6 +157,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   # returns NaN for both p.value and conf.int - so NaN is checked
   # explicitly rather than relying on tryCatch alone.
   resolve_raw_cols <- function(state, cols, replicates) {
+    state <- .state_column_prefix(state)
     hits <- cols[startsWith(cols, state)]
     if (length(hits) != replicates) {
       stop(sprintf("Expected %d raw replicate columns matching state '%s', found %d: %s",

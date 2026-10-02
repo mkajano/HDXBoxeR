@@ -65,6 +65,7 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
   }
 
   resolve_raw_cols <- function(state, cols, replicates) {
+    state <- .state_column_prefix(state)
     hits <- cols[startsWith(cols, state)]
     if (length(hits) != replicates) {
       stop(sprintf("Expected %d raw replicate columns matching state '%s', found %d: %s",
@@ -125,6 +126,7 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
   sd1 <- sd_ci_timepoint(sub_df, replicates, alpha)
   sd_prefixes <- c("sd_ci_", "sd_")
   resolve_col <- function(state, cols, known_prefixes) {
+    state <- .state_column_prefix(state)
     root <- cols
     for (p in known_prefixes) root <- sub(paste0("^", p), "", root)
     cols[startsWith(root, state)][1]
@@ -160,4 +162,57 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
   }
   result <- do.call(rbind, out)
   result[order(result$direction, result$region_start), ]
+}
+
+#' Roll up derived regions against named residue subsets
+#'
+#' A companion to [residue_regions()]: that function always scans every
+#' residue covered by any tested peptide - the unrestricted, data-driven
+#' "total" picture, deliberately not pre-restricted to any subset you might
+#' already suspect matters. This function takes that unrestricted result
+#' and a named list of residue subsets (e.g. structural domains) and
+#' reports, per subset, how much of it the data-driven regions actually
+#' cover - a cross-check for a structural hypothesis against the
+#' unconstrained result, not a replacement for it. Call [residue_regions()]
+#' once (it does the expensive per-peptide testing and clustering), then
+#' this function as many times as you like against different subset
+#' definitions - it's a cheap rollup over an already-computed result.
+#'
+#' @param region_df the data.frame returned by [residue_regions()].
+#' @param regions named list of `c(start, end)` residue ranges to check
+#'   against `region_df`, e.g. `list(NTR = c(1, 85), ACD = c(86, 165))`.
+#' @return data.frame with one row per named subset: `subset`,
+#'   `n_residues` (subset size), `n_residues_significant` (residues in the
+#'   subset covered by any region in `region_df`), `frac_significant`,
+#'   `n_regions_overlapping`, and `directions` (comma-separated set of
+#'   `direction` values among the overlapping regions, `""` if none).
+#' @seealso [residue_regions()]
+#' @examples
+#' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a <- output_tp(file_nm, percent = FALSE)
+#' rr <- residue_regions(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+#' residue_regions_subset_summary(rr, regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+#' @export
+residue_regions_subset_summary <- function(region_df, regions) {
+  if (!is.data.frame(region_df) || !all(c("region_start", "region_end", "direction") %in% colnames(region_df))) {
+    stop("region_df must be the data.frame returned by residue_regions().")
+  }
+  if (missing(regions) || is.null(regions) || length(regions) == 0) {
+    stop("regions is required - a named list of c(start, end) residue ranges to check.")
+  }
+  out <- do.call(rbind, lapply(names(regions), function(rname) {
+    rng <- regions[[rname]]
+    res_in_subset <- rng[1]:rng[2]
+    overlap <- region_df[region_df$region_end >= rng[1] & region_df$region_start <= rng[2], ]
+    sig_positions <- if (nrow(overlap) > 0) {
+      unique(unlist(lapply(seq_len(nrow(overlap)), function(i) overlap$region_start[i]:overlap$region_end[i])))
+    } else integer(0)
+    n_sig <- sum(res_in_subset %in% sig_positions)
+    data.frame(subset = rname, n_residues = length(res_in_subset), n_residues_significant = n_sig,
+               frac_significant = n_sig / length(res_in_subset), n_regions_overlapping = nrow(overlap),
+               directions = paste(sort(unique(overlap$direction)), collapse = ","),
+               stringsAsFactors = FALSE)
+  }))
+  rownames(out) <- NULL
+  out
 }

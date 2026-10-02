@@ -92,6 +92,7 @@ plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
   # than requiring exactly one column, or this breaks on any normal
   # multi-replicate res_df.
   resolve_state_mean <- function(state, cols, mat) {
+    state <- .state_column_prefix(state)
     hits <- cols[startsWith(cols, state)]
     if (length(hits) == 0) {
       stop(sprintf("state '%s' matches no column among: %s",

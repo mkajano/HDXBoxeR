@@ -11,7 +11,8 @@ output_tp(
   times,
   seq_match = FALSE,
   csv = "NA",
-  percent = FALSE
+  percent = FALSE,
+  .arg_df = NULL
 )
 }
 \arguments{
@@ -28,6 +29,14 @@ output_tp(
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 
 \item{percent}{Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.}
+
+\item{.arg_df}{advanced/internal: a pre-computed \code{\link[=arg_df]{arg_df()}} data.frame for
+this same \code{filepath}, to skip re-reading and re-parsing the file from
+disk. Default \code{NULL} reads \code{filepath} as usual - only pass this when
+calling \code{output_tp()} many times for the same file (e.g. once per pair
+of states) and \code{arg_df(filepath)} has already been computed once by the
+caller; passing a data.frame that doesn't match \code{filepath} will
+silently produce wrong results, since nothing here re-checks it.}
 }
 \value{
 data frame with reorganized data where in columns is the deuteration uptake for Protein States.

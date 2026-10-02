@@ -6,18 +6,33 @@
 \usage{
 plot_compare_states_unmatched(
   res,
-  col = NULL,
+  plot_type = c("jitter", "box", "violin"),
+  palette = "Set2",
   digits = 3,
   state_labels = NULL,
-  cex_annot = 1
+  cex_annot = 1,
+  show_points = TRUE,
+  point_cex = 0.9,
+  jitter_width = 0.15,
+  tint = 0.55,
+  notch = FALSE,
+  bg = "grey95",
+  grid_col = "white",
+  show_grid = TRUE,
+  font_family = ""
 )
 }
 \arguments{
 \item{res}{the list returned by \code{\link[=compare_states_unmatched]{compare_states_unmatched()}} (uses
 \code{res$data} and \code{res$summary}).}
 
-\item{col}{optional vector of colors, one per state. Default \code{NULL} uses
-\code{RColorBrewer::brewer.pal(..., "Set2")}.}
+\item{plot_type}{one of \code{"jitter"} (just the individual points, no
+summary shape - the safest default when you want to see every peptide,
+not only significant ones, at a glance), \code{"box"}, or \code{"violin"}
+(kernel density per state). Default \code{"jitter"}.}
+
+\item{palette}{either a single \code{RColorBrewer} qualitative palette name
+(default \code{"Set2"}) or an explicit vector of colors, one per state.}
 
 \item{digits}{number of significant digits for the annotated p-values.
 Default \code{3}.}
@@ -31,28 +46,71 @@ as-is. Default \code{NULL} shows every state's raw name unchanged.}
 
 \item{cex_annot}{text size for the p-value annotation lines. Default
 \code{1}.}
+
+\item{show_points}{logical; overlay jittered individual data points on
+top of the box/violin shape. Always \code{TRUE} (and unused) when
+\code{plot_type = "jitter"}. Default \code{TRUE}.}
+
+\item{point_cex}{size of the jittered points. Default \code{0.9}.}
+
+\item{jitter_width}{horizontal jitter width for points, as a fraction of
+the box spacing. Default \code{0.15}.}
+
+\item{tint}{how much lighter than the base state color the box/violin
+fill is, \code{0} (no lightening) to \code{1} (white) - see "On color and
+visibility". Default \code{0.55}.}
+
+\item{notch}{logical; draw notched boxes (a visual approximation of a
+comparison interval around each median). Only applies to
+\code{plot_type = "box"}. Default \code{FALSE}.}
+
+\item{bg}{panel background color. Default \code{"grey95"}; use \code{"white"} for
+a plain white panel.}
+
+\item{grid_col}{gridline color drawn over \code{bg}. Default \code{"white"}.}
+
+\item{show_grid}{logical; draw the shaded background/gridlines at all.
+Default \code{TRUE}.}
+
+\item{font_family}{font family passed to text-drawing calls. Default
+\code{""} (device default).}
 }
 \value{
-draws a one-panel-per-region base-R boxplot; returns \code{NULL}
+draws a one-panel-per-region base-R plot; returns \code{NULL}
 invisibly.
 }
 \description{
-Draws what the comparison actually ran on: one boxplot panel per region,
-the pooled \code{frac_deut} values by state (one value per peptide, or per
-replicate under \code{method = "classic"} - whatever \code{res$data} holds), with
-the omnibus p-value and every pairwise result annotated on each panel.
+Draws what the comparison actually ran on: one panel per region, the
+pooled \code{deut_value} values by state (one value per peptide, or per
+replicate under \code{method = "classic"} - whatever \code{res$data} holds) as a
+box, violin, or plain jittered-point strip (\code{plot_type}), with the
+omnibus p-value and every pairwise result annotated on each panel. The
+y-axis label follows \code{res$value} automatically (raw Da uptake by default -
+see \code{\link[=compare_states_unmatched]{compare_states_unmatched()}}'s \code{value} argument). Works for any
+number of states \code{compare_states_unmatched()} was run with, not only two.
 This is the "show me the test" companion to
 \code{\link[=plot_coverage_diagnostics]{plot_coverage_diagnostics()}}, which instead shows whether the test
 should be trusted in the first place (peptide-map overlap) rather than
 its result.
 }
+\section{On color and visibility}{
+
+Fills and points here are drawn as fully OPAQUE colors (box/violin fills
+lightened by blending toward white in RGB space, not by alpha
+transparency) deliberately - some graphics devices (notably Windows'
+native \code{windows()} device, which RStudio's Plots pane can fall back to)
+render semi-transparent fills or points as invisible or fully solid
+instead of blending them, a real failure mode this avoids entirely by
+never depending on device compositing for whether data is visible.
+}
+
 \examples{
 \donttest{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 res <- compare_states_unmatched(file_nm, times = "1800.00s",
                                  regions = list(nterm = c(1, 100), cterm = c(101, 225)))
 plot_compare_states_unmatched(res)
-plot_compare_states_unmatched(res, state_labels = c(Unbound = "Apo", bound = "Complex"))
+plot_compare_states_unmatched(res, plot_type = "violin", state_labels = c(Unbound = "Apo", bound = "Complex"))
 }
 }
 \seealso{

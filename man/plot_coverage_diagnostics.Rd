@@ -4,7 +4,19 @@
 \alias{plot_coverage_diagnostics}
 \title{Plot the peptide-map coverage diagnostics from \code{compare_states_unmatched()}}
 \usage{
-plot_coverage_diagnostics(res, low_threshold = 0.5, col = NULL)
+plot_coverage_diagnostics(
+  res,
+  low_threshold = 0.5,
+  palette = "Set2",
+  warn_col = "firebrick",
+  ok_col = "grey55",
+  bg = "grey95",
+  grid_col = "white",
+  show_grid = TRUE,
+  legend = TRUE,
+  cex_main = 1,
+  font_family = ""
+)
 }
 \arguments{
 \item{res}{the list returned by \code{\link[=compare_states_unmatched]{compare_states_unmatched()}} (uses
@@ -14,8 +26,31 @@ plot_coverage_diagnostics(res, low_threshold = 0.5, col = NULL)
 is drawn in a warning color and a reference line is drawn. Default
 \code{0.5}.}
 
-\item{col}{optional vector of colors, one per state, for the peptide
-count panel. Default \code{NULL} uses \code{RColorBrewer::brewer.pal(..., "Set2")}.}
+\item{palette}{either a single \code{RColorBrewer} qualitative palette name
+(default \code{"Set2"}) or an explicit vector of colors, one per state, for
+the peptide-count panel.}
+
+\item{warn_col}{color for a shared-peptide bar below \code{low_threshold} in
+the overlap panel. Default \code{"firebrick"}.}
+
+\item{ok_col}{color for a shared-peptide bar at or above \code{low_threshold}.
+Default \code{"grey55"}.}
+
+\item{bg}{panel background color. Default \code{"grey95"}; use \code{"white"} for
+a plain white panel.}
+
+\item{grid_col}{gridline color drawn over \code{bg}. Default \code{"white"}.}
+
+\item{show_grid}{logical; draw the shaded background/gridlines at all.
+Default \code{TRUE}.}
+
+\item{legend}{logical; draw the state legend on the count panel.
+Default \code{TRUE}.}
+
+\item{cex_main}{text size for panel titles. Default \code{1}.}
+
+\item{font_family}{font family passed to text-drawing calls. Default
+\code{""} (device default).}
 }
 \value{
 draws a two-panel base-R plot; returns \code{NULL} invisibly.

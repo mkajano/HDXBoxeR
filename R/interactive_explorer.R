@@ -39,6 +39,7 @@
   if (missing(state2) || is.null(state2)) state2 <- nm1[2]
 
   resolve_col <- function(state, cols, known_prefixes = character(0)) {
+    state <- .state_column_prefix(state)
     root <- cols
     for (p in known_prefixes) root <- sub(paste0("^", p), "", root)
     hits <- cols[startsWith(root, state)]
@@ -58,6 +59,7 @@
   ci <- CI_2pts(stats::na.omit(sd1[[sd_state1]]), stats::na.omit(sd1[[sd_state2]]), replicates, alpha)
 
   resolve_raw_cols <- function(state, cols, replicates) {
+    state <- .state_column_prefix(state)
     hits <- cols[startsWith(cols, state)]
     if (length(hits) != replicates) {
       stop(sprintf("Expected %d raw replicate columns matching state '%s', found %d: %s",

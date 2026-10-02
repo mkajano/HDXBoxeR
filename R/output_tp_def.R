@@ -25,13 +25,20 @@
 #'
 #' a<-output_tp(filepath=file_nm, replicates=3, states=c("bound", "Unbound"),
 #' times=c("3.00s", "72000.00s"), seq_match=TRUE, csv="NA", percent=TRUE)
+#' @param .arg_df advanced/internal: a pre-computed [arg_df()] data.frame for
+#'   this same `filepath`, to skip re-reading and re-parsing the file from
+#'   disk. Default `NULL` reads `filepath` as usual - only pass this when
+#'   calling `output_tp()` many times for the same file (e.g. once per pair
+#'   of states) and `arg_df(filepath)` has already been computed once by the
+#'   caller; passing a data.frame that doesn't match `filepath` will
+#'   silently produce wrong results, since nothing here re-checks it.
 #' @export
-output_tp<- function(filepath, replicates, states, times, seq_match=FALSE, csv="NA", percent=FALSE){
+output_tp<- function(filepath, replicates, states, times, seq_match=FALSE, csv="NA", percent=FALSE, .arg_df=NULL){
   if(missing(states)) { states=arguments_call1(filepath); message(cat("Protein.States used:", states, sep=" "))}
   if(missing(times)) times=arguments_call2(filepath, states); message(cat("Deut.times used:", times, sep=" "))
   if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(cat("Number of replicates used:", replicates, sep=" "))
 
-  a<-arg_df(filepath)
+  a<-if (is.null(.arg_df)) arg_df(filepath) else .arg_df
   rownames(a)<-1:dim(a)[1] ##name rows
   ##loop below will go through Protein states, timepoints and Experiments to get replicates
   ##it will save a dataframe in wide format instead of long format, result of this loop is dataframe named "b"
