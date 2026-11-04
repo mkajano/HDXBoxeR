@@ -32,12 +32,14 @@ information available-case matching needs (see Details).}
 Default \code{NULL} uses every state found in \code{filepath} (\code{\link[=nm_states]{nm_states()}}).}
 
 \item{by}{matching rule for identifying "the same peptide" across
-states. Currently only \code{"sequence"} (Sequence+Start+End identity,
-\code{\link[=output_tp]{output_tp()}}'s \code{seq_match = TRUE}) is implemented. A \code{"position"}
-mode (Start+End only, ignoring Sequence - needed so a peptide covering
-a point mutation isn't dropped just because its sequence differs
-between states) is planned but not yet implemented; passing it errors
-rather than silently falling back.}
+states. \code{"sequence"} (default) requires identical Sequence, Start, End
+and Charge in both states (\code{\link[=output_tp]{output_tp()}}'s \code{seq_match = FALSE}).
+\code{"position"} matches on Start, End and Charge only, ignoring Sequence
+(\code{\link[=output_tp]{output_tp()}}'s \code{seq_match = TRUE}), so a peptide covering a point
+mutation is still compared; its \code{Sequence} is then reported as the
+per-state sequences joined by \code{"."}. In both modes \code{peptide_id} is
+\code{Start_End_zCharge} (plus the sequence in \code{"sequence"} mode), so each
+charge state is its own peptide.}
 
 \item{reference}{optional state name. If given, only \code{reference} vs.
 each other state is tested (N-1 pairs, Dunnett-style), instead of
@@ -91,18 +93,11 @@ adjusted across every peptide-by-pair test at this timepoint together.
 }
 \section{Which replicate SD feeds the pooled CI}{
 
-\code{plot_fissure_vent()}'s default \code{sd_source = "CI"} derives each state's
-SD from a two-sample CI against \code{df}'s \emph{first} state - a designated
-reference baked into that formula, harmless when every comparison is
-against one fixed reference, but not well-defined for an arbitrary pair
-among 3+ states with no single reference. This function instead always
-uses each state's own raw replicate SD directly (\code{plot_fissure_vent()}'s
-\code{sd_source != "CI"} alternative), which treats every state symmetrically
-and needs no reference concept - the correct generalization here, not
-merely an implementation convenience. One consequence: \code{ci} values from
-this function will not numerically match \code{plot_fissure_vent()}'s default
-for the same pair (they will match \code{plot_fissure_vent(sd_source = "raw SD")},
-i.e. any \code{sd_source} value other than \code{"CI"}).
+Each state's own raw replicate SD, pooled via \code{CI_2pts()} - the same
+threshold as \code{plot_fissure_vent()}'s default (\code{sd_source = "raw"}),
+\code{CI_tp()}, \code{diff_peptides_prep()} and the interactive plots, so \code{ci}
+values here match those functions for the same pair. It treats every
+state symmetrically and needs no reference state.
 }
 
 \section{Available-case, not complete-case, matching}{

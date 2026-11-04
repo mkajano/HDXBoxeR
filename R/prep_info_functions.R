@@ -35,7 +35,11 @@ general_info<- function(filepath){
     tmps<-paste(as.vector(unique(temp1$Deut.Time)),collapse=" ")
     summ<-c(summ, tmps)
 bp2<-c()
-    summ<-c(summ, length(unique(temp1$Experiment))/length(as.vector(unique(temp1$Deut.Time))))
+    ## replicates = smallest number of distinct experiments at any of this
+    ## state's common timepoints (same rule output_tp() uses), not
+    ## n(Experiment)/n(Deut.Time), which is wrong whenever experiment names
+    ## are reused across timepoints
+    summ<-c(summ, arguments_call3(filepath, state, times))
     for (time in unique(temp1$Deut.Time)){##
 
       temp2<-temp1[which(temp1$Deut.Time ==time ),]##creates temporary df, temp2 from one state of protein with the same timepoints

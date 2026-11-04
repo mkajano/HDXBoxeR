@@ -11,7 +11,7 @@
 #' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
-#' @param seq_match Flag allows to choose if the peptide sequences should be matched between states. seq_match=FALSE signifies no sequence matching, seq_match=T states that the sequences are matched between the sets.
+#' @param seq_match How peptides are matched between states. `FALSE` (default): a peptide is kept only if the same Sequence, Start, End, Search.RT and Charge are found in every state (exact sequence identity). `TRUE`: peptides are matched by position only (Start, End, Search.RT and Charge), ignoring Sequence, so peptides covering e.g. a point mutation are kept; where the sequences differ between states they are joined with "." in the `Sequence` column.
 #' @param csv Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.
 #' @param percent Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.
 #' @return data frame with reorganized data where in columns is the deuteration uptake for Protein States.

@@ -44,7 +44,7 @@ general_info(file_nm)
 A coverage percentage well below 100% means part of the sequence has no data at all in that state - not necessarily a problem (some regions may be poorly digested or simply not ionize well), but worth knowing before interpreting the *absence* of a significant result there as "nothing happens" rather than "nothing was measured."
 Low mean redundancy means individual residues are typically covered by very few peptides, so an unusual value from one bad peptide isn't cross-checked by neighbors - exactly what `residue_regions()`'s `min_peptides` corroboration requirement (`vignette("anova")`) is designed to guard against downstream.
 
-`backHX_calculations()` reports back-exchange - deuterium lost during sample handling/LC before the mass measurement, calculated from the undeuterated (`0s`) and fully-deuterated (`FD`) controls:
+`backHX_calculations()` reports back-exchange - deuterium lost during sample handling/LC before the mass measurement, calculated from the undeuterated (`0s`) and fully-deuterated (`FD`) controls. The peptide masses come from the *measured* centroids: HDX Examiner's `Exp Cent` is an m/z value, so it is multiplied by the peptide's `Charge` to get a mass in Da, i.e. back-exchange = 1 - (Exp Cent[FD] - Exp Cent[0s]) x Charge / N / Dfact:
 
 ```{r}
 backHX_calculations(file_nm)

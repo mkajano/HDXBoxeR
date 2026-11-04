@@ -52,7 +52,9 @@
   av_state1 <- resolve_col(state1, colnames(av1), "av_")
   av_state2 <- resolve_col(state2, colnames(av1), "av_")
 
-  sd1 <- sd_ci_timepoint(sub_df, replicates, alpha)
+  ## raw per-state replicate SD - same pooled CI as plot_fissure_vent()'s
+  ## default and the rest of the package (CI_tp(), diff_peptides_prep())
+  sd1 <- sd_timepoint(sub_df, replicates)
   sd_prefixes <- c("sd_ci_", "sd_")
   sd_state1 <- resolve_col(state1, colnames(sd1), sd_prefixes)
   sd_state2 <- resolve_col(state2, colnames(sd1), sd_prefixes)

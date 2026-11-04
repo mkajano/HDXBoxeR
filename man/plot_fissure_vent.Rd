@@ -13,7 +13,7 @@ plot_fissure_vent(
   alpha = 0.01,
   pvalue = 0.01,
   position_col = NA,
-  sd_source = "CI",
+  sd_source = "raw",
   length1 = NA,
   xlim = NULL,
   ylim = NULL,
@@ -50,9 +50,12 @@ ellipses are drawn in these colors instead of the significance-based
 \code{sig_col}/\code{nonsig_col} outline, and \code{fill_alpha} is ignored (position
 colors are used as-is, opaque).}
 
-\item{sd_source}{flag. "CI" (default) calculates SD from the critical
-interval (sd_ci_timepoint); anything else uses the raw SD of the
-peptide's replicates (sd_timepoint).}
+\item{sd_source}{flag. \code{"raw"} (default) uses the raw SD of each state's
+replicates (\code{sd_timepoint()}), matching the threshold used everywhere
+else in the package. \code{"CI"} instead back-calculates SDs from a
+two-sample t-test interval (\code{sd_ci_timepoint()}); those are SDs of the
+\emph{difference} between states, so the resulting band is wider (about
+1.8x on the shipped example) and fewer peptides are called significant.}
 
 \item{length1}{optional peptide length filter passed to \code{select_indices()}.}
 
@@ -84,9 +87,10 @@ Deuteration can be as either \% deuteration, uptake, or fraction deuteration
 }
 \details{
 The CI is plotted as the lines parallel to the diagonal - a single,
-POOLED threshold (\code{CI_2pts()}, from \code{sd_ci_timepoint()}) built from every
-peptide's replicate SD at this timepoint, comparing each state to the
-first state in \code{df} (kept as the control/reference state by convention).
+POOLED threshold (\code{CI_2pts()}) built from every peptide's own raw
+replicate SD per state at this timepoint (\code{sd_timepoint()}) - the same
+SDs and therefore the same threshold as \code{CI_tp()}, \code{diff_peptides_prep()},
+the heat map/Woods/robot plots and \code{compare_states_tp()}.
 It answers "is this peptide's change bigger than the typical measurement
 noise across the whole experiment" - a deliberately pooled,
 practical-significance question, per the Hageman & Weis hybrid method

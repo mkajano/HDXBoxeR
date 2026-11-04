@@ -31,9 +31,9 @@ pymol_script_significant_residue<-function(df, path="",
   setwd(path)
 
   for ( deut_time in(unique(df$Deut.Time))){
-    pv<-pv_timepoint(df[df$Deut.Time==deut_time,])
-    sd<-sd_timepoint(df[df$Deut.Time==deut_time,])
-    df1<-ave_timepoint(df[df$Deut.Time==deut_time,])
+    pv<-pv_timepoint(df[df$Deut.Time==deut_time,], replicates)
+    sd<-sd_timepoint(df[df$Deut.Time==deut_time,], replicates)
+    df1<-ave_timepoint(df[df$Deut.Time==deut_time,], replicates)
 
 
     #preparation significance per residue & coverage

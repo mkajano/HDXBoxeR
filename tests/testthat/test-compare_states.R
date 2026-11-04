@@ -77,8 +77,27 @@ test_that("compare_states_tp() reproduces plot_fissure_vent()'s delta/p-value fo
   expect_equal(row$p_value, 0.003094462, tolerance = 1e-6)
 })
 
-test_that("compare_states_tp() by = \"position\" errors as not-yet-implemented", {
-  expect_error(compare_states_tp(raw3_path, times = "1800.00s", by = "position"))
+test_that("compare_states_tp() by = \"sequence\" requires identical sequences; by = \"position\" keeps a mutated peptide", {
+  ## third state identical to "bound" except peptide 40-58 carries a Y->A
+  ## substitution at its C-terminus
+  raw <- read.csv(file_nm)
+  mut <- raw[raw$Protein.State == "bound", ]
+  mut$Protein.State <- "mut"
+  mut$Experiment <- gsub("^bound", "mut", mut$Experiment)
+  hit <- mut$Start == 40 & mut$End == 58
+  mut$Sequence[hit] <- sub("Y$", "A", mut$Sequence[hit])
+  tmp <- tempfile(fileext = ".csv")
+  write.csv(rbind(raw, mut), tmp, row.names = FALSE)
+
+  by_seq <- compare_states_tp(tmp, times = "1800.00s")
+  by_pos <- compare_states_tp(tmp, times = "1800.00s", by = "position")
+  in_bm <- function(res) any(res$Start == 40 & res$End == 58 & res$state1 == "bound" & res$state2 == "mut")
+  expect_false(in_bm(by_seq))
+  expect_true(in_bm(by_pos))
+  ## position ids carry no sequence, so pair and omnibus ids agree and the
+  ## mutated peptide still gets an omnibus p-value
+  row <- by_pos[by_pos$Start == 40 & by_pos$End == 58 & by_pos$state2 == "mut", ]
+  expect_true(all(!is.na(row$p_omnibus)))
 })
 
 test_that("compare_states_tp() correctly matches a state name containing a space", {
@@ -146,6 +165,20 @@ test_that("compare_states_unmatched() defaults to raw # Deut (Da), not a per-pep
   ## paired t-test's p-value, so this must be identical under raw/frac_deut
   expect_equal(res_raw$summary$n_peptides_significant, res_frac$summary$n_peptides_significant)
   expect_equal(res_raw$summary$frac_peptides_significant, res_frac$summary$frac_peptides_significant)
+})
+
+test_that("compare_states_unmatched() treats each charge state as its own peptide", {
+  ## regression test: peptide_id used to omit Charge, so a peptide seen at
+  ## two charge states was t-tested with 2x the replicates per state
+  raw <- read.csv(file_nm)
+  extra <- raw[raw$Start == 63 & raw$End == 77, ]
+  extra$Charge <- extra$Charge + 1
+  tmp <- tempfile(fileext = ".csv")
+  write.csv(rbind(raw, extra), tmp, row.names = FALSE)
+
+  base <- compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)))
+  dup  <- compare_states_unmatched(tmp, times = "1800.00s", regions = list(nterm = c(1, 100)))
+  expect_equal(dup$summary$n_peptides_tested, base$summary$n_peptides_tested + 1L)
 })
 
 test_that("compare_states_unmatched() method = \"classic\" warns about pseudo-replication", {

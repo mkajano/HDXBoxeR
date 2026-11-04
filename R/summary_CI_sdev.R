@@ -13,7 +13,7 @@
 #' a<- summary_sd_CI(file_nm, replicates=3, alpha=0.01)
 #' @export
 summary_sd_CI<-function(filepath, replicates=3, alpha=0.01){
-a<- output_tp(filepath)
+a<- output_tp(filepath, replicates = replicates)
 sd1<-sd_timepoint(a,replicates)
 sds<-c()
 cis<-c()

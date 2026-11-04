@@ -50,7 +50,7 @@ allowed inside one region before it is split into two. Default \code{2}.}
 
 \item{alpha}{alpha used only for the diagnostic pooled Hageman & Weis
 critical interval reported alongside each region (via
-\code{\link[=sd_ci_timepoint]{sd_ci_timepoint()}}/\code{\link[=CI_2pts]{CI_2pts()}}, the same pooled threshold
+\code{\link[=sd_timepoint]{sd_timepoint()}}/\code{\link[=CI_2pts]{CI_2pts()}}, the same pooled threshold
 \code{\link[=plot_fissure_vent]{plot_fissure_vent()}} draws as its grey band) - not used as the
 region-inclusion gate itself. Default \code{0.01}.}
 }

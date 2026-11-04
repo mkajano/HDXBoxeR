@@ -80,7 +80,9 @@
 #' non-significant even though individual peptides in it clearly differ.
 #' To surface this, `summary` also reports `n_peptides_tested`,
 #' `n_peptides_significant`, and `frac_peptides_significant`: for every
-#' peptide identity shared between that pair's two states in that region, a
+#' peptide identity (Start, End, Charge and Sequence - each charge state
+#' counts as its own peptide) shared between that pair's two states in
+#' that region, a
 #' per-peptide matched Welch t-test (replicates of that one peptide, state1
 #' vs. state2 - the same kind of test [compare_states_tp()] and
 #' `plot_fissure_vent()` use), with p-values adjusted together across every
@@ -232,7 +234,10 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
     stop(sprintf("reference '%s' not among states: %s", reference, paste(states, collapse = ", ")))
   }
   b <- b[b$Protein.State %in% states, ]
-  b$peptide_id <- paste(b$Start, b$End, b$Sequence, sep = "_")
+  ## Charge is part of the identity: each charge state is its own peptide
+  ## (as in output_tp()/compare_states_tp()), so a peptide seen at two charge
+  ## states is never pooled as 2x the replicates in the matched t-test
+  b$peptide_id <- paste(b$Start, b$End, paste0("z", b$Charge), b$Sequence, sep = "_")
 
   if (method == "classic") {
     warning("method = \"classic\" pools every replicate row as its own observation - replicates ",

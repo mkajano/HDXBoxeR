@@ -20,6 +20,16 @@ m0\% is the non-deuterated peptide centroid mass, m100\% is the maximally labele
 the theoretical number of backbone amides in the peptide and Dfrac is the fraction of D/H in the labeling buffer used.
 Function requires undeuterated and Fully deuterated sets marked in Deut.time as 0s and FD respectively.
 }
+\details{
+Masses are taken from the measured centroids: HDX Examiner's \verb{Exp Cent}
+column is an m/z value, so each centroid is multiplied by the peptide's
+\code{Charge} to convert it to a mass, i.e.
+\verb{m100\% - m0\% = (Exp Cent[FD] - Exp Cent[0s]) * Charge} (in Da).
+Earlier versions used the theoretical centroid (\verb{Theor Cent}) without
+the charge factor, which overstated back-exchange roughly in proportion to
+the charge state. The returned table carries this as its \code{"method"}
+attribute.
+}
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- backHX_calculations(filepath=file_nm, Dfact=0.85)

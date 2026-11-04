@@ -24,7 +24,7 @@ output_tp(
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 
-\item{seq_match}{Flag allows to choose if the peptide sequences should be matched between states. seq_match=FALSE signifies no sequence matching, seq_match=T states that the sequences are matched between the sets.}
+\item{seq_match}{How peptides are matched between states. \code{FALSE} (default): a peptide is kept only if the same Sequence, Start, End, Search.RT and Charge are found in every state (exact sequence identity). \code{TRUE}: peptides are matched by position only (Start, End, Search.RT and Charge), ignoring Sequence, so peptides covering e.g. a point mutation are kept; where the sequences differ between states they are joined with "." in the \code{Sequence} column.}
 
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 

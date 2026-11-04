@@ -191,7 +191,7 @@ woods_CI_plot<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3,
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=replicates,
                                   alpha=alpha)
 
 

@@ -35,10 +35,10 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
   dfup=input_up
   df=input_proc
   for ( deut.time in(unique(df$Deut.Time))){
-    pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = 3)
-    sd<-sd_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = 3)
-    dfu<-ave_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = 3)
-    df1<-ave_timepoint(df[df$Deut.Time==deut.time,], replicates = 3)
+    pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates)
+    sd<-sd_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates)
+    dfu<-ave_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates)
+    df1<-ave_timepoint(df[df$Deut.Time==deut.time,], replicates = replicates)
 
     #preparation significance per residue & coverage
     cl1<-significant_peptide_uptake(dfu, pv, sd, alpha, pv_cutoff,replicates)

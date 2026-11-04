@@ -123,7 +123,9 @@ peptide riding along in the same region and can come back completely
 non-significant even though individual peptides in it clearly differ.
 To surface this, \code{summary} also reports \code{n_peptides_tested},
 \code{n_peptides_significant}, and \code{frac_peptides_significant}: for every
-peptide identity shared between that pair's two states in that region, a
+peptide identity (Start, End, Charge and Sequence - each charge state
+counts as its own peptide) shared between that pair's two states in
+that region, a
 per-peptide matched Welch t-test (replicates of that one peptide, state1
 vs. state2 - the same kind of test \code{\link[=compare_states_tp]{compare_states_tp()}} and
 \code{plot_fissure_vent()} use), with p-values adjusted together across every

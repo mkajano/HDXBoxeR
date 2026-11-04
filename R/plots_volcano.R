@@ -34,7 +34,7 @@ lab_vol<-function(df, cola){
 #' @return volcano plots
 #' @export
 vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
+  if(missing(cola)) cola=c(brewer.pal(n = max((dim(df1)[2]-7), 3), name = "Paired"));
   abs.a<-abs(df1[,8:dim(df1)[2]])>CI
   cl1<-pv[,8:dim(df1)[2]]< pv_cutoff
   col_res<-data.frame(abs.a*cl1)

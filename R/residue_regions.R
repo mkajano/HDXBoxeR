@@ -39,7 +39,7 @@
 #'   allowed inside one region before it is split into two. Default `2`.
 #' @param alpha alpha used only for the diagnostic pooled Hageman & Weis
 #'   critical interval reported alongside each region (via
-#'   [sd_ci_timepoint()]/[CI_2pts()], the same pooled threshold
+#'   [sd_timepoint()]/[CI_2pts()], the same pooled threshold
 #'   [plot_fissure_vent()] draws as its grey band) - not used as the
 #'   region-inclusion gate itself. Default `0.01`.
 #' @return data.frame with one row per region: `direction`
@@ -123,7 +123,7 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
     lapply(seq_along(starts), function(i) c(pos[starts[i]], pos[ends[i]]))
   }
 
-  sd1 <- sd_ci_timepoint(sub_df, replicates, alpha)
+  sd1 <- sd_timepoint(sub_df, replicates)
   sd_prefixes <- c("sd_ci_", "sd_")
   resolve_col <- function(state, cols, known_prefixes) {
     state <- .state_column_prefix(state)

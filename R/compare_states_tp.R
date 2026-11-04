@@ -13,18 +13,11 @@
 #' adjusted across every peptide-by-pair test at this timepoint together.
 #'
 #' @section Which replicate SD feeds the pooled CI:
-#' `plot_fissure_vent()`'s default `sd_source = "CI"` derives each state's
-#' SD from a two-sample CI against `df`'s *first* state - a designated
-#' reference baked into that formula, harmless when every comparison is
-#' against one fixed reference, but not well-defined for an arbitrary pair
-#' among 3+ states with no single reference. This function instead always
-#' uses each state's own raw replicate SD directly (`plot_fissure_vent()`'s
-#' `sd_source != "CI"` alternative), which treats every state symmetrically
-#' and needs no reference concept - the correct generalization here, not
-#' merely an implementation convenience. One consequence: `ci` values from
-#' this function will not numerically match `plot_fissure_vent()`'s default
-#' for the same pair (they will match `plot_fissure_vent(sd_source = "raw SD")`,
-#' i.e. any `sd_source` value other than `"CI"`).
+#' Each state's own raw replicate SD, pooled via `CI_2pts()` - the same
+#' threshold as `plot_fissure_vent()`'s default (`sd_source = "raw"`),
+#' `CI_tp()`, `diff_peptides_prep()` and the interactive plots, so `ci`
+#' values here match those functions for the same pair. It treats every
+#' state symmetrically and needs no reference state.
 #'
 #' @section Available-case, not complete-case, matching:
 #' `output_tp()`'s wide-format merge is an inner join across every state
@@ -63,12 +56,14 @@
 #' @param states character vector of three or more states to compare.
 #'   Default `NULL` uses every state found in `filepath` ([nm_states()]).
 #' @param by matching rule for identifying "the same peptide" across
-#'   states. Currently only `"sequence"` (Sequence+Start+End identity,
-#'   [output_tp()]'s `seq_match = TRUE`) is implemented. A `"position"`
-#'   mode (Start+End only, ignoring Sequence - needed so a peptide covering
-#'   a point mutation isn't dropped just because its sequence differs
-#'   between states) is planned but not yet implemented; passing it errors
-#'   rather than silently falling back.
+#'   states. `"sequence"` (default) requires identical Sequence, Start, End
+#'   and Charge in both states ([output_tp()]'s `seq_match = FALSE`).
+#'   `"position"` matches on Start, End and Charge only, ignoring Sequence
+#'   ([output_tp()]'s `seq_match = TRUE`), so a peptide covering a point
+#'   mutation is still compared; its `Sequence` is then reported as the
+#'   per-state sequences joined by `"."`. In both modes `peptide_id` is
+#'   `Start_End_zCharge` (plus the sequence in `"sequence"` mode), so each
+#'   charge state is its own peptide.
 #' @param reference optional state name. If given, only `reference` vs.
 #'   each other state is tested (N-1 pairs, Dunnett-style), instead of
 #'   every pair (N(N-1)/2) - both fewer simultaneous tests and usually the
@@ -113,8 +108,13 @@ compare_states_tp <- function(filepath, times, states = NULL,
                                replicates = 3, alpha = 0.01, pvalue = 0.01,
                                p_adjust_method = "BH", percent = FALSE) {
   by <- match.arg(by)
-  if (by == "position") {
-    stop("by = \"position\" is not yet implemented - only by = \"sequence\" (the default) works today.")
+  ## output_tp(seq_match = FALSE) merges on Sequence+Start+End+Charge (exact
+  ## sequence identity); seq_match = TRUE merges on Start+End+Charge only and
+  ## joins differing sequences with "." - i.e. position matching
+  seq_match <- (by == "position")
+  make_id <- function(d) {
+    if (by == "position") paste(d$Start, d$End, paste0("z", d$Charge), sep = "_")
+    else paste(d$Start, d$End, paste0("z", d$Charge), d$Sequence, sep = "_")
   }
 
   if (is.null(states)) states <- nm_states(filepath)
@@ -151,9 +151,9 @@ compare_states_tp <- function(filepath, times, states = NULL,
   ## omnibus: needs the peptide present in every requested state at once -
   ## the one place complete-case is statistically unavoidable (see Details)
   omni_df <- output_tp(filepath, replicates = replicates, states = states, times = times,
-                        seq_match = TRUE, percent = percent, .arg_df = raw_arg_df)
+                        seq_match = seq_match, percent = percent, .arg_df = raw_arg_df)
   omni_df <- omni_df[omni_df$Deut.Time == times, ]
-  peptide_id_omni <- paste(omni_df$Start, omni_df$End, omni_df$Sequence, sep = "_")
+  peptide_id_omni <- make_id(omni_df)
 
   p_omnibus_raw <- numeric(0)
   if (nrow(omni_df) > 0) {
@@ -179,7 +179,7 @@ compare_states_tp <- function(filepath, times, states = NULL,
   build_pair <- function(pr) {
     s1 <- pr[1]; s2 <- pr[2]
     pair_df <- output_tp(filepath, replicates = replicates, states = c(s1, s2), times = times,
-                          seq_match = TRUE, percent = percent, .arg_df = raw_arg_df)
+                          seq_match = seq_match, percent = percent, .arg_df = raw_arg_df)
     pair_df <- pair_df[pair_df$Deut.Time == times, ]
     if (nrow(pair_df) == 0) return(NULL)
 
@@ -204,7 +204,7 @@ compare_states_tp <- function(filepath, times, states = NULL,
     })
     test <- do.call(rbind, test)
 
-    peptide_id <- paste(pair_df$Start, pair_df$End, pair_df$Sequence, sep = "_")
+    peptide_id <- make_id(pair_df)
     omni_match <- match(peptide_id, peptide_id_omni)
 
     data.frame(

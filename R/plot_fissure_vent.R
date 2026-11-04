@@ -6,9 +6,10 @@
 #' Deuteration can be as either % deuteration, uptake, or fraction deuteration
 #'
 #' The CI is plotted as the lines parallel to the diagonal - a single,
-#' POOLED threshold (`CI_2pts()`, from `sd_ci_timepoint()`) built from every
-#' peptide's replicate SD at this timepoint, comparing each state to the
-#' first state in `df` (kept as the control/reference state by convention).
+#' POOLED threshold (`CI_2pts()`) built from every peptide's own raw
+#' replicate SD per state at this timepoint (`sd_timepoint()`) - the same
+#' SDs and therefore the same threshold as `CI_tp()`, `diff_peptides_prep()`,
+#' the heat map/Woods/robot plots and `compare_states_tp()`.
 #' It answers "is this peptide's change bigger than the typical measurement
 #' noise across the whole experiment" - a deliberately pooled,
 #' practical-significance question, per the Hageman & Weis hybrid method
@@ -55,9 +56,12 @@
 #'   match exactly one column. Defaults to the first state found in `df`.
 #' @param state2 Second protein state, same matching rule. Defaults to the
 #'   second state found in `df`.
-#' @param sd_source flag. "CI" (default) calculates SD from the critical
-#'   interval (sd_ci_timepoint); anything else uses the raw SD of the
-#'   peptide's replicates (sd_timepoint).
+#' @param sd_source flag. `"raw"` (default) uses the raw SD of each state's
+#'   replicates (`sd_timepoint()`), matching the threshold used everywhere
+#'   else in the package. `"CI"` instead back-calculates SDs from a
+#'   two-sample t-test interval (`sd_ci_timepoint()`); those are SDs of the
+#'   *difference* between states, so the resulting band is wider (about
+#'   1.8x on the shipped example) and fewer peptides are called significant.
 #' @param position_col optional vector of per-peptide colors; when supplied,
 #'   ellipses are drawn in these colors instead of the significance-based
 #'   `sig_col`/`nonsig_col` outline, and `fill_alpha` is ignored (position
@@ -89,7 +93,7 @@
 #' @export
 
 plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha = 0.01, pvalue = 0.01,
-                               position_col = NA, sd_source = "CI", length1 = NA,
+                               position_col = NA, sd_source = "raw", length1 = NA,
                                xlim = NULL, ylim = NULL,
                                sig_col = "firebrick", nonsig_col = "grey60", fill_alpha = 0.3, ...) {
 
