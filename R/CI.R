@@ -17,7 +17,7 @@
 #' CI_2pts(s1=sd1, s2=sd2, replicates=3, alpha=0.01)
 #' @export
 CI_2pts<-function(s1, s2, replicates=3, alpha=0.01){
-  tvalue=abs(qt(alpha/2, replicates*2-2))
+  tvalue=abs(qt(alpha, replicates*2-2))
   sp1<-sqrt(sum(s1^2*(replicates-1))/((replicates-1)*length(s1)))
   sp2<-sqrt(sum(s2^2*(replicates-1))/((replicates-1)*length(s2)[1]))
   spa<-sqrt((sp1^2+sp2^2)/replicates)
@@ -46,7 +46,7 @@ CI_2pts<-function(s1, s2, replicates=3, alpha=0.01){
 #' @export
 CI_tp<-function(df, replicates=3, alpha=0.01 ){
   CI_all<-c()
-  tvalue=abs(qt(alpha/2, replicates*2-2))
+  tvalue=abs(qt(alpha, replicates*2-2))
   for ( i in 8:dim(df)[2]){
     sp1<-sqrt(sum(df[,7]^2*(replicates-1))/((replicates-1)*length(df[,7])))
     sp2<-sqrt(sum(df[,i]^2*(replicates-1))/((replicates-1)*length(df[,i])[1]))
