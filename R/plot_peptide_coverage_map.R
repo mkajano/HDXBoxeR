@@ -132,7 +132,7 @@ plot_peptide_coverage_map <- function(filepath, states = NULL, palette = "Set2",
     plot(NA, xlim = c(1, xmax), ylim = ylim_d, xaxs = "i", yaxs = "i", xaxt = "n", ylab = "depth", xlab = "")
     if (show_grid) .hdx_panel(par("usr")[1:2], par("usr")[3:4], bg = bg, grid_col = grid_col, ny = 3)
     graphics::polygon(c(1, seq_along(cov), xmax), c(0, cov, 0), col = col[s], border = NA)
-    .hdx_title(sprintf("%s", s), sprintf("%d peptides · %s%% sequence coverage", nrow(d), pct_cov),
+    .hdx_title(sprintf("%s", s), sprintf("%d peptides \u00b7 %s%% sequence coverage", nrow(d), pct_cov),
                cex_title = cex_main)
 
     ## peptide map: solid blocks (rect), not thin line segments - reads as

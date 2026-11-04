@@ -166,7 +166,8 @@ plot_coverage_diagnostics <- function(res, low_threshold = 0.5, palette = "Set2"
 #' res <- compare_states_unmatched(file_nm, times = "1800.00s",
 #'                                  regions = list(nterm = c(1, 100), cterm = c(101, 225)))
 #' plot_compare_states_unmatched(res)
-#' plot_compare_states_unmatched(res, plot_type = "violin", state_labels = c(Unbound = "Apo", bound = "Complex"))
+#' plot_compare_states_unmatched(res, plot_type = "violin",
+#'                               state_labels = c(Unbound = "Apo", bound = "Complex"))
 #' }
 #' @export
 plot_compare_states_unmatched <- function(res, plot_type = c("jitter", "box", "violin"),

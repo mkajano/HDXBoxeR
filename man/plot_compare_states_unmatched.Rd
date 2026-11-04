@@ -110,7 +110,8 @@ file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 res <- compare_states_unmatched(file_nm, times = "1800.00s",
                                  regions = list(nterm = c(1, 100), cterm = c(101, 225)))
 plot_compare_states_unmatched(res)
-plot_compare_states_unmatched(res, plot_type = "violin", state_labels = c(Unbound = "Apo", bound = "Complex"))
+plot_compare_states_unmatched(res, plot_type = "violin",
+                              state_labels = c(Unbound = "Apo", bound = "Complex"))
 }
 }
 \seealso{
