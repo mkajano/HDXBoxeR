@@ -64,9 +64,9 @@ vol_tp<-function(df1, pv, CI, pvalue=0.01, col, pv_cutoff, cola){
   mtext(c(exp_ddu),  c(SOUTH<-1),line=0.9, outer=TRUE, adj=c(0.36), cex=0.9)
   mtext(c("p-value"),  c(WEST<-2),line=0.9, outer=TRUE, cex=0.9)
 
-  axis(2, at=c(10^-7, 10^-6, 10^-5, 10^-4, 10^-3, 10^-2, 10^-1, 10), cex.axis=1, labels=T)
+  axis(2, at=c(10^-7, 10^-6, 10^-5, 10^-4, 10^-3, 10^-2, 10^-1, 10), cex.axis=1, labels=TRUE)
   at.y <- outer(1:9, 10^(2:(-7)))
-  axis(2, at=at.y, labels=F,tcl=-0.2)}
+  axis(2, at=at.y, labels=FALSE,tcl=-0.2)}
 
 #' Returns volcano plots for timepoints in the data frame
 #'

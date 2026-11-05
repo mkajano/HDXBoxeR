@@ -98,7 +98,7 @@ pymol_script_significant_peptide<-function(df,path="",
                      paste(line, sep="' '", collapse=""))}
         }}
 
-      if (order.pep==T){
+      if (isTRUE(order.pep)){
         nsig_pep<-res.txt[grep("color NSig",res.txt)]
         sig_pep<-res.txt[grep("color col", res.txt)]
         len_pep_sig<-len.pep[grep("color col", res.txt)]

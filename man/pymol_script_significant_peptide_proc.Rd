@@ -19,7 +19,7 @@ pymol_script_significant_peptide_proc(
 )
 }
 \arguments{
-\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=T) function.}
+\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=TRUE) function.}
 
 \item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.}
 

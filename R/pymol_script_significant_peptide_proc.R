@@ -7,7 +7,7 @@
 #'   tested on the uptake table `input_up` (Da, the package-wide rule), while
 #'   peptides are colored by their difference in percent deuteration, first state minus each state (from `input_proc`); [pymol_script_significant_peptide()] uses the relative change in uptake.
 #'
-#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=T) function.
+#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=TRUE) function.
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
 #' @param path location where the Pymol scripts will be saved. Default `""`: the working directory.
 #' @param pvalue p-value cutoff here set up to 0.01
@@ -101,7 +101,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="",
                      paste(line, sep="' '", collapse=""))}
         }}
 
-      if (order.pep==T){
+      if (isTRUE(order.pep)){
         res.txt<-res.txt[rev(order(len.pep))]
         message("peptides ordered according to peptide length")
       } else if (order.pep==FALSE){

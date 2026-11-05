@@ -66,9 +66,9 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
 
   plot(x=1, type = "n", ylim=ylim, xlim=xlim, ylab="",
        xlab="", yaxt="n")
-  axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
+  axis(1, at=seq(0, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
   axis(2, at=seq(-1000, 1000, by=50), cex.axis=1, labels=c(rev(seq(50,1000, by=50)), seq(0,1000, by=50)))
-  axis(2, at=seq(-1000, 1000, by=10), cex.axis=1, labels=F,tcl=-0.2)
+  axis(2, at=seq(-1000, 1000, by=10), cex.axis=1, labels=FALSE,tcl=-0.2)
   exp_ddu<-expression('% Deuteration')
   mtext(c("Residue"),  c(SOUTH<-1),line=0.7, outer=TRUE, cex=1)
   mtext(exp_ddu,  c(WEST<-2),line=0.7, outer=TRUE, cex=1)

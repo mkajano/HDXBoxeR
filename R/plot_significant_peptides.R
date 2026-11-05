@@ -60,8 +60,8 @@ peptide_pv_tp<-function(df, pv, sd, nb_row, ranges=c(-Inf, seq(-30, 30, by=10), 
 
     main_nm=.hdx_strip_suffix(colnames(df)[j+7])
     mtext(main_nm, side=1, outer=FALSE, line=0, cex=0.6)
-    axis(3, at=seq(0, max(df[, end_col])+25, by=25),  tcl=-0.2, labels = F)
-    axis(3, at=seq(0, max(df[, end_col])+25, by=50), labels = T, cex.axis=0.65)
+    axis(3, at=seq(0, max(df[, end_col])+25, by=25),  tcl=-0.2, labels = FALSE)
+    axis(3, at=seq(0, max(df[, end_col])+25, by=50), labels = TRUE, cex.axis=0.65)
     box(lwd=2)
   }}
 

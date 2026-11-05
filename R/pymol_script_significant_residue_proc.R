@@ -77,7 +77,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
         ac[df1[i,start_col]:df1[i,end_col]]=fc.d[i,j]
         ##make multiple vectors which have 1 at position which peptide covers
         ac1<-c(ac1, ac)}
-      ac2=data.frame(matrix(ac1, nrow =dim(df1)[1], byrow=T))
+      ac2=data.frame(matrix(ac1, nrow =dim(df1)[1], byrow=TRUE))
       max.a<-c()
       for ( k in 1:dim(ac2)[2]){
         ind1<-which.max(abs(ac2[,k]))

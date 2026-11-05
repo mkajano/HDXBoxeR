@@ -149,10 +149,12 @@ hdx_results_table <- function(filepath, states, times, reference, all_pairs = FA
 #'   [general_info()].
 #' @return the path of the report, invisibly.
 #' @examples
-#' \dontrun{
-#' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' render_report(file_nm, output_file = file.path(tempdir(), "report.html"),
-#'               regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+#' \donttest{
+#' if (requireNamespace("rmarkdown", quietly = TRUE) && rmarkdown::pandoc_available()) {
+#'   file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#'   render_report(file_nm, output_file = file.path(tempdir(), "report.html"),
+#'                 regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+#' }
 #' }
 #' @export
 render_report <- function(filepath, output_file = "hdx_report.html", states = NULL, times = NULL,

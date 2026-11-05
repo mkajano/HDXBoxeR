@@ -74,7 +74,7 @@ heat_map_tp<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
     # rect(head(seq(xl,xr,(xr-xl)/a[dim(a)[1],4]),-1)*cc,yb,
     #      tail(seq(xl,xr,(xr-xl)/a[dim(a)[1],4]),-1)*cc, yt,col=cc[col_cv_mis+1], border = NA)
   }
-  axis(1, at=seq(0, 700, by=25),  tcl=-0.2, labels = F)
+  axis(1, at=seq(0, 700, by=25),  tcl=-0.2, labels = FALSE)
   abline(h=0:7, lwd=0.5, col="grey30")
   box(lwd=2)
   return()

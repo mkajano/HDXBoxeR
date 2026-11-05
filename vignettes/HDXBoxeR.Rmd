@@ -160,7 +160,7 @@ Function names reflect the chosen option.
 Input can be formatted to:
 
 -   Analyze time points *or* time courses analysis (`output_tp` vs `output_tc` functions).
--   Analyze Deuterons Uptake *or* Percent Deuteration (flag `percent=F/T`).
+-   Analyze Deuterons Uptake *or* Percent Deuteration (flag `percent=FALSE/T`).
 -   Use all protein states/deuteration times *or* use selected (options: `states` and `times`, respectively).
 -   Use all replicates *or* specify the maximum number of replicates (`replicates` option in the function).
 -   Match peptides by sequence between protein states *or* by position only (flag `seq_match`). Default is to match sequences, to prevent mismatches. Use `seq_match=TRUE` for point mutants.
@@ -177,14 +177,14 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #### Input for uptake deuteration. Default will use all common states, all common Deuteration Times, all replicates of each state, no csv will be written, and peptide sequences will be matched.
 input_uptake_timepoint<-output_tp(filepath = file_nm) 
 # input for percent deuteration
-input_deut_timepoint<-output_tp(filepath = file_nm, percent=T) 
+input_deut_timepoint<-output_tp(filepath = file_nm, percent=TRUE) 
 
 #################
 ####Time courses 
 #Deuteration uptake
 input_uptake_timecourse<-output_tc(file_nm) 
 # Time courses comparisons
-input_deut_timecourse<-output_tc(file_nm, percent=T)
+input_deut_timecourse<-output_tc(file_nm, percent=TRUE)
 
 #################
 ####Analyze selected protein.states, deuteration times, replicates. 
@@ -383,7 +383,7 @@ library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 # ## input for deuteration uptakeinput_uptake_timepoint<-output_tp(file_nm) 
 # # input for procent deuteration
-input_deut_timepoint<-output_tp(file_nm, percent=T) 
+input_deut_timepoint<-output_tp(file_nm, percent=TRUE) 
 
 ## deuteration uptake for time points
 plots_av_tp(input_uptake_timepoint)
@@ -415,7 +415,7 @@ plots_diff_tp(input_uptake_timepoint)
 
 #Load deut data
 # input for procent deuteration
-# input_deut_timepoint<-output_tp(file_nm, percent=T) 
+# input_deut_timepoint<-output_tp(file_nm, percent=TRUE) 
 
 ### difference in procent deuteration
 plots_diff_tp_proc(input_deut_timepoint,replicates=3, col=4)
@@ -524,7 +524,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 ## input for deuteration uptake
 a<-output_tp(file_nm) 
 # input for procent deuteration
-b<-output_tp(file_nm, percent=T) 
+b<-output_tp(file_nm, percent=TRUE) 
 
 ##Average uptake heat maps
 ### heat maps 
@@ -560,12 +560,12 @@ Selecting a few time points with `select_indices()` is recommended.
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 
 
-tp_aP<-output_tp(filepath = file_nm, percent=T) #timepoints
+tp_aP<-output_tp(filepath = file_nm, percent=TRUE) #timepoints
 indp<-select_indices(tp_aP,  times = c("3.00s", "60.00s"))
 deuteration_woods_timepoints(tp_aP[indp,], replicates = 3)
 
 ## input for timecourses 
-tc_aP<-output_tc(filepath = file_nm, percent=T) #timecourse
+tc_aP<-output_tc(filepath = file_nm, percent=TRUE) #timecourse
 deuteration_woods_timecourse(tc_aP, replicates=3)
 
 
@@ -582,7 +582,7 @@ For statistical analysis in timepoints, please use robot plots (see the next sec
 ##
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 ## input for timecourses for procent deuteration and uptake
-tc_aP<-output_tc(filepath = file_nm, percent=T)
+tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 
 ## average procent deuteration in timecourse
 plots_av_tcourse(tc_aP, replicates = 3)
@@ -630,7 +630,7 @@ library(HDXBoxeR)
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
 ## input for timecourses for procent deuteration and uptake
 tc_a<-output_tc(filepath = file_nm)
-tc_aP<-output_tc(filepath = file_nm, percent=T)
+tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 names_states<- nm_states(file_nm) ## only two protein states should be used in functions below. 
 
 ## returns dataframe with all significant peptides with pvalue=0.01, and alpha of 0.001 
@@ -682,7 +682,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 ## input for deuteration uptake
 a<-output_tp(file_nm) 
 # input for procent deuteration
-b<-output_tp(file_nm, percent=T) 
+b<-output_tp(file_nm, percent=TRUE) 
 
 
 ### Scripts written for significantly different peptides (uptake data). Color scheme, ranges to be colored and p-value can be changed.
@@ -748,7 +748,7 @@ output_tp(filepath =file_nm , csv = tempfile())
 
 ### verbose versions of the output functions create csv files with all important data averages, sd, and pvalues for uptake data
 verbose_timepoint_output(filepath = file_nm, output_name =tempfile())
-verbose_timepoint_output(filepath = file_nm, output_name = tempfile(), percent=T)
+verbose_timepoint_output(filepath = file_nm, output_name = tempfile(), percent=TRUE)
 
 ```
 
@@ -787,11 +787,11 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #### Input for uptake deuteration
 a<-output_tp(file_nm) 
 # input for percent deuteration
-b<-output_tp(file_nm, percent=T) 
+b<-output_tp(file_nm, percent=TRUE) 
 
 # Time courses inputs
 tc_a<-output_tc(filepath = file_nm)
-tc_aP<-output_tc(filepath = file_nm, percent=T)
+tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 
 
 ###########################

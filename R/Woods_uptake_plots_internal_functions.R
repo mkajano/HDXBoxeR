@@ -15,13 +15,13 @@ pl_gen_ch2<-function(df,  ddlab=1, ...){
        xlab = "",   yaxt = "n", ...)
 
 
-  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = F,
+  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = FALSE,
        tcl = -0.2)
   axis(2, at = seq(-1000, 1000, by = 20), cex.axis = 1,
        labels = c(rev(seq(20, 1000, by = 20)), seq(0, 1000,
                                                    by = 20)))
   axis(2, at = seq(-1000, 1000, by = 10), cex.axis = 1,
-       labels = F, tcl = -0.2)
+       labels = FALSE, tcl = -0.2)
   box(lwd=2)
   exp_ddu <- c(expression("% Deuteration"), expression(Delta * " %D"[2] * "O"))
   mtext(c("Residue"), c(SOUTH <- 1), line = 0.6,
@@ -109,7 +109,7 @@ pl_gen_uptake<-function(df, timepoints, ddlab=1, ...){
        labels = c(rev(seq(20, 1000, by = 20)), seq(0, 1000,
                                                    by = 20)))
   axis(2, at = seq(-1000, 1000, by = 10), cex.axis = 1,
-       labels = F, tcl = -0.2)
+       labels = FALSE, tcl = -0.2)
   box(lwd=2)
   exp_ddu <- c(expression("% Deuteration"), expression(Delta * " %D"[2] * "O"))
   mtext(c("log(Time)"), c(SOUTH <- 1), line = 0.6,
@@ -139,12 +139,12 @@ pl_gen_ch_frac<-function(df,  ddlab=3, ...){
        xlab = "",   yaxt = "n", ...)
 
 
-  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = F,
+  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = FALSE,
        tcl = -0.2)
   axis(2, at = seq(-1, 10, by = 0.25), cex.axis = 1,
        labels = c( seq(-1, 10, by = 0.25)))
   axis(2, at = seq(-1, 10, by = 0.1), cex.axis = 1,
-       labels = F, tcl = -0.2)
+       labels = FALSE, tcl = -0.2)
   box(lwd=2)
   exp_ddu <- c(expression("% Deuteration"), expression(Delta * " %D"[2] * "O"),
                "Fraction Deuterated")
@@ -175,12 +175,12 @@ pl_gen_ch_list_frac<-function(min_x, max_x,  ddlab=3, ...){
        xlab = "",   yaxt = "n", ...)
 
 
-  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = F,
+  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = FALSE,
        tcl = -0.2)
   axis(2, at = seq(-1, 10, by = 0.25), cex.axis = 1,
        labels = c( seq(-1, 10, by = 0.25)))
   axis(2, at = seq(-1, 10, by = 0.1), cex.axis = 1,
-       labels = F, tcl = -0.2)
+       labels = FALSE, tcl = -0.2)
   box(lwd=2)
   exp_ddu <- c(expression("% Deuteration"), expression(Delta * " %D"[2] * "O"),
                "Fraction Deuterated")

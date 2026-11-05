@@ -3,7 +3,7 @@ average_timecourse_proc<-function(filepath){
   Start<-c()
   End<-c()
   Charge<-c()
-  df<-output_tc(filepath, percent=T)
+  df<-output_tc(filepath, percent=TRUE)
   fp<-output_FD_proc(filepath)
   ud<-output_UD_proc(filepath)
 
@@ -59,7 +59,7 @@ sd_timecourse_proc<-function(filepath){
   Start<-c()
   End<-c()
   Charge<-c()
-  df<-output_tc(filepath, percent=T)
+  df<-output_tc(filepath, percent=TRUE)
   fp<-output_FD_proc(filepath)
   ud<-output_UD_proc(filepath)
 

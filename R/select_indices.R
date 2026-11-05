@@ -31,7 +31,7 @@ select_indices<-function(df, start=NA, end=NA, length=NA,
   if(is.na(times)[1]==FALSE){
     condition4<- rowSums(sapply(times, function(x) df$Deut.Time==x))
   } else (condition4<-1:dim(df)[1])
-  if(is.na(states)[1]==F){
+  if(!is.na(states)[1]){
     condition5<-rowSums(sapply(states, function(x) df$Protein.State==x))
   } else (condition5<-1:dim(df)[1])
 
