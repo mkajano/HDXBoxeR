@@ -4,7 +4,7 @@
 #' Masson, G.R., Burke, J.E., Ahn, N.G. et al. Recommendations for performing, interpreting and reporting hydrogen deuterium exchange mass spectrometry (HDX-MS) experiments. Nat Methods 16, 595–602 (2019). https://doi.org/10.1038/s41592-019-0459-y
 #' It generates csv file in format ready for publication of the data.
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param output_name Name of output file. It has to be csv file
 #' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
@@ -159,23 +159,7 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
 #' @return Data.frame for further processing
 #' @export
 arg_UN_FD<-function(filepath){
-  a <- read.csv(file = filepath, header = F, skip = 1)
-  nm <- read.csv(file = filepath, header = T, row.names = NULL,
-                 nrows = 1)
-  nm1 <- colnames(nm)
-
-  if(length(unique(nm1=="row.names"))==2){
-    nm1<-nm1[-which(nm1=="row.names")]
-    nm1<-c(nm1, "row.names")}
-
-  colnames(a) <- c(nm1)
-
-  dif_col<- setdiff(c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
-                      "Charge", "Search.RT", "X..Deut", "Deut.."), nm1)
-
-  if (length(dif_col)!=0)
-  {stop(paste("input file missing column(s): ", dif_col, sep=""))}
-
+  a <- .hdx_raw(filepath)
 
   undeut <- a[a$Deut.Time=="0s",c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
                                   "Charge", "Search.RT","Exp.Cent", "X..Deut", "Deut..")]

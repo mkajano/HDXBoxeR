@@ -6,7 +6,7 @@
 #' backexchange calculations (average and range), Critical interval and standard deviation.
 #' Function requires undeuterated and Fully deuterated sets marked in Deut.time as 0s and FD respectively.
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param replicates number of replicates. Default set to 3.
 #' @param Dfact Dfact is the fraction of D/H in the labeling buffer used. Default set up to 0.85
 #' @param alpha Critical interval, level of stringency

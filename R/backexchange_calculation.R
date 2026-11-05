@@ -16,7 +16,7 @@
 #' the charge state. The returned table carries this as its `"method"`
 #' attribute.
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param Dfact is the fraction of D/H in the labeling buffer used. Default set up to 0.85
 #' @return Returns summary table for backexchange.
 #' @examples
@@ -25,22 +25,11 @@
 #' @export
 backHX_calculations<- function(filepath, Dfact=0.85){
 
-  a <- read.csv(file = filepath, header = F, skip = 1)
-  nm <- read.csv(file = filepath, header = T, row.names = NULL,
-                 nrows = 1)
-  nm1 <- colnames(nm)
-
-  if(length(unique(nm1=="row.names"))==2){
-    nm1<-nm1[-which(nm1=="row.names")]
-    nm1<-c(nm1, "row.names")}
-
-  colnames(a) <- c(nm1)
-
-  dif_col<- setdiff(c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
-                      "Charge", "Search.RT", "X..Deut", "Deut..", "Exp.Cent"), nm1)
-
-  if (length(dif_col)!=0)
-  {stop(paste("input file missing column(s): ", dif_col, sep=""))}
+  a <- .hdx_raw(filepath)
+  if (all(is.na(a$Exp.Cent))) {
+    stop("back-exchange needs measured centroids (Exp Cent), which this input does not have",
+         call. = FALSE)
+  }
 
 
   a <- a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",

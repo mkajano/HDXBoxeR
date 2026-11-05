@@ -23,6 +23,22 @@
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
   structure mapping, data quality.
 
+## Input formats
+
+* New `read_hdx()` reads HDXExaminer "All results" tables and Waters
+  DynamX cluster and state exports (DynamX 2.x and 3.x), detecting the
+  format from the header. `read_hdxexaminer()` and `read_dynamx()` read one
+  format explicitly. For DynamX cluster data each raw file is a replicate
+  and uptake is computed from the centroid mass; on a public matched
+  cluster/state data set it agrees with DynamX's own uptake (r = 0.9999).
+  `fd =` marks the fully deuterated control (a control state, or each
+  state's last time point); `combine_charges = TRUE` merges charge states.
+* New `as_hdx_long()` builds HDXBoxeR input from a long table exported by
+  any other software, with times in s, min or h.
+* Every function that takes `filepath` now also accepts a DynamX file or a
+  table from `read_hdx()`/`as_hdx_long()`; reading once and passing the
+  table avoids re-reading the file in every call.
+
 ## Uneven and missing replicates
 
 * `output_tp()` and `output_tc()` now use every replicate of every state by

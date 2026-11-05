@@ -7,7 +7,7 @@
 #' Protein.States, Deut.times, or number of replicates can be specified.
 #'
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param replicates optional maximum number of replicates per state and time. By default every replicate is used; missing measurements are `NA`. Replicates are numbered in the order their experiments appear in the file.
 #' @param min_replicates a peptide is kept for a state only if it has at least this many replicate values at every time. Default `2`.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.

@@ -3,7 +3,7 @@
 #'
 #' Returns a data frame for Full deuteration set
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is uptake data for Protein States.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -14,22 +14,7 @@
 
 
     arg_df_FD<-function(filepath){
-      a <- read.csv(file = filepath, header = FALSE, skip = 1)
-      nm <- read.csv(file = filepath, header = TRUE, row.names = NULL,
-                     nrows = 1)
-      nm1 <- colnames(nm)
-
-      if(length(unique(nm1=="row.names"))==2){
-        nm1<-nm1[-which(nm1=="row.names")]
-        nm1<-c(nm1, "row.names")}
-
-      colnames(a) <- c(nm1)
-
-      dif_col<- setdiff(c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
-                          "Charge", "Search.RT", "X..Deut", "Deut.."), nm1)
-
-      if (length(dif_col)!=0)
-      {stop(paste("input file missing column(s): ", dif_col, sep=""))}
+      a <- .hdx_raw(filepath)
 
 
       a <- a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
@@ -88,18 +73,15 @@ FD<-arg_df_FD(filepath)
 #'
 #' Returns a data frame for Full deuteration set
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is uptake data for Protein States.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_UD(file_nm)
 #' @export
 output_UD<- function(filepath){
-  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
-  nm1<-colnames(nm)
-  colnames(a)<-c(nm1) ##assign names to the columns
-  a<-a[,c(1:6,8,9, 21, 22)] ##choose only useful columns
+  a<-.hdx_raw(filepath)
+  a<-a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence", "Charge", "Search.RT", "X..Deut", "Deut..")] ##choose only useful columns
   rownames(a)<-1:dim(a)[1] ##name rows
   a<-na.omit(a) ##remove missing values, removes non-deuterated state
   zero<-a[which(a$Deut.Time == '0.00s'),] ##this line can be used to take advantage of control sample
@@ -140,18 +122,15 @@ output_UD<- function(filepath){
 #'
 #' Returns a data frame for Full deuteration set
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is procent deuteration for Protein States.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_FD_proc(file_nm)
 #' @export
 output_FD_proc<- function(filepath){
-  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
-  nm1<-colnames(nm)
-  colnames(a)<-c(nm1) ##assign names to the columns
-  a<-a[,c(1:6,8,9,  21, 22)]
+  a<-.hdx_raw(filepath)
+  a<-a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence", "Charge", "Search.RT", "X..Deut", "Deut..")]
   if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
     undeut<-a[which(a$Deut.Time == '0s'),]}
   if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
@@ -202,18 +181,15 @@ output_FD_proc<- function(filepath){
 #'
 #' Returns a data frame for Undeuterated control set
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is procent deuteration for Protein States.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_UD_proc(file_nm)
 #' @export
 output_UD_proc<- function(filepath){
-  a<-read.csv(file=filepath,  header = FALSE, skip = 1)### load the file witout headers
-  nm<-read.csv(file=filepath, header = TRUE, row.names = NULL, nrows = 1)###load the header names
-  nm1<-colnames(nm)
-  colnames(a)<-c(nm1) ##assign names to the columns
-  a<-a[,c(1:6,8,9,  21, 22)]
+  a<-.hdx_raw(filepath)
+  a<-a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence", "Charge", "Search.RT", "X..Deut", "Deut..")]
   if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
     undeut<-a[which(a$Deut.Time == '0s'),]}
   if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){

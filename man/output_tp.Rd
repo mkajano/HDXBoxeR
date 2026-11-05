@@ -17,7 +17,7 @@ output_tp(
 )
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 
 \item{replicates}{optional maximum number of replicates per state and time. By default every replicate is used, so states may have different numbers of replicates (e.g. 3 and 4); missing measurements are \code{NA}. Replicates are numbered in the order their experiments appear in the file.}
 

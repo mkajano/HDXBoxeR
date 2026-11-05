@@ -4,7 +4,7 @@
 #' The output is being used later for the analysis to compare different protein states.
 #' input parameters match the output_tp parameters
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
@@ -46,11 +46,11 @@ boxer_input_to_long<-function(filepath, replicates, states, times, seq_match=FAL
 #' The output is being used later for the analysis to compare different protein states.
 #' no initial matching of the files is made, raw data imported
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized in a long format
 #' @export
 all_data_long_input<-function(filepath){
-  b1<-read.csv(filepath)
+  b1<-.hdx_raw(filepath)
   bt<-b1[which(b1$Deut.Time != "0s" & b1$Deut.Time != "FD" ),]
   bt$nb_prot<-nb_exch_deut(bt)
   bt$frac_deut<-as.numeric(bt$X..Deut)/bt$nb_prot

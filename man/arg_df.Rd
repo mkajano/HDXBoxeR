@@ -7,7 +7,7 @@
 arg_df(filepath)
 }
 \arguments{
-\item{filepath}{input file location}
+\item{filepath}{input file location, or a table from \code{\link[=read_hdx]{read_hdx()}}}
 }
 \value{
 Data.frame for further processing

@@ -4,7 +4,7 @@
 #' Returns summary data.
 #' Function returns: Protein states, timepoints, number of replicates,  # peptides, % coveregae, average peptide length and redundancy.
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param replicates number of replicates. Default set to 3.
 #' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @return Returns summary table.
