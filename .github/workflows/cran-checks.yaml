@@ -47,6 +47,13 @@ jobs:
           args: ${{ matrix.config.manual && 'c("--as-cran")' || 'c("--no-manual", "--as-cran")' }}
           build_args: ${{ matrix.config.manual && 'character()' || 'c("--no-manual")' }}
           error-on: '"warning"'
+      - name: Show LaTeX errors of the PDF manual
+        if: failure() && matrix.config.manual
+        run: |
+          for f in $(find check -name 'Rdlatex.log' -o -name '*-manual.log'); do
+            grep -n -A3 '^!' "$f" | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            grep -n -i 'not found' "$f" | head -10 | while IFS= read -r line; do echo "::error::$line"; done
+          done
 
   no-suggests:
     runs-on: ubuntu-latest

@@ -34,7 +34,7 @@ centroid m/z under this name.
 }
 \description{
 Format prepared based of example from:
-Masson, G.R., Burke, J.E., Ahn, N.G. et al. Recommendations for performing, interpreting and reporting hydrogen deuterium exchange mass spectrometry (HDX-MS) experiments. Nat Methods 16, 595–602 (2019). https://doi.org/10.1038/s41592-019-0459-y
+Masson, G.R., Burke, J.E., Ahn, N.G. et al. Recommendations for performing, interpreting and reporting hydrogen deuterium exchange mass spectrometry (HDX-MS) experiments. Nat Methods 16, 595-602 (2019). https://doi.org/10.1038/s41592-019-0459-y
 It generates csv file in format ready for publication of the data.
 }
 \examples{
