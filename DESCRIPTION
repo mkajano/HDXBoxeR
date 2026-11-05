@@ -25,6 +25,8 @@ Description: A protocol that facilitates the processing and analysis of Hydrogen
     and Masson et al. (2019) <doi:10.1038/s41592-019-0459-y>.
     'HDXBoxeR' citation: Janowska et al. (2024) <doi:10.1093/bioinformatics/btae479>.
 License: GPL (>= 2)
+URL: https://github.com/mkajano/HDXBoxeR
+BugReports: https://github.com/mkajano/HDXBoxeR/issues
 Imports: 
     dplyr,
     graphics,
@@ -52,5 +54,5 @@ VignetteBuilder:
     rmarkdown
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1

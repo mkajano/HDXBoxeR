@@ -4,3 +4,14 @@
 ^Meta$
 ^BUGS\.md$
 ^\.claude$
+^\.RData$
+^\.Rhistory$
+^R/\.Rhistory$
+^vignettes/.*\.html$
+^vignettes/lib$
+^vignettes/rsconnect$
+^\.github$
+^cran-comments\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
