@@ -38,7 +38,10 @@ jobs:
           needs: check
       - name: Install LaTeX packages for the manual
         if: matrix.config.manual
-        run: tlmgr install inconsolata
+        continue-on-error: true
+        run: |
+          tlmgr update --self || true
+          tlmgr install inconsolata || true
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: ${{ matrix.config.manual && 'c("--as-cran")' || 'c("--no-manual", "--as-cran")' }}
