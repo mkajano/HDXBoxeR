@@ -13,7 +13,7 @@ deuteration_woods_timecourse_frac(
 )
 }
 \arguments{
-\item{input_data}{output from function output_tc(..., percent=TRUE)}
+\item{input_data}{output from function output_tc() with uptake in Da (it is divided by the number of exchangeable amides, see nb_exch_deut())}
 
 \item{states}{states, if missing all states used}
 

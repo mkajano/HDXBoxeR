@@ -55,13 +55,13 @@ symmetric around (and include) \code{0}, e.g.
 units \code{res_df} is already in (Da, percent, or fraction - unchanged
 from \code{res_df}, not re-derived here).}
 
-\item{col}{color for residues with no HDX data at this}
+\item{col}{color for residues with no HDX data at this
+timepoint (\code{NA} delta, or simply absent from \code{res_df}). Default
+\code{"grey80"}.}
 
 \item{background}{background color for the 3D viewer. Default \code{"white"}.}
 
-\item{colors_initial}{deprecated, use \code{col}.
-timepoint (\code{NA} delta, or simply absent from \code{res_df}). Default
-\code{"grey80"}.}
+\item{colors_initial}{deprecated, use \code{col}.}
 }
 \value{
 an \code{NGLVieweR} \code{htmlwidget}.

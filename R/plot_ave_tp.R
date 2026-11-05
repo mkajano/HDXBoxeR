@@ -14,7 +14,7 @@ av_tp<-function(df, col, cola) {
   if(missing(col)) col=c(1, brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
   n1=max((dim(df)[2]-7), 3)
   #col<-c(1, brewer.pal(n = n1, name = "Paired"))
-  plot(df[,7], type="n", xlab="", ylab="", lwd=2, col=col[1], ylim=c(0, max(df[,7:dim(df)[2]])+10))
+  plot(df[,7], type="n", xlab="", ylab="", lwd=2, col=col[1], ylim=c(0, max(df[,7:dim(df)[2]], na.rm = TRUE)+10))
 
   for ( i in 7:dim(df)[2]){
     points(df[,i], type="l", xlab="", ylab="", col=col[i-6])}
@@ -42,7 +42,7 @@ legend_raw_ave<-function(df, col, cola){
   n1=max((dim(df)[2]-7), 3)
   #col<-c(1, brewer.pal(n = n1, name = "Paired"))
   ##draw boxplots ave and sd1
-  nm1<-str_sub(colnames(df[7:dim(df)[2]]), start = 4, end = -9)
+  nm1<-.hdx_strip_suffix(colnames(df[7:dim(df)[2]]))
   legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
          yjust = yadj,
          fill=col,  bty="n", cex=0.6, xpd = TRUE, border = col )

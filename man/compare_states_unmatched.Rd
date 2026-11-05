@@ -45,7 +45,8 @@ see Details.}
 \item{reference}{optional state name - if given, only \code{reference} vs.
 each other state is tested, instead of every pair.}
 
-\item{replicates}{number of replicates per state. Default \code{3}.}
+\item{replicates}{not used: every replicate of every state is used. Kept
+so that older calls still work.}
 
 \item{pvalue}{significance cutoff. This function does not compute
 \code{is_sig} for the pooled \code{shift_hl}/\code{p_value} result itself (callers can
@@ -156,9 +157,9 @@ counts as its own peptide) shared between that pair's two states in
 that region, a
 per-peptide matched Welch t-test (replicates of that one peptide, state1
 vs. state2 - the same kind of test \code{\link[=compare_states_tp]{compare_states_tp()}} and
-\code{plot_fissure_vent()} use), with p-values adjusted together across every
-peptide-by-pair test in this call (same family as \code{p_adj} above) and
-called significant at \code{p_adj < pvalue}. A region with a flat/non-significant
+\code{plot_fissure_vent()} use), with p-values adjusted across the peptides of
+each pair of states, and called significant when \code{p_adj < pvalue} and the
+difference exceeds the critical interval. A region with a flat/non-significant
 pooled result but \code{frac_peptides_significant > 0} means real, localized
 signal exists in there - shrink \code{regions} to isolate it, or use
 peptide-matched testing directly instead of pooling.

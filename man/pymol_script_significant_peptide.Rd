@@ -20,7 +20,7 @@ pymol_script_significant_peptide(
 \arguments{
 \item{df}{output from functions output_tp}
 
-\item{path}{location where the scripts will be saved}
+\item{path}{location where the scripts will be saved. Default \code{""}: the working directory.}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
 

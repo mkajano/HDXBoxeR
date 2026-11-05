@@ -72,7 +72,7 @@
   })
 
   tbl <- data.frame(
-    peptide_id = paste(av1$Start, av1$End, av1$Sequence, sep = "_"),
+    peptide_id = paste(av1$Start, av1$End, av1$Sequence, paste0("z", av1$Charge), sep = "_"),
     Start = av1$Start, End = av1$End, Sequence = av1$Sequence,
     state1_val = av1[[av_state1]], state2_val = av1[[av_state2]],
     delta = av1[[av_state2]] - av1[[av_state1]],
@@ -316,7 +316,7 @@ interactive_fissure_vent <- function(df, state1, state2, times, replicates = 3,
 interactive_woods <- function(df, state1, state2, times, replicates = 3,
                                alpha = 0.01, pvalue = 0.01, shared_data = NULL, p_adjust = "none") {
   .hdx_require_interactive()
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha, pvalue, shared_data, "hdx_woods", p_adjust = p_adjust)
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data, "hdx_woods", p_adjust = p_adjust)
   tbl <- sd_obj$data(withSelection = FALSE)
 
   seg <- function(val_col, label, col_sig, col_nonsig) {
@@ -375,7 +375,7 @@ interactive_woods <- function(df, state1, state2, times, replicates = 3,
 significant_peptides_table <- function(df, state1, state2, times, replicates = 3,
                                         alpha = 0.01, pvalue = 0.01, shared_data = NULL, p_adjust = "none") {
   .hdx_require_interactive(need_dt = TRUE)
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha, pvalue, shared_data, "hdx_table", p_adjust = p_adjust)
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data, "hdx_table", p_adjust = p_adjust)
 
   ## build the display table and sort it as ONE data.frame, so peptide_id
   ## (the crosstalk join key) always travels with the row it identifies -

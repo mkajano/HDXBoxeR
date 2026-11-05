@@ -13,6 +13,17 @@
   a <- raw[raw$Deut.Time %in% labels, .hdx_required, drop = FALSE]
   a$X..Deut <- suppressWarnings(as.numeric(a$X..Deut))
   a$Deut.. <- suppressWarnings(as.numeric(a$Deut..))
+  if (label != "FD" && nrow(a) > 0) {
+    ## the undeuterated sample is the reference: its uptake is 0 by
+    ## definition. HDXExaminer writes "n/a" and DynamX gives none, so
+    ## missing values are set to 0 (one label only, if several exist)
+    v <- if (percent) a$Deut.. else a$X..Deut
+    has_val <- tapply(!is.na(v), a$Deut.Time, sum)
+    keep_lab <- if (any(has_val > 0)) names(which.max(has_val)) else names(which.max(table(a$Deut.Time)))
+    a <- a[a$Deut.Time == keep_lab, , drop = FALSE]
+    a$X..Deut[is.na(a$X..Deut)] <- 0
+    a$Deut..[is.na(a$Deut..)] <- 0
+  }
   a <- a[!is.na(if (percent) a$Deut.. else a$X..Deut), , drop = FALSE]
   if (nrow(a) == 0) stop("no '", paste(labels, collapse = "'/'"), "' rows with values in the input",
                          call. = FALSE)
@@ -47,6 +58,8 @@ output_FD<- function(filepath){
 #'
 #' Returns the in-exchange control (`Deut.Time` 0, e.g. `"0s"` or `"0.00s"`):
 #' one row per peptide and protein state, one column per replicate (uptake in Da).
+#' Missing uptake (HDXExaminer writes `n/a` for the undeuterated sample) is
+#' set to 0, since the undeuterated sample is the reference.
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is uptake data for Protein States.

@@ -9,7 +9,7 @@
 #'
 #' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=T) function.
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
-#' @param path location where the Pymol scripts will be saved
+#' @param path location where the Pymol scripts will be saved. Default `""`: the working directory.
 #' @param pvalue p-value cutoff here set up to 0.01
 #' @param pv_cutoff deprecated, use `pvalue`.
 #' @param alpha cutoff for critical interval
@@ -33,14 +33,14 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="",
                                                 ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 alpha=0.01,
                                                 pvalue=0.01, replicates=3, order.pep=TRUE, p_adjust="none", resno_offset=0, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   .hdx_check_aligned(input_proc, input_up)
   dfup=input_up
   df=input_proc
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
-  setwd(path)
+  if (nzchar(path)) setwd(path)
 
   #####from HDX get data and
   for ( deut.time in(unique(df$Deut.Time))){

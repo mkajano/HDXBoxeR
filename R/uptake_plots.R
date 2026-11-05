@@ -2,7 +2,7 @@
 #'
 #' Uptake plots per peptide
 #'
-#' @param input_data output from function output_tp(..., percent=T)
+#' @param input_data output from function output_tc(..., percent=TRUE)
 #' @param col colors, default NA
 #' @param cola deprecated, use `col`.
 #' @param timepoints the labeling times

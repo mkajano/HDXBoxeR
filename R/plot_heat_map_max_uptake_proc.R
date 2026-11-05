@@ -18,7 +18,7 @@ heat_map_tp_maxuptake_proc<-function(df, dfup, pv, sd,
                                      ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                      alpha=0.01,
                                      pvalue=0.01, replicates=3, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   #####
   #preparation significance per residue & coverage
   cl1<-significant_peptide_uptake(dfup, pv, sd,alpha, pvalue, replicates)
@@ -122,7 +122,7 @@ plot_heat_map_max_uptake_tp_proc<-function(input_proc, input_up, mar_x=3.5,
                                            ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            alpha=0.01,
                                            pvalue=0.01, replicates=3, p_adjust="none", pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   .hdx_check_aligned(input_proc, input_up)
 
   oldpar<-par(no.readonly = TRUE)

@@ -72,12 +72,14 @@ output_tp(d_long)
 ## Replicates
 
 All replicates are used, and states can have different numbers of replicates.
-In `three_states.csv` the states have 3 or 4 replicates.
-A missing replicate is `NA`.
+In `three_states.csv` the wild type has 4 replicates; the mutants have 3 or 4, depending on the peptide.
+The table has one column per replicate (4 per state here), and a missing replicate is `NA`.
 
 ```{r}
 a3 <- output_tp(d3)
 attr(a3, "replicates")
+## replicates with a value, per state, for the first peptides
+sapply(c("WT", "D109H", "R120G"), function(s) rowSums(!is.na(a3[1:5, grep(s, colnames(a3))])))
 ```
 
 -   A peptide is used when it has at least 2 replicates in every state (`min_replicates`). Dropped peptides are reported.

@@ -29,7 +29,7 @@ Calculation of global confidence interval using approach by:
 Reliable Identification of Significant Differences in Differential Hydrogen Exchange-Mass Spectrometry Measurements Using a Hybrid Significance Testing Approach
 Tyler S. Hageman and David D. Weis
 Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
-calculations for alpha 0.99
+The default alpha is 0.01.
 }
 \details{
 The t-value is two-tailed, \verb{|qt(alpha/2, df)|}, as in the published

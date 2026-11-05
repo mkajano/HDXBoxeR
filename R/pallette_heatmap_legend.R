@@ -47,7 +47,7 @@ pallette_ll<-function(pallette, lab){
 #' legend_heat_map_tp(df=a)
 #' @export
 legend_heat_map_tp<-function(df){
-  nm1<-str_sub(colnames(df[8:dim(df)[2]]), start=4, end=-9)
+  nm1<-.hdx_strip_suffix(colnames(df[8:dim(df)[2]]))
   axis(2, at=0.5:(dim(df)[2]-7.5), labels=nm1, las=2, line = , cex.axis=0.7)
 }
 
@@ -59,7 +59,7 @@ legend_heat_map_tp<-function(df){
 #' @return legend for the heatmap prercent
 #' @export
 legend_heat_map_tp_proc<-function(df){
-  nm1<-str_sub(colnames(df[8:dim(df)[2]]), start=4, end=-8)
+  nm1<-.hdx_strip_suffix(colnames(df[8:dim(df)[2]]))
   axis(2, at=0.5:(dim(df)[2]-7.5), labels=nm1, las=2, line = , cex.axis=0.7)
 }
 

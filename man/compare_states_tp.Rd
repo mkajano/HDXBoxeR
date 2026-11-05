@@ -104,8 +104,8 @@ to gate significance (see Details) - and (2) the package's usual
 Hageman & Weis hybrid test (pooled \code{CI_2pts()} + per-pair Welch p-value)
 for every pair of states (or every \code{reference} vs. the rest, if
 \code{reference} is given). A pair is significant when its Welch p-value
-(raw by default, or adjusted with \code{p_adjust} across every peptide-by-pair
-test at this timepoint) is below \code{pvalue} AND its difference exceeds the
+(raw by default, or adjusted with \code{p_adjust} across the peptides of that
+pair) is below \code{pvalue} AND its difference exceeds the
 pooled CI - the same rule as every other function in the package.
 }
 \section{Which replicate SD feeds the pooled CI}{
@@ -113,8 +113,10 @@ pooled CI - the same rule as every other function in the package.
 Each state's own raw replicate SD, pooled via \code{CI_2pts()} - the same
 threshold as \code{plot_fissure_vent()}'s default (\code{sd_source = "raw"}),
 \code{CI_tp()}, \code{diff_peptides_prep()} and the interactive plots, so \code{ci}
-values here match those functions for the same pair. It treats every
-state symmetrically and needs no reference state.
+values here match those functions for the same pair (when those are given
+a table of the same two states; on a table of 3+ states they pool over
+the peptides found in every state, so the CI can differ slightly). It
+treats every state symmetrically and needs no reference state.
 }
 
 \section{Available-case, not complete-case, matching}{
@@ -147,10 +149,9 @@ peptides with \code{p_adjust}); \code{is_sig} depends only on the per-pair rule.
 
 \examples{
 \donttest{
-file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-# the shipped example only has two states; compare_states_tp() needs 3+.
-# See vignette("multistate") for a worked example that
-# constructs a synthetic third state to demonstrate this function.
+file_3state <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
+res <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5")
+head(res)
 }
 }
 \seealso{

@@ -12,7 +12,8 @@ hdx_summary_table(
   alpha = 0.01,
   pvalue = 0.01,
   protein_range = NULL,
-  file = NULL
+  file = NULL,
+  states = NULL
 )
 }
 \arguments{
@@ -37,6 +38,9 @@ Default \code{0.85}.}
 \code{\link[=general_info]{general_info()}}. Default: first to last covered residue.}
 
 \item{file}{optional output file: \code{.csv} or \code{.md} (markdown table).}
+
+\item{states}{optional states to include (the first one is the
+reference). Default: every state.}
 }
 \value{
 data frame with columns \code{Item} and one per state (invisibly

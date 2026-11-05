@@ -8,7 +8,7 @@ plot_heat_map_tp_proc(
   input_proc,
   input_up,
   mar_x = 3.5,
-  ranges = c(-Inf, -3, -2, -1, 0, 1, 2, 3, Inf),
+  ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
   pvalue = 0.01,
   replicates = 3,

@@ -4,7 +4,7 @@
 #' Number of colors and corresponding to them ranges can be defined by user.
 #'
 #' @param df output from functions output_tp
-#' @param path location where the scripts will be saved
+#' @param path location where the scripts will be saved. Default `""`: the working directory.
 #' @param alpha cutoff for critical interval
 #' @param pvalue p-value cutoff here set up to 0.01
 #' @param pv_cutoff deprecated, use `pvalue`.
@@ -28,11 +28,11 @@ pymol_script_significant_peptide<-function(df,path="",
                                            ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            alpha=0.01,
                                            pvalue=0.01, replicates=3, order.pep=TRUE, p_adjust="none", resno_offset=0, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
-  setwd(path)
+  if (nzchar(path)) setwd(path)
   #####from HDX get data and
   for ( deut_time in(unique(df$Deut.Time))){
 

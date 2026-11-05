@@ -6,7 +6,7 @@
 #' @return legend for the heatmap
 #' @export
 legend_heat_map_tc<-function(df){
-  nm1<-str_sub(colnames(df[7:dim(df)[2]]), start=4, end=-9)
+  nm1<-.hdx_strip_suffix(colnames(df[7:dim(df)[2]]))
   axis(2, at=0.5:(dim(df)[2]-6.5), labels=nm1, las=2, line = , cex.axis=0.7)
 }
 

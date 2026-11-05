@@ -43,8 +43,8 @@
 #' @param states states to compare. Default: all.
 #' @param times time points. Default: all.
 #' @param reference reference state; every other state is compared with it
-#'   (difference = other - reference). Default: the first state. Use
-#'   `reference = NULL` together with `all_pairs = TRUE` for every pair.
+#'   (difference = other - reference). Default: the first state.
+#'   `reference = NULL` or `all_pairs = TRUE` compares every pair.
 #' @param all_pairs `TRUE` compares every pair of states instead.
 #' @param alpha alpha of the pooled critical interval. Default `0.01`.
 #' @param pvalue p-value cutoff. Default `0.01`.
@@ -214,6 +214,8 @@ render_report <- function(filepath, output_file = "hdx_report.html", states = NU
 #' @param protein_range residue range for the coverage, as in
 #'   [general_info()]. Default: first to last covered residue.
 #' @param file optional output file: `.csv` or `.md` (markdown table).
+#' @param states optional states to include (the first one is the
+#'   reference). Default: every state.
 #' @return data frame with columns `Item` and one per state (invisibly
 #'   when `file` is given).
 #' @seealso [all_summary()], [output_prep()], [hdx_results_table()]
@@ -224,8 +226,14 @@ render_report <- function(filepath, output_file = "hdx_report.html", states = NU
 #'   "Data analysis software" = "HDExaminer 3; HDXBoxeR"))
 #' @export
 hdx_summary_table <- function(filepath, metadata = list(), replicates = NULL, Dfact = 0.85,
-                              alpha = 0.01, pvalue = 0.01, protein_range = NULL, file = NULL) {
+                              alpha = 0.01, pvalue = 0.01, protein_range = NULL, file = NULL,
+                              states = NULL) {
   raw <- .hdx_raw(filepath)
+  if (!is.null(states)) {
+    miss <- setdiff(states, raw$Protein.State)
+    if (length(miss)) stop("state(s) not found: ", paste(miss, collapse = ", "), call. = FALSE)
+    raw <- raw[raw$Protein.State %in% states, , drop = FALSE]
+  }
   s <- suppressMessages(all_summary(raw, replicates = replicates, Dfact = Dfact, alpha = alpha,
                                     protein_range = protein_range))
   states <- s$Protein.State

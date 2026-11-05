@@ -11,7 +11,7 @@ vol_tp(df1, pv, CI, pvalue = 0.01, col, pv_cutoff, cola)
 
 \item{pv}{pvalues dataframes calculated using pv_timepoint function}
 
-\item{CI}{critical interval, here is multiple sets are using maximum CI is used.}
+\item{CI}{critical interval: one value per compared state (as from \code{\link[=CI_tp]{CI_tp()}}), or a single value used for all.}
 
 \item{pvalue}{p-value cutoff here set up to 0.01}
 

@@ -119,7 +119,7 @@
     if (is.null(dim(seq_by_group))) seq_by_group <- matrix(seq_by_group, nrow = 1)
     desc$Sequence <- apply(seq_by_group, 1, function(s) {
       s <- s[!is.na(s)]
-      if (length(unique(s)) <= 1) s[1] else paste(s, collapse = ".")
+      if (length(unique(s)) <= 1) s[1] else paste(unique(s), collapse = ".")
     })
   }
 
@@ -141,7 +141,7 @@
   if (layout == "tp") {
     out <- data.frame(desc[, c("Deut.Time", "Start", "End", "Sequence", "Search.RT", "Charge")],
                       value_df, check.names = TRUE)
-    t_ord <- suppressWarnings(as.numeric(str_sub(out$Deut.Time, end = -2)))
+    t_ord <- .hdx_time_seconds(out$Deut.Time)
     o <- order(t_ord, out$Deut.Time, out$Start, out$End, out$Charge)
   } else {
     out <- data.frame(desc[, c("Sequence", "Protein.State", "Start", "End", "Search.RT", "Charge")],
@@ -193,3 +193,15 @@
 
 ## message helper: one line, no stray NULL from message(cat(...))
 .hdx_msg <- function(label, x) message(paste(label, paste(x, collapse = " ")))
+
+## time label to seconds, for sorting: "1800.00s", "30 s", "1min", "2 h";
+## NA for labels such as "FD"
+.hdx_time_seconds <- function(x) {
+  x <- trimws(as.character(x))
+  num <- suppressWarnings(as.numeric(sub("^([0-9.eE+-]+).*$", "\\1", x)))
+  unit <- tolower(trimws(sub("^[0-9.eE+-]+", "", x)))
+  mult <- ifelse(unit %in% c("", "s", "sec"), 1,
+          ifelse(unit %in% c("m", "min", "mins"), 60,
+          ifelse(unit %in% c("h", "hr", "hrs", "hour", "hours"), 3600, NA_real_)))
+  num * mult
+}

@@ -71,7 +71,7 @@ legend_raw_ave_tc<-function(df,col, cola){
 
   mtext(c("Index"),  c(SOUTH<-1),line=0.7, outer=TRUE, cex=0.8)
   mtext("% Deuteration",  c(WEST<-2),line=0.7, outer=TRUE, cex=0.8)
-  nm1<-str_sub(colnames(df[7:dim(df)[2]]), start = 4, end = -9)
+  nm1<-.hdx_strip_suffix(colnames(df[7:dim(df)[2]]))
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
   legend("bottom", nm1, xpd = TRUE, horiz = TRUE, inset = c(0,   0), bty = "n",  fill = col, cex = 0.8)}

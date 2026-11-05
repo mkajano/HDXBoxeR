@@ -174,7 +174,7 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 ### Later change the path to the path you your data!!!
 
 ##########Deuteration uptake vs percent deuteration file preparation
-#### Input for uptake deuteration. Default will use all common states, all common Deuteration Times, max. common number of replicates, no csv will be written, and peptide sequences will be matched. 
+#### Input for uptake deuteration. Default will use all common states, all common Deuteration Times, all replicates of each state, no csv will be written, and peptide sequences will be matched.
 input_uptake_timepoint<-output_tp(filepath = file_nm) 
 # input for percent deuteration
 input_deut_timepoint<-output_tp(filepath = file_nm, percent=T) 
@@ -435,7 +435,7 @@ The strength of the volcano plots is that they allow for a quick view to see how
 The Volcano plots take advantage of the p-value and critical interval calculation.
 The p-value is calculated per each peptide using the Welch t-test for the desired number of replicates.
 The global critical interval is calculated as described in Hageman and Weis (Analytical Chemistry 2019, 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325).
-As the default alpha is set to 0.99, the p-value cut off is marked by horizontal lines, and the global critical interval by vertical lines.
+The default alpha is 0.01. The p-value cut off is marked by horizontal lines, and the global critical interval by vertical lines.
 Significantly different peptides between the sets are located in the shaded area.
 The volcano plots are only prepared for differences in deuterons uptake.
 The critical intervals for all time-points are returned in the terminal.
@@ -450,7 +450,7 @@ a<-output_tp(file_nm)
 plots_vol_tp(a)
 # change colors for significant peptides in volcano plots
 plots_vol_tp(a, col=c(2,3), replicates=3)
-#change pv_cutoff from 0.01 to 0.1
+#change the p-value cutoff from 0.01 to 0.1
 plots_vol_tp(a, pvalue = 0.1)
 
 ```
@@ -553,7 +553,7 @@ legend_heat_map(ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf))
 
 Woods plots come in two flavors: one that looks at the time course or timepoints.
 Below are examples.
-The usage of the `subset_indices` is highly recommended.
+Selecting a few time points with `select_indices()` is recommended.
 
 ```{r fig_woods, fig.height = 5, fig.width = 5}
 ##
@@ -623,7 +623,7 @@ If the robot plots are too crowded, we recommend removing peptides from the robo
 However, even then, some areas of the plot are too crowded, so manual removal of peptides is necessary to prepare a final plot.
 To determine which peptides should be removed (or kept), we recommend first looking at the plot and then running the `robot_indexes_df()` function, which returns all significant peptides in the set.
 After that, one should choose indexes that the user wants to keep and run the `robot_2states_indexes()` function.
-A note for all these functions: only two states of the proteins should be given, not the whole sets (parameter `states`).
+`robot_indexes_df()` lists significant peptides for every state compared with the first one. `robot_2states_indexes()` draws two states: give them with `states`.
 
 ```{r fig8a, fig.height = 4, fig.width = 5, echo=FALSE}
 library(HDXBoxeR)

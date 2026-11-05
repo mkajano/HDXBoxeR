@@ -9,7 +9,9 @@ dif_tp_proc(df, col, cola)
 \arguments{
 \item{df}{output from functions output_tp or output_tp_proc.}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 plots of difference in average

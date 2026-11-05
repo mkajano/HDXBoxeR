@@ -224,6 +224,18 @@ read_dynamx <- function(path, type = c("auto", "cluster", "state"), fd = NULL,
   ud <- d$Exposure == 0
   m0 <- tapply(d$mass[ud], pkey[ud], mean)
   d$uptake <- d$mass - as.numeric(m0[pkey])
+  ## a state without its own undeuterated run (e.g. an FD control) uses the
+  ## undeuterated mass of the same peptide and charge from the other states;
+  ## that mass does not depend on the state
+  akey <- do.call(paste, c(d[c("Start", "End", "Sequence", "z")], sep = "\r"))
+  m0_any <- tapply(d$mass[ud], akey[ud], mean)
+  borrow <- is.na(d$uptake) & !ud & !is.na(m0_any[akey])
+  if (any(borrow)) {
+    message("undeuterated mass taken from the other states for: ",
+            paste(unique(d$State[borrow]), collapse = ", "),
+            " (", sum(borrow), " measurement(s))")
+    d$uptake[borrow] <- d$mass[borrow] - as.numeric(m0_any[akey[borrow]])
+  }
   ## one retention time per peptide and charge across all states, since
   ## output_tp() matches peptides between states on it
   rtkey <- do.call(paste, c(d[c("Start", "End", "Sequence", "z")], sep = "\r"))

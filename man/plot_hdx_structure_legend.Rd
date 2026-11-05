@@ -16,13 +16,13 @@ plot_hdx_structure_legend(
 (or, if that call used the default \code{NULL}, the auto-scaled vector -
 see \code{\link[=plot_hdx_structure]{plot_hdx_structure()}}'s \verb{@details} on reconstructing it).}
 
-\item{col}{the same \code{col} passed to}
+\item{col}{the same \code{col} passed to
+\code{\link[=plot_hdx_structure]{plot_hdx_structure()}}. Default \code{"grey80"}.}
 
 \item{unit_label}{axis label for the bins, e.g. \code{"Da"} or \code{"\%"}. Default
 \code{""}.}
 
-\item{colors_initial}{deprecated, use \code{col}.
-\code{\link[=plot_hdx_structure]{plot_hdx_structure()}}. Default \code{"grey80"}.}
+\item{colors_initial}{deprecated, use \code{col}.}
 }
 \value{
 draws a base-R legend plot; returns \code{NULL} invisibly.

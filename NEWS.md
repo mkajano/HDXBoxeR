@@ -21,13 +21,20 @@
 * Data quality: `plot_peptide_coverage_map()`; long-format helpers
   `boxer_input_to_long()` and `all_data_long_input()`.
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
-  structure mapping, data quality.
+  structure mapping, data quality. The unfinished correlation-plots
+  vignette was removed.
 
 ## Interface and documentation
 
 * Argument names are consistent: `pvalue` (was `pv_cutoff`) and `col` (was
   `cola` / `colors_initial`). The old names still work, with a deprecation
-  warning; positional calls are unaffected.
+  warning. As in 0.0.2, `pv_cutoff` sets both the p-value cutoff and the
+  critical-interval `alpha` (unless `alpha` is given).
+* The plotting and PyMOL functions now have separate `alpha` and `pvalue`
+  arguments, placed where `pv_cutoff` was. Calls that pass these values by
+  position (e.g. `plot_heat_map_tp(a, 3.5, ranges, 0.05, 3)`) now set
+  different arguments: name the arguments. `CI_factor` was removed from the
+  robot and Woods plot functions; use `alpha`.
 * PyMOL script functions gain `resno_offset` to match structure numbering.
 * Internal helper functions are marked internal (still exported; hidden
   from the help index).
@@ -169,6 +176,23 @@
 
 ## Changes to results
 
+* Robot plots, Woods plots, `robot_indexes()` and `robot_indexes_df()`:
+  p-values and averages came from two tables sorted differently (by
+  Start as text in one, as a number in the other) and were combined row
+  by row, so the wrong peptides could be called significant. This was
+  also the case in 0.0.2. Both tables now have the same order.
+* `plots_vol_tp()` colors each state with its own critical interval
+  instead of the largest one.
+* `plot_heat_map_tp_proc()`: the default `ranges` is
+  `c(-Inf, seq(-30, 30, by = 10), Inf)`, as documented (it was ten times
+  smaller).
+* `backHX_calculations()` averages the replicate centroids of each
+  peptide before the calculation, so the range is over peptides; a state
+  without FD or undeuterated data gives `NA`.
+* `output_UD()` and the time-course tables treat a missing undeuterated
+  uptake (HDXExaminer `n/a`, DynamX) as 0, so `average_timecourse()`,
+  `sd_timecourse()` and their `_proc` versions work with such data.
+
 * `backHX_calculations()` now computes back-exchange from the measured
   centroid times charge, `(Exp Cent[FD] - Exp Cent[0s]) * Charge`. It
   previously used the theoretical centroid m/z without the charge factor,
@@ -224,6 +248,32 @@
   `Charge`.
 * `read_dynamx(fd = "last")` warns when states have different longest
   exposures.
+* `read_dynamx()`: a state without its own undeuterated run (e.g. an FD
+  control) uses the undeuterated mass of the same peptide from the other
+  states, with a message.
+* `compare_states_tp()` stops when given more than one time point.
+* `residue_deconvolution()` and `residue_level_average()` use the plain
+  sequence and the Start-End range, so joined sequences
+  (`seq_match = TRUE`) or DynamX modifications no longer spread uptake
+  beyond the peptide; `nb_exch_deut()` ignores modifications.
+* PyMOL functions work with the default `path = ""` (working directory).
+* `pymol_script_significant_residue_proc()` keeps `input_up` first (as in
+  0.0.2) and swaps the two tables, with a warning, when they are given the
+  other way round.
+* Interactive plots treat charge states of one peptide as separate
+  peptides; vector `alpha`/`pvalue` no longer break `interactive_woods()`
+  and `significant_peptides_table()`.
+* `output_prep()` uses every replicate by default, handles uneven
+  replicates and missing centroids.
+* `plot_hdx_structure()` matches state names exactly.
+* State names in plot legends and titles are no longer cut short for
+  percent tables.
+* Average, difference and volcano plots work with `NA` values (e.g.
+  `percent = "FD"` tables).
+* `seq_match = TRUE` with three or more states lists each sequence once;
+  time labels in minutes or hours sort by time.
+* `hdx_summary_table()` gains `states`; the report summary uses the
+  report's states.
 
 ## Documentation and packaging
 

@@ -101,9 +101,9 @@
 #' that region, a
 #' per-peptide matched Welch t-test (replicates of that one peptide, state1
 #' vs. state2 - the same kind of test [compare_states_tp()] and
-#' `plot_fissure_vent()` use), with p-values adjusted together across every
-#' peptide-by-pair test in this call (same family as `p_adj` above) and
-#' called significant at `p_adj < pvalue`. A region with a flat/non-significant
+#' `plot_fissure_vent()` use), with p-values adjusted across the peptides of
+#' each pair of states, and called significant when `p_adj < pvalue` and the
+#' difference exceeds the critical interval. A region with a flat/non-significant
 #' pooled result but `frac_peptides_significant > 0` means real, localized
 #' signal exists in there - shrink `regions` to isolate it, or use
 #' peptide-matched testing directly instead of pooling.
@@ -175,7 +175,8 @@
 #'   see Details.
 #' @param reference optional state name - if given, only `reference` vs.
 #'   each other state is tested, instead of every pair.
-#' @param replicates number of replicates per state. Default `3`.
+#' @param replicates not used: every replicate of every state is used. Kept
+#'   so that older calls still work.
 #' @param pvalue significance cutoff. This function does not compute
 #'   `is_sig` for the pooled `shift_hl`/`p_value` result itself (callers can
 #'   filter `p_adj < pvalue` there themselves), but `pvalue` does gate the

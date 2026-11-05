@@ -35,13 +35,21 @@ backHX_calculations<- function(filepath, Dfact=0.85){
   a <- a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
             "Charge", "Search.RT", "X..Deut", "Deut..", "Exp.Cent")]
 
-  undeut<-a[which(a$Deut.Time == '0s'),]
-  FD<-a[which(a$Deut.Time == 'FD'),]
-#undeut<-na.omit(undeut)
-#FD<-na.omit(FD)
+  ## undeuterated rows are "0s" (HDXExaminer and read_dynamx()); "0.00s"
+  ## is HDXExaminer's in-exchange control and is not used here
+  a$Exp.Cent <- suppressWarnings(as.numeric(a$Exp.Cent))
+  key <- c('Protein.State', 'Start', 'End', 'Sequence', 'Charge')
+  ## one mean centroid per peptide, charge and state (replicates averaged),
+  ## so the 0s/FD merge is one-to-one
+  cent_mean <- function(d) {
+    d <- d[!is.na(d$Exp.Cent), , drop = FALSE]
+    if (nrow(d) == 0) return(data.frame(d[, key], Exp.Cent = numeric(0)))
+    stats::aggregate(Exp.Cent ~ Protein.State + Start + End + Sequence + Charge, data = d, FUN = mean)
+  }
+  undeut <- cent_mean(a[a$Deut.Time == '0s', , drop = FALSE])
+  FD <- cent_mean(a[a$Deut.Time == 'FD', , drop = FALSE])
 
-tst<-merge(undeut, FD, by = c('Protein.State', 'Start','End', 'Sequence',
-                   'Charge'))
+tst<-merge(undeut, FD, by = key)
 bck_levels<-c()
 for (state in unique(a$Protein.State)){
   temp1<-tst[which(tst$Protein.State ==state),]
@@ -50,9 +58,8 @@ for (state in unique(a$Protein.State)){
 dif_cent<-(as.numeric(temp1$Exp.Cent.y)-as.numeric(temp1$Exp.Cent.x))*as.numeric(temp1$Charge)
 N<-nb_exch_deut(temp1)
 backHX<-c((1-dif_cent/N/Dfact)*100)
-bck_levels<-c(bck_levels,c(round(c(mean(backHX), range(backHX)), digits=2)))
-#bck_levels<-c(bck_levels, paste(state, "state. Ave BackHX: ", round(mean(backHX), digits = 2), "% ; BackHX range: ",
-#                  round(range(backHX)[1], digits = 2),"-", round(range(backHX)[2], digits = 2), "%"))
+backHX <- backHX[is.finite(backHX)]
+bck_levels<-c(bck_levels, if (length(backHX)) round(c(mean(backHX), range(backHX)), digits=2) else rep(NA_real_, 3))
 }
 sum1<-data.frame(matrix(bck_levels,nrow=3))
 names(sum1)<- unique(a$Protein.State)

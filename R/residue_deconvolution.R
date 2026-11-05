@@ -64,7 +64,7 @@ residue_deconvolution <- function(df, protein_length, lambda_smooth = 0.1) {
   build_design_matrix <- function(sub) {
     A <- matrix(0, nrow(sub), protein_length)
     for (i in seq_len(nrow(sub))) {
-      keep <- peptide_exch_residues(sub$Start[i], sub$Sequence[i])
+      keep <- peptide_exch_residues(sub$Start[i], sub$Sequence[i], sub$End[i])
       keep <- keep[keep >= 1 & keep <= protein_length]
       A[i, keep] <- 1
     }

@@ -10,7 +10,9 @@ test_that(".hdx_comparison_table returns internally consistent, correctly-shaped
   ## the join key must match the row it was built from - regression test
   ## for a real bug where sorting a display table separately from its key
   ## column desynced peptide_id from Sequence/Start/End/delta/p_value
-  expect_equal(tbl$peptide_id, paste(tbl$Start, tbl$End, tbl$Sequence, sep = "_"))
+  ## (the id ends with the charge state, "_z<charge>")
+  expect_equal(sub("_z[0-9]+$", "", tbl$peptide_id), paste(tbl$Start, tbl$End, tbl$Sequence, sep = "_"))
+  expect_false(anyDuplicated(tbl$peptide_id) > 0)
   expect_equal(tbl$delta, tbl$state2_val - tbl$state1_val)
 })
 

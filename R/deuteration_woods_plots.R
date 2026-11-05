@@ -154,11 +154,11 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' @export
 woods_CI_plot<-function(thP, th, replicates=3,
                         pvalue=0.01, states, alpha=0.01, ylim=c(0,120), p_adjust="none", ..., pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
-  nm1<-str_sub(nm[7:length(nm)], start=4, end=-10)
+  nm1<-.hdx_strip_suffix(nm[7:length(nm)])
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
 

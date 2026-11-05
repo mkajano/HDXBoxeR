@@ -37,7 +37,7 @@ when it lies entirely inside it.}
 \item{replicates}{optional maximum number of replicates per state.}
 
 \item{percent}{value scale, as in \code{\link[=output_tp]{output_tp()}}: \code{FALSE} (Da, default),
-\code{TRUE} or \code{"FD"}.}
+\code{TRUE}, \code{"FD"} or \code{"per_residue"}.}
 
 \item{time_model}{\code{FALSE} (default): one model per region and time point.
 \code{TRUE}: one model per region over all \code{times} (needs two or more).}

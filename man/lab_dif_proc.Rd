@@ -10,6 +10,8 @@ lab_dif_proc(df, col, cola)
 \item{df}{output from functions output_tp or output_tp_proc.}
 
 \item{col}{color pallette for different Protein States. As default Paired pallette from RColorBrewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 legends for procent deuteration plots

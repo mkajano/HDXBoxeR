@@ -8,9 +8,10 @@
 #'   tested on the uptake table `input_up` (Da, the package-wide rule), while
 #'   residues are colored by the largest significant difference in percent deuteration, first state minus each state (from `input_proc`); [pymol_script_significant_residue()] uses the relative change in uptake.
 #'
-#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
-#' @param path location where the Pymol scripts will be saved
+#'   Note: in this function `input_up` is the first argument (as in earlier versions); name both arguments to be safe.
+#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).
+#' @param path location where the Pymol scripts will be saved. Default `""`: the working directory.
 #' @param alpha cutoff for critical interval
 #' @param pvalue p-value cutoff here set up to 0.01
 #' @param pv_cutoff deprecated, use `pvalue`.
@@ -33,12 +34,20 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
                                                 ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 alpha=0.01,
                                                 pvalue=0.01, replicates=3, p_adjust="none", resno_offset=0, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
+  ## input_up comes first here (as in 0.0.2), unlike the other _proc
+  ## functions; tables given the other way round are swapped back
+  is_pct <- function(d) any(grepl("_Deut\\.\\._[0-9]+$", colnames(d)))
+  if (is_pct(input_up) && !is_pct(input_proc)) {
+    warning("input_up looks like a percent table and input_proc like an uptake table: ",
+            "they were swapped. Name the arguments to avoid this.", call. = FALSE)
+    tmp <- input_up; input_up <- input_proc; input_proc <- tmp
+  }
   .hdx_check_aligned(input_proc, input_up)
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
-  setwd(path)
+  if (nzchar(path)) setwd(path)
 
    #####from HDX get data and
   dfup=input_up

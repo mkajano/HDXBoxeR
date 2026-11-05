@@ -10,16 +10,18 @@
 #' Hageman & Weis hybrid test (pooled `CI_2pts()` + per-pair Welch p-value)
 #' for every pair of states (or every `reference` vs. the rest, if
 #' `reference` is given). A pair is significant when its Welch p-value
-#' (raw by default, or adjusted with `p_adjust` across every peptide-by-pair
-#' test at this timepoint) is below `pvalue` AND its difference exceeds the
+#' (raw by default, or adjusted with `p_adjust` across the peptides of that
+#' pair) is below `pvalue` AND its difference exceeds the
 #' pooled CI - the same rule as every other function in the package.
 #'
 #' @section Which replicate SD feeds the pooled CI:
 #' Each state's own raw replicate SD, pooled via `CI_2pts()` - the same
 #' threshold as `plot_fissure_vent()`'s default (`sd_source = "raw"`),
 #' `CI_tp()`, `diff_peptides_prep()` and the interactive plots, so `ci`
-#' values here match those functions for the same pair. It treats every
-#' state symmetrically and needs no reference state.
+#' values here match those functions for the same pair (when those are given
+#' a table of the same two states; on a table of 3+ states they pool over
+#' the peptides found in every state, so the CI can differ slightly). It
+#' treats every state symmetrically and needs no reference state.
 #'
 #' @section Available-case, not complete-case, matching:
 #' `output_tp()`'s wide-format merge is an inner join across every state
@@ -106,10 +108,9 @@
 #'   [compare_states_unmatched()]
 #' @examples
 #' \donttest{
-#' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' # the shipped example only has two states; compare_states_tp() needs 3+.
-#' # See vignette("multistate") for a worked example that
-#' # constructs a synthetic third state to demonstrate this function.
+#' file_3state <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
+#' res <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5")
+#' head(res)
 #' }
 #' @export
 compare_states_tp <- function(filepath, times, states = NULL,
@@ -125,6 +126,10 @@ compare_states_tp <- function(filepath, times, states = NULL,
     p_adjust <- p_adjust_method
   }
   p_adjust <- match.arg(p_adjust, stats::p.adjust.methods)
+  if (length(times) != 1) {
+    stop("compare_states_tp() compares one time point: give a single 'times' value ",
+         "(call it once per time point).", call. = FALSE)
+  }
   ## output_tp(seq_match = FALSE) merges on Sequence+Start+End+Charge (exact
   ## sequence identity); seq_match = TRUE merges on Start+End+Charge only and
   ## joins differing sequences with "." - i.e. position matching

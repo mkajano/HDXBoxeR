@@ -17,7 +17,7 @@
 #' @export
 peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                              alpha=0.01, pvalue=0.01, replicates=3, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   #preparation significance per residue & coverage
   cl1<-significant_peptide_uptake(dfup, pv, sd,alpha,  pvalue, replicates)
   cl1[is.na(cl1) ] <- 0
@@ -54,7 +54,7 @@ peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30
 
     }
 
-    main_nm=str_sub(colnames(df)[j+7], end = -9, start=4)
+    main_nm=.hdx_strip_suffix(colnames(df)[j+7])
     mtext(main_nm, side=1, outer=FALSE, line=0, cex=0.6)
     axis(3, at=seq(0, max(df[, end_col])+25, by=25),  tcl=-0.2, labels = F)
     axis(3, at=seq(0, max(df[, end_col])+25, by=50), labels = T, cex.axis=0.65)
@@ -91,7 +91,7 @@ plot_peptide_sig_tp_proc<-function(input_proc, input_up, nb_pep_row=100,
                                    ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                    alpha=0.01,
                                    pvalue=0.01, replicates=3, p_adjust="none", pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   .hdx_check_aligned(input_proc, input_up)
 
   oldpar<-par(no.readonly = TRUE)

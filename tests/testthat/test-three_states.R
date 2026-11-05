@@ -34,8 +34,12 @@ test_that("output_FD() returns every state; output_UD() finds a '0s' control", {
   fd <- output_FD(f3)
   expect_setequal(unique(fd$Protein.State), c("WT_pH7.5", "D109H_pH7.5", "R120G_ph7.5"))
   expect_equal(colnames(fd)[1:6], c("Protein.State", "Start", "End", "Sequence", "Search.RT", "Charge"))
-  ## the "0s" rows are found, but HDXExaminer leaves their uptake empty here
-  expect_error(output_UD(f3), "rows with values")
+  ## the "0s" rows are found; HDXExaminer leaves their uptake empty, so it is 0
+  ud3 <- output_UD(f3)
+  expect_setequal(unique(ud3$Protein.State), unique(fd$Protein.State))
+  expect_true(all(as.matrix(ud3[, 7:ncol(ud3)]) == 0, na.rm = TRUE))
+  expect_no_error(suppressMessages(average_timecourse(f3)))
+  expect_no_error(suppressMessages(sd_timecourse_proc(f3)))
   ## the 2-state example has an empty "0s" and a "0.00s" with values
   ud <- output_UD(system.file("extdata", "All_results_table.csv", package = "HDXBoxeR"))
   expect_true(nrow(ud) > 0)

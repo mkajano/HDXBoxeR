@@ -4,7 +4,7 @@
 #' Reliable Identification of Significant Differences in Differential Hydrogen Exchange-Mass Spectrometry Measurements Using a Hybrid Significance Testing Approach
 #' Tyler S. Hageman and David D. Weis
 #' Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
-#' calculations for alpha 0.99
+#' The default alpha is 0.01.
 #'
 #' The t-value is two-tailed, `|qt(alpha/2, df)|`, as in the published
 #' version of the package.
@@ -58,7 +58,7 @@ CI_2pts<-function(s1, s2, replicates=3, alpha=0.01, n1=NULL, n2=NULL){
 #' @return treshold for determining significance.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-#' a<- output_tc(file_nm, seq_match=FALSE)
+#' a<- output_tp(file_nm)
 #' sd<-sd_timepoint(df=a, replicates=3)
 #' CI_tp(df=sd, replicates=3, alpha=0.01 )
 #' CI_tp(sd)

@@ -10,7 +10,7 @@
 #' @return list of the dataframes
 #' @export
 diff_peptides_prep<-function(df,replicates=3, pvalue=0.01, alpha=0.01, p_adjust="none", pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
 
   av1<-ave_timepoint(df, replicates)
   df1<-dif_ave(av1)
@@ -29,9 +29,9 @@ diff_peptides_prep<-function(df,replicates=3, pvalue=0.01, alpha=0.01, p_adjust=
 
       nb2=nb2+1
       CI<-CI_tp(s1[s1$Deut.Time==k,c(1:7,i)], replicates, alpha)
-      nm_of_state<-c(paste(str_sub(colnames(df1)[7], start = 4, end=-9),
+      nm_of_state<-c(paste(.hdx_strip_suffix(colnames(df1)[7]),
                      " - ",
-                     str_sub(colnames(df1)[i], start = 4, end=-9)))
+                     .hdx_strip_suffix(colnames(df1)[i])))
 
       abs.a<-abs(df1[df1$Deut.Time==k,i])>CI
       cl1<-pv[pv$Deut.Time==k,i]< pvalue

@@ -15,7 +15,6 @@ articles:
   - multistate
   - interactive_explorer
   - hdx_structure
-  - correlations_plots
 
 reference:
 - title: Reading data

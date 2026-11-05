@@ -56,7 +56,9 @@ replicates (\code{sd_timepoint()}), matching the threshold used everywhere
 else in the package. \code{"CI"} instead back-calculates SDs from a
 two-sample t-test interval (\code{sd_ci_timepoint()}); those are SDs of the
 \emph{difference} between states, so the resulting band is wider (about
-1.8x on the shipped example) and fewer peptides are called significant.}
+1.8x on the shipped example) and fewer peptides are called significant.
+With \code{"CI"} the number of replicates is taken from \code{replicates}, not
+from the data: set it when states have more or fewer than 3.}
 
 \item{length1}{optional peptide length filter passed to \code{select_indices()}.}
 
@@ -87,7 +89,7 @@ p >= \code{pvalue}).}
 Fissure vent plot showing peptide-level deuteration in state1 vs
 state2, with the CI band and per-peptide uncertainty ellipses.
 Invisibly, a data frame with one row per drawn peptide: time, Start,
-End, Sequence, both state averages, \code{delta}, \code{p_value}, \code{p_adj}, \code{ci}
+End, Sequence, Charge, both state averages, \code{delta}, \code{p_value}, \code{p_adj}, \code{ci}
 and \code{is_sig}.
 }
 \description{

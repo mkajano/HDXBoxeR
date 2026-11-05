@@ -30,7 +30,7 @@
 #' @export
 robot_plot_All<-function(thP, th, replicates=3,
                          pvalue=0.01, alpha=0.01, states, p_adjust="none", min_timepoints=1, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   if(missing(states)) states=unique(thP$Protein.State)
 
   oldpar<-par(no.readonly = TRUE)

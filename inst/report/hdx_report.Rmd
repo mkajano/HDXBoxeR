@@ -50,7 +50,7 @@ tab(data.frame(
 ## Summary (Masson et al. 2019)
 
 ```{r}
-tab(hdx_summary_table(d, metadata = if (is.null(params$metadata)) list() else params$metadata,
+tab(hdx_summary_table(d, states = states, metadata = if (is.null(params$metadata)) list() else params$metadata,
                       alpha = params$alpha, pvalue = params$pvalue, Dfact = params$Dfact,
                       protein_range = params$protein_range))
 ```

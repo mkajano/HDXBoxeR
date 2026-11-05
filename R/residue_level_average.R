@@ -55,7 +55,7 @@ residue_level_average <- function(df, protein_length) {
     ## (peptide_exch_residues(), shared with residue_deconvolution())
     cov_mat <- matrix(FALSE, nrow(sub), protein_length)
     for (i in seq_len(nrow(sub))) {
-      keep <- peptide_exch_residues(sub$Start[i], sub$Sequence[i])
+      keep <- peptide_exch_residues(sub$Start[i], sub$Sequence[i], sub$End[i])
       keep <- keep[keep >= 1 & keep <= protein_length]
       cov_mat[i, keep] <- TRUE
     }

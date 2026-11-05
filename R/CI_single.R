@@ -4,7 +4,7 @@
 #' Reliable Identification of Significant Differences in Differential Hydrogen Exchange-Mass Spectrometry Measurements Using a Hybrid Significance Testing Approach
 #' Tyler S. Hageman and David D. Weis
 #' Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
-#' calculations for alpha 0.99
+#' The default alpha is 0.01.
 #'
 #' @param s1 standard deviation from one sample
 #' @param replicates number of replicates. Default set to 3.

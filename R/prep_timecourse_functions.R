@@ -12,7 +12,8 @@ prep_timecourse_plot_ave<-function(control_df, variant_df, replicates=3){
   av_c<-  ave_timepoint(control_df, replicates)
   av_v<-  ave_timepoint(variant_df, replicates)
   comb_av<-merge(av_c, av_v, by = c('Start','End', 'Sequence', 'Search.RT','Charge'))
-  comb_av<-arrange(comb_av, c(Start))
+  comb_av<-comb_av[.hdx_peptide_order(comb_av), , drop = FALSE]
+  rownames(comb_av) <- NULL
   sh_avc<-comb_av[,c(1:dim(av_c)[2])]
   sh_avv<-comb_av[,c(1:5, (dim(av_c)[2]+1):(dim(av_c)[2]*2-5))]
   return(list(sh_avc, sh_avv))

@@ -14,7 +14,7 @@ uptake_plots(
 )
 }
 \arguments{
-\item{input_data}{output from function output_tp(..., percent=T)}
+\item{input_data}{output from function output_tc(..., percent=TRUE)}
 
 \item{timepoints}{the labeling times}
 

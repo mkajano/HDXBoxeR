@@ -17,7 +17,7 @@
 heat_map_tp_proc<-function(df,dfup, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                            alpha=0.01,
                            pvalue=0.01, replicates=3, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   #####
   #preparation significance per residue & coverage
 
@@ -106,10 +106,10 @@ heat_map_tp_proc<-function(df,dfup, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
 #' plot_heat_map_tp_proc(input_proc=a_proc, input_up=a_up)
 #' @export
 plot_heat_map_tp_proc<-function(input_proc, input_up, mar_x=3.5,
-                                ranges=c(-Inf, -3,-2,-1, 0,1, 2,3, Inf),
+                                ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                 alpha=0.01,
                                 pvalue=0.01, replicates=3, p_adjust="none", pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   .hdx_check_aligned(input_proc, input_up)
 
   oldpar<-par(no.readonly = TRUE)

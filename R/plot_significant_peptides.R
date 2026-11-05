@@ -17,7 +17,7 @@
 peptide_pv_tp<-function(df, pv, sd, nb_row, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                         alpha=0.01,
                         pvalue=0.01, replicates=3, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   #####
   #preparation significance per residue & coverage
   cl1<-significant_peptide_uptake(df, pv, sd, alpha, pvalue, replicates)
@@ -58,7 +58,7 @@ peptide_pv_tp<-function(df, pv, sd, nb_row, ranges=c(-Inf, seq(-30, 30, by=10), 
       points(c(df[i,start_col], df[i,end_col]), c(y1[i], y1[i]), type="l",
              col=cbr1[si.fv[i,j]])}
 
-    main_nm=str_sub(colnames(df)[j+7], end = -9, start=4)
+    main_nm=.hdx_strip_suffix(colnames(df)[j+7])
     mtext(main_nm, side=1, outer=FALSE, line=0, cex=0.6)
     axis(3, at=seq(0, max(df[, end_col])+25, by=25),  tcl=-0.2, labels = F)
     axis(3, at=seq(0, max(df[, end_col])+25, by=50), labels = T, cex.axis=0.65)
@@ -82,7 +82,7 @@ peptide_pv_tp<-function(df, pv, sd, nb_row, ranges=c(-Inf, seq(-30, 30, by=10), 
 plot_peptide_sig_tp<-function(df1, replicates=3, nb_pep_row=100,
                               ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                               alpha=0.01,pvalue=0.01, p_adjust="none", pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   pv1<-pv_timepoint(df1,  replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(df1, replicates)
   av1<-ave_timepoint(df1, replicates)

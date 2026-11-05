@@ -26,8 +26,8 @@ hdx_results_table(
 \item{times}{time points. Default: all.}
 
 \item{reference}{reference state; every other state is compared with it
-(difference = other - reference). Default: the first state. Use
-\code{reference = NULL} together with \code{all_pairs = TRUE} for every pair.}
+(difference = other - reference). Default: the first state.
+\code{reference = NULL} or \code{all_pairs = TRUE} compares every pair.}
 
 \item{all_pairs}{\code{TRUE} compares every pair of states instead.}
 

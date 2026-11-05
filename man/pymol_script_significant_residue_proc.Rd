@@ -18,11 +18,12 @@ pymol_script_significant_residue_proc(
 )
 }
 \arguments{
-\item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.}
+\item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.
+Note: in this function \code{input_up} is the first argument (as in earlier versions); name both arguments to be safe.}
 
 \item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).}
 
-\item{path}{location where the Pymol scripts will be saved}
+\item{path}{location where the Pymol scripts will be saved. Default \code{""}: the working directory.}
 
 \item{ranges}{ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)}
 

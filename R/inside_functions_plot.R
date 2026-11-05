@@ -42,7 +42,7 @@ coverage_residue<-function(df1, start_col, end_col){
 #' @keywords internal
 #' @export
 significant_peptide_uptake<-function(df_av, pv, sd, alpha=0.01, pvalue=0.01, replicates=3, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   CI=CI_tp(sd, replicates,alpha)
   abs.a<-c()
   for ( i in 8:dim(df_av)[2]){

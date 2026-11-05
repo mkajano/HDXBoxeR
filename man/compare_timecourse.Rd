@@ -37,7 +37,7 @@ and across peptides within each time for the per-time calls.}
 the per-time rule for \code{sig_min_timepoints}. Default \code{2}.}
 
 \item{percent}{value scale as in \code{\link[=output_tp]{output_tp()}}: \code{FALSE} (Da, default),
-\code{TRUE} or \code{"FD"}.}
+\code{TRUE}, \code{"FD"} or \code{"per_residue"}.}
 
 \item{replicates}{optional maximum number of replicates per state.}
 }

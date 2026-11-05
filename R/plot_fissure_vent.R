@@ -62,6 +62,8 @@
 #'   two-sample t-test interval (`sd_ci_timepoint()`); those are SDs of the
 #'   *difference* between states, so the resulting band is wider (about
 #'   1.8x on the shipped example) and fewer peptides are called significant.
+#'   With `"CI"` the number of replicates is taken from `replicates`, not
+#'   from the data: set it when states have more or fewer than 3.
 #' @param position_col optional vector of per-peptide colors; when supplied,
 #'   ellipses are drawn in these colors instead of the significance-based
 #'   `sig_col`/`nonsig_col` outline, and `fill_alpha` is ignored (position
@@ -87,7 +89,7 @@
 #' @return Fissure vent plot showing peptide-level deuteration in state1 vs
 #'   state2, with the CI band and per-peptide uncertainty ellipses.
 #'   Invisibly, a data frame with one row per drawn peptide: time, Start,
-#'   End, Sequence, both state averages, `delta`, `p_value`, `p_adj`, `ci`
+#'   End, Sequence, Charge, both state averages, `delta`, `p_value`, `p_adj`, `ci`
 #'   and `is_sig`.
 #' @examples
 #' \donttest{

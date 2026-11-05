@@ -45,7 +45,7 @@ legend_states_PerD_bottom<-function (df, cols)
 {
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
-  nm1 <- unique(str_sub(colnames(df[7:dim(df)[2]]), start = 1, end = -11))
+  nm1 <- unique(.hdx_strip_suffix(colnames(df[7:dim(df)[2]])))
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0,
                                                         0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")

@@ -75,6 +75,19 @@
   invisible(TRUE)
 }
 
+## one row order for merged time-course tables (numeric Start, End, Charge,
+## Sequence); merge() sorts its keys as text, so "100" would come before "20"
+.hdx_peptide_order <- function(d) {
+  order(as.numeric(d$Start), as.numeric(d$End), as.numeric(d$Charge), as.character(d$Sequence))
+}
+
+## state (or time) name from a value column name: drops "av_"/"sd_",
+## "_X..Deut"/"_Deut..", a replicate number and merge suffixes
+.hdx_strip_suffix <- function(x) {
+  x <- sub("^(av|sd)_", "", x)
+  sub("_(X\\.\\.Deut|Deut\\.\\.)(_[0-9]+)?(\\.[xy])?$", "", x)
+}
+
 ## warning for a renamed argument (old name still accepted)
 .hdx_deprecated <- function(old, new) {
   warning(sprintf("argument '%s' is deprecated; use '%s' instead.", old, new), call. = FALSE)

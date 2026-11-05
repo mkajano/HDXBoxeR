@@ -16,7 +16,7 @@ legend_raw_ave_proc<-function(df, col, cola) {
   yadj =0
   xloc =getCoords1(1, input = "p")
   xadj =0
-  nm1<-str_sub(colnames(df[7:dim(df)[2]]), start = 4, end = -8)
+  nm1<-.hdx_strip_suffix(colnames(df[7:dim(df)[2]]))
   legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
          yjust = yadj,
          fill=col,  bty="n", cex=0.5, xpd = TRUE, border = col )

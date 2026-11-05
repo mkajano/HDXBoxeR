@@ -15,6 +15,8 @@ data frame with reorganized data where in columns is uptake data for Protein Sta
 \description{
 Returns the in-exchange control (\code{Deut.Time} 0, e.g. \code{"0s"} or \code{"0.00s"}):
 one row per peptide and protein state, one column per replicate (uptake in Da).
+Missing uptake (HDXExaminer writes \code{n/a} for the undeuterated sample) is
+set to 0, since the undeuterated sample is the reference.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

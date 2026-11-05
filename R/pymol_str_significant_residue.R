@@ -5,7 +5,7 @@
 #' Residues are being colored by maximum uptake from significant peptides per residues.
 #'
 #' @param df average data frame. Generated using ave_timepoint() function.
-#' @param path location where the Pymol scripts will be saved
+#' @param path location where the Pymol scripts will be saved. Default `""`: the working directory.
 #' @param alpha cutoff for critical interval
 #' @param pvalue p-value cutoff here set up to 0.01
 #' @param pv_cutoff deprecated, use `pvalue`.
@@ -27,12 +27,12 @@ pymol_script_significant_residue<-function(df, path="",
                                            ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            alpha=0.01,
                                            pvalue=0.01,  replicates=3, p_adjust="none", resno_offset=0, pv_cutoff){
-  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   #####from HDX get data and
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
-  setwd(path)
+  if (nzchar(path)) setwd(path)
 
   for ( deut_time in(unique(df$Deut.Time))){
     pv<-pv_timepoint(df[df$Deut.Time==deut_time,], replicates, p_adjust = p_adjust)

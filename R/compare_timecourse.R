@@ -34,7 +34,7 @@
 #' @param min_timepoints number of time points at which a peptide must pass
 #'   the per-time rule for `sig_min_timepoints`. Default `2`.
 #' @param percent value scale as in [output_tp()]: `FALSE` (Da, default),
-#'   `TRUE` or `"FD"`.
+#'   `TRUE`, `"FD"` or `"per_residue"`.
 #' @param replicates optional maximum number of replicates per state.
 #' @return data frame with one row per peptide: `Start`, `End`, `Sequence`,
 #'   `Charge`, `n_times`, `summed_delta`, `se`, `df`, `p_value`, `p_adj`,

@@ -15,7 +15,7 @@ deuteration_woods_timepoints_frac(
 )
 }
 \arguments{
-\item{input_data}{output from function output_tp(..., percent=TRUE)}
+\item{input_data}{output from function output_tp() with uptake in Da (it is divided by the number of exchangeable amides, see nb_exch_deut())}
 
 \item{times}{Deuteration times, if missing all deuteration times used}
 

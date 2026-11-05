@@ -39,8 +39,8 @@ volcano plots
 Returns volcano plots for each peptide. Critical interval is calculated according to #' Reliable Identification of Significant Differences in Differential Hydrogen Exchange-Mass Spectrometry Measurements Using a Hybrid Significance Testing Approach
 Tyler S. Hageman and David D. Weis
 Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
-calculations for alpha 0.99
-pvalues calculated using Welch t-test.
+pvalues calculated using Welch t-test. Each state is colored with its own
+critical interval (vs the first state).
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

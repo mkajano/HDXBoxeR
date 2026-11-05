@@ -3,7 +3,8 @@
 #' Returns plots with difference deuteration at each peptide.
 #'
 #' @param df output from functions output_tp or output_tp_proc.
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
 #' @return plots of difference in average
 #' @keywords internal
 #' @export
@@ -15,7 +16,7 @@ dif_tp<-function(df, col, cola) {
   n1=max((dim(df)[2]-7), 3)
   #col<-c(brewer.pal(n = n1, name = "Paired"))
   plot(df[,7], type="n", xlab="", ylab="", lwd=2, col=col[1],
-       ylim=c(min(df[,7:dim(df)[2]])-0.5, max(df[,7:dim(df)[2]])+0.5))
+       ylim=c(min(df[,7:dim(df)[2]], na.rm = TRUE)-0.5, max(df[,7:dim(df)[2]], na.rm = TRUE)+0.5))
   abline(h=0)
   for ( i in 8:dim(df)[2]){
     points(df[,i], type="l", xlab="", ylab="", col=col[i-7])}
@@ -44,8 +45,8 @@ lab_dif<-function(df, col, cola){
   xadj =0
   n1=max((dim(df)[2]-7), 3)
   #col<-c(brewer.pal(n = n1, name = "Paired"))
-  nmx<-str_sub(colnames(df[8:dim(df)[2]]), start = 4, end=-9)
-  nm1<-c(paste(str_sub(colnames(df)[7], start = 4, end=-9), "-"), nmx)
+  nmx<-.hdx_strip_suffix(colnames(df[8:dim(df)[2]]))
+  nm1<-c(paste(.hdx_strip_suffix(colnames(df)[7]), "-"), nmx)
   cola2<-c("white", col)
   legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
          yjust = yadj,

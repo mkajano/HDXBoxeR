@@ -58,9 +58,9 @@
 #'   units `res_df` is already in (Da, percent, or fraction - unchanged
 #'   from `res_df`, not re-derived here).
 #' @param col color for residues with no HDX data at this
-#' @param colors_initial deprecated, use `col`.
 #'   timepoint (`NA` delta, or simply absent from `res_df`). Default
 #'   `"grey80"`.
+#' @param colors_initial deprecated, use `col`.
 #' @param background background color for the 3D viewer. Default `"white"`.
 #' @return an `NGLVieweR` `htmlwidget`.
 #' @seealso [residue_level_average()], [residue_deconvolution()],
@@ -94,12 +94,9 @@ plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
   # than requiring exactly one column, or this breaks on any normal
   # multi-replicate res_df.
   resolve_state_mean <- function(state, cols, mat) {
-    state <- .state_column_prefix(state)
-    hits <- cols[startsWith(cols, state)]
-    if (length(hits) == 0) {
-      stop(sprintf("state '%s' matches no column among: %s",
-                    state, paste(cols, collapse = ", ")))
-    }
+    ## exact state match (an unambiguous abbreviation is accepted), so "WT"
+    ## does not also pick up "WT_mut"
+    hits <- .hdx_state_cols(state, cols)
     if (length(hits) == 1) return(mat[[hits]])
     rowMeans(as.matrix(mat[, hits, drop = FALSE]), na.rm = TRUE)
   }
@@ -167,8 +164,8 @@ plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
 #'   (or, if that call used the default `NULL`, the auto-scaled vector -
 #'   see [plot_hdx_structure()]'s `@details` on reconstructing it).
 #' @param col the same `col` passed to
-#' @param colors_initial deprecated, use `col`.
 #'   [plot_hdx_structure()]. Default `"grey80"`.
+#' @param colors_initial deprecated, use `col`.
 #' @param unit_label axis label for the bins, e.g. `"Da"` or `"%"`. Default
 #'   `""`.
 #' @return draws a base-R legend plot; returns `NULL` invisibly.

@@ -2,7 +2,7 @@
 #'
 #' All the peptides are plotted based on their uptake.
 #'
-#' @param input_data output from function output_tp(..., percent=TRUE)
+#' @param input_data output from function output_tp() with uptake in Da (it is divided by the number of exchangeable amides, see nb_exch_deut())
 #' @param col colors, default NA
 #' @param cola deprecated, use `col`.
 #' @param times Deuteration times, if missing all deuteration times used
@@ -66,7 +66,7 @@ deuteration_woods_timepoints_frac<-function(input_data,times, replicates=3,
 #' All the peptides are plotted based on their uptake.
 #'
 #' @param list_input_data list of multiple outputs from function
-#' output_tp(..., percent=TRUE)
+#' output_tp() with uptake in Da (it is divided by the number of exchangeable amides, see nb_exch_deut())
 #' @param col colors, default NA
 #' @param cola deprecated, use `col`.
 #' @param times Deuteration times, if missing all deuteration times used
@@ -103,7 +103,7 @@ deuteration_woods_timepoints_frac_list<-function(list_input_data,times, replicat
     Start_seq<-c(Start_seq, min(list_input_data[[len_list]]$Start))
     End_seq<-c(End_seq, max(list_input_data[[len_list]]$End))
   nb_datasets=nb_datasets+dim(ls_a1[[len_list]])[2]-6
-  nms_dt<-c(nms_dt, unique(str_sub(colnames(input_data[7:dim(input_data)[2]]), start = 1, end = -11)))
+  nms_dt<-c(nms_dt, unique(.hdx_strip_suffix(colnames(input_data[7:dim(input_data)[2]]))))
   }
 
 
@@ -158,7 +158,7 @@ legend_nm_bottom(nms_dt, col[1:nb_datasets])
 #'
 #' All the peptides are plotted based on their uptake.
 #'
-#' @param input_data output from function output_tc(..., percent=TRUE)
+#' @param input_data output from function output_tc() with uptake in Da (it is divided by the number of exchangeable amides, see nb_exch_deut())
 #' @param states states, if missing all states used
 #' @param replicates replicates
 #' @param ylim y axis limits

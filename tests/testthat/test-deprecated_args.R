@@ -4,9 +4,12 @@ file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 
 test_that("old argument names still work, with a deprecation warning, and give the same result", {
   a <- suppressMessages(output_tp(file_nm))
-  new <- diff_peptides_prep(a, pvalue = 0.05)
+  ## as in 0.0.2, pv_cutoff sets both the p-value cutoff and alpha
+  new <- diff_peptides_prep(a, pvalue = 0.05, alpha = 0.05)
   expect_warning(old <- diff_peptides_prep(a, pv_cutoff = 0.05), "'pv_cutoff' is deprecated; use 'pvalue'")
   expect_equal(old, new)
+  expect_warning(old2 <- diff_peptides_prep(a, pv_cutoff = 0.05, alpha = 0.01), "deprecated")
+  expect_equal(old2, diff_peptides_prep(a, pvalue = 0.05, alpha = 0.01))
 
   expect_equal(suppressWarnings(color_ranges_Spectral(c(-Inf, 0, Inf), colors_initial = "white")),
                color_ranges_Spectral(c(-Inf, 0, Inf), col = "white"))

@@ -53,7 +53,7 @@
 #'   `"position"`, as in [compare_states_tp()].
 #' @param replicates optional maximum number of replicates per state.
 #' @param percent value scale, as in [output_tp()]: `FALSE` (Da, default),
-#'   `TRUE` or `"FD"`.
+#'   `TRUE`, `"FD"` or `"per_residue"`.
 #' @param time_model `FALSE` (default): one model per region and time point.
 #'   `TRUE`: one model per region over all `times` (needs two or more).
 #' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:

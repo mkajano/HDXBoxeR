@@ -14,9 +14,17 @@
 #' nb_exch_deut(a)
 #' @export
 nb_exch_deut<-function(df){
-  nb_exch_deut<-c(c(df$End-df$Start)-str_count(df$Sequence,'P') )+
-  as.numeric(substr(df$Sequence, 1, 1)=="P")-1
+  s <- .hdx_clean_seq(df$Sequence)
+  nb_exch_deut<-c(c(df$End-df$Start)-str_count(s,'P') )+
+  as.numeric(substr(s, 1, 1)=="P")-1
   return(nb_exch_deut)
+}
+
+## plain one-letter sequence: drops modifications ("+Phospho"), keeps the
+## first of sequences joined with "." (seq_match = TRUE) and any non-letters
+.hdx_clean_seq <- function(x) {
+  x <- sub("\\..*$", "", sub("\\+.*$", "", as.character(x)))
+  gsub("[^A-Z]", "", x)
 }
 
 #' Exchangeable residue indices for one peptide (internal)
@@ -31,8 +39,9 @@ nb_exch_deut<-function(df){
 #' @param seq_string character, peptide Sequence.
 #' @return integer vector of residue indices (relative to the full protein).
 #' @noRd
-peptide_exch_residues <- function(start, seq_string) {
-  chars <- strsplit(seq_string, "")[[1]]
+peptide_exch_residues <- function(start, seq_string, end = NULL) {
+  chars <- strsplit(.hdx_clean_seq(seq_string), "")[[1]]
+  if (!is.null(end)) chars <- chars[seq_len(min(length(chars), end - start + 1))]
   if (length(chars) < 3) return(integer(0))
   local_idx <- 3:length(chars)
   resid_idx <- start + local_idx - 1
