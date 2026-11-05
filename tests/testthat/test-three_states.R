@@ -35,7 +35,11 @@ test_that("output_FD() returns every state; output_UD() finds a '0s' control", {
   expect_setequal(unique(fd$Protein.State), c("WT_pH7.5", "D109H_pH7.5", "R120G_ph7.5"))
   expect_equal(colnames(fd)[1:6], c("Protein.State", "Start", "End", "Sequence", "Search.RT", "Charge"))
   ## the "0s" rows are found, but HDXExaminer leaves their uptake empty here
-  expect_error(output_UD(f3), "no '0s' rows with values")
+  expect_error(output_UD(f3), "rows with values")
+  ## the 2-state example has an empty "0s" and a "0.00s" with values
+  ud <- output_UD(system.file("extdata", "All_results_table.csv", package = "HDXBoxeR"))
+  expect_true(nrow(ud) > 0)
+  expect_setequal(unique(ud$Protein.State), c("Unbound", "bound"))
 })
 
 test_that("_proc functions stop when the two tables are not aligned", {

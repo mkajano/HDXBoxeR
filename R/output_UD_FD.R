@@ -3,17 +3,22 @@
 ## as output_tc(); a single replicate is enough for a control
 .hdx_control_table <- function(filepath, label, percent) {
   raw <- .hdx_raw(filepath)
+  labels <- label
   if (label != "FD") {
     ## the in-exchange control can be written "0s", "0.00s", "0" ...
     tnum <- suppressWarnings(as.numeric(sub("s$", "", raw$Deut.Time)))
     zero <- unique(raw$Deut.Time[!is.na(tnum) & tnum == 0])
-    if (length(zero)) label <- zero[1]
+    if (length(zero)) labels <- zero
   }
-  a <- raw[raw$Deut.Time == label, .hdx_required, drop = FALSE]
+  a <- raw[raw$Deut.Time %in% labels, .hdx_required, drop = FALSE]
   a$X..Deut <- suppressWarnings(as.numeric(a$X..Deut))
   a$Deut.. <- suppressWarnings(as.numeric(a$Deut..))
   a <- a[!is.na(if (percent) a$Deut.. else a$X..Deut), , drop = FALSE]
-  if (nrow(a) == 0) stop("no '", label, "' rows with values in the input", call. = FALSE)
+  if (nrow(a) == 0) stop("no '", paste(labels, collapse = "'/'"), "' rows with values in the input",
+                         call. = FALSE)
+  ## if several labels hold values, keep the one with the most rows
+  label <- names(which.max(table(a$Deut.Time)))
+  a <- a[a$Deut.Time == label, , drop = FALSE]
   out <- .hdx_wide(a, states = unique(a$Protein.State), times = label, min_replicates = 1,
                    percent = percent, layout = "tc")
   out[, c("Protein.State", "Start", "End", "Sequence", "Search.RT", "Charge",
