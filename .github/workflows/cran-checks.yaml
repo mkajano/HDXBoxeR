@@ -1,0 +1,67 @@
+# Extra checks that CRAN runs before accepting a package:
+# R-devel (with the PDF manual), and a check without the Suggests packages.
+# Based on https://github.com/r-lib/actions/tree/v2/examples
+on:
+  push:
+    branches: [main, correlation_V2]
+  workflow_dispatch:
+
+name: CRAN-checks
+
+permissions: read-all
+
+jobs:
+  devel:
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }} (R-devel)
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {os: ubuntu-latest,  manual: true}
+          - {os: windows-latest, manual: false}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-tinytex@v2
+        if: matrix.config.manual
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: devel
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+      - name: Install LaTeX packages for the manual
+        if: matrix.config.manual
+        run: tlmgr install inconsolata
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: ${{ matrix.config.manual && 'c("--as-cran")' || 'c("--no-manual", "--as-cran")' }}
+          build_args: ${{ matrix.config.manual && 'character()' || 'c("--no-manual")' }}
+          error-on: '"warning"'
+
+  no-suggests:
+    runs-on: ubuntu-latest
+    name: ubuntu-latest (release, no Suggests)
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      _R_CHECK_DEPENDS_ONLY_: true
+      _R_CHECK_FORCE_SUGGESTS_: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: r-lib/actions/setup-pandoc@v2
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: any::rcmdcheck
+          needs: check
+      - uses: r-lib/actions/check-r-package@v2
+        with:
+          args: 'c("--no-manual", "--as-cran")'
