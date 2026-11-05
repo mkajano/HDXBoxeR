@@ -34,6 +34,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
                                                 alpha=0.01,
                                                 pvalue=0.01, replicates=3, p_adjust="none", resno_offset=0, pv_cutoff){
   if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  .hdx_check_aligned(input_proc, input_up)
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
@@ -106,7 +107,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
       set_colors<-c(set_colors, paste("set_color ", col_nm[i],", [",  rgb_col[1,i],
                                       ",", rgb_col[2,i], ",", rgb_col[3,i], "]", sep=""))}
     ###write outputs per each state in the
-    nm1<-str_sub(colnames(df1[8:dim(df1)[2]]), start=4, end=-9)
+    nm1<-sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", sub("^av_", "", colnames(df1)[8:dim(df1)[2]]))
     for (j in 1:dim(si_apc)[2]){
       output_name<-paste("pymol_maxuptake_proc_", nm1[j],"_", deut.time, ".txt", sep="")
       res.txt<-c()

@@ -103,8 +103,9 @@
 
 plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha = 0.01, pvalue = 0.01,
                                position_col = NA, sd_source = "raw", length1 = NA,
-                               xlim = NULL, ylim = NULL, p_adjust = "none",
-                               sig_col = "firebrick", nonsig_col = "grey60", fill_alpha = 0.3, ...) {
+                               xlim = NULL, ylim = NULL,
+                               sig_col = "firebrick", nonsig_col = "grey60", fill_alpha = 0.3,
+                               p_adjust = "none", ...) {
 
   av1 <- ave_timepoint(df, replicates)
 
@@ -235,6 +236,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
     delta <- av1[ind1, av_state2] - av1[ind1, av_state1]
     drawn[[length(drawn) + 1]] <- data.frame(
       Deut.Time = av1$Deut.Time[ind1], Start = av1$Start[ind1], End = av1$End[ind1],
+      Charge = av1$Charge[ind1],
       Sequence = av1$Sequence[ind1], state1_av = av1[ind1, av_state1], state2_av = av1[ind1, av_state2],
       delta = delta, p_value = pv_state1v2[ind1], p_adj = as.numeric(p_adj), ci = ci,
       is_sig = !is.na(p_adj) & abs(delta) > ci & p_adj < pvalue,

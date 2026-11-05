@@ -24,7 +24,7 @@ output_tc(
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 
-\item{seq_match}{How peptides are matched between time points, as in \code{\link[=output_tp]{output_tp()}}. \code{FALSE} (default): same Sequence, Start, End, Search.RT and Charge. \code{TRUE}: matched by position only, ignoring Sequence; differing sequences are joined with \code{"."}.}
+\item{seq_match}{How peptides are matched between time points, as in \code{\link[=output_tp]{output_tp()}}. \code{FALSE} (default): same Sequence, Start, End and Charge. \code{TRUE}: matched by position only, ignoring Sequence; differing sequences are joined with \code{"."}.}
 
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 

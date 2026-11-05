@@ -46,12 +46,15 @@ significant_peptide_uptake<-function(df_av, pv, sd, alpha=0.01, pvalue=0.01, rep
   CI=CI_tp(sd, replicates,alpha)
   abs.a<-c()
   for ( i in 8:dim(df_av)[2]){
-    abs1<-abs(df_av[,i])>CI[i-7]
+    ## the difference to the first (reference) state must exceed the CI
+    ## (earlier versions compared the state average itself to the CI)
+    abs1<-abs(df_av[,i]-df_av[,7])>CI[i-7]
     abs.a<-c(abs.a, abs1)
   }
   abs.a=data.frame(matrix(abs.a, ncol =length(CI) , byrow = FALSE))
 
   cl1a<-pv[,8:dim(df_av)[2]]<pvalue
   cl1<-abs.a*cl1a
+  cl1[is.na(cl1)] <- 0  ## untestable peptides are not significant
   return(cl1)
 }

@@ -10,6 +10,28 @@
   which(rowSums(sig) >= min_timepoints)
 }
 
+## significant peptides (Start, End, Sequence, Charge) of every state compared
+## with states[1]; collected by peptide identity, not by row number, because
+## each comparison is merged separately and row numbers differ between them
+.robot_sig_peptides <- function(thP, th, states, replicates, pvalue, alpha, p_adjust, min_timepoints) {
+  keys <- list()
+  for (state in states[2:length(states)]) {
+    control_df_up <- th[th$Protein.State == states[1], ]
+    variant_df_up <- th[th$Protein.State == state, ]
+    pv1 <- pv_timecourse(df_c = control_df_up, df_v = variant_df_up, replicates, p_adjust = p_adjust)
+    lav.proc_up <- prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
+    sh_avc_up <- lav.proc_up[[1]]; sh_avv_up <- lav.proc_up[[2]]
+    CI_all <- prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates = replicates, alpha = alpha)
+    rows <- .robot_sig_rows(pv1, sh_avc_up, sh_avv_up, CI_all, pvalue, min_timepoints)
+    keys[[state]] <- sh_avc_up[rows, c("Start", "End", "Sequence", "Charge")]
+  }
+  out <- unique(do.call(rbind, keys))
+  out <- out[order(out$Start, out$End, out$Charge), , drop = FALSE]
+  rownames(out) <- NULL
+  out
+}
+
+
 #' Returns dataframe with peptides which exhibit significant difference between two sets
 #'
 #' Function to help decide which peptides will be drawn on Robot plots.
@@ -36,39 +58,8 @@
 robot_indexes_df<-function(thP, th, replicates=3,
                            pvalue=0.01, alpha=0.01, states, p_adjust="none", min_timepoints=1){
   if(missing(states)) states=unique(thP$Protein.State)
-
-  ## peptide_all accumulates across all variant states (vs. the shared
-  ## control, states[1]); sh_avc is control-derived and, for a well-formed
-  ## input where every state was measured on the same peptide set, has the
-  ## same row identity/order across iterations, so row indices found for one
-  ## variant remain valid to index into the last iteration's sh_avc below.
-  peptide_all<-c()
-  for ( state in states[2:length(states)]) {
-
-    control_df<- thP[thP$Protein.State==states[1],]
-    variant_df<- thP[thP$Protein.State==state,]
-
-    control_df_up<- th[th$Protein.State==states[1],]
-    variant_df_up<- th[th$Protein.State==state,]
-
-    pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates, p_adjust = p_adjust)
-    lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
-    lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
-
-    sh_avc<-lav.proc[[1]]
-    sh_avv<-lav.proc[[2]]
-    sh_avc_up<-lav.proc_up[[1]]
-    sh_avv_up<-lav.proc_up[[2]]
-
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=replicates,
-                                    alpha=alpha)
-
-    peptide_all<-c(peptide_all, .robot_sig_rows(pv1, sh_avc_up, sh_avv_up, CI_all, pvalue, min_timepoints))
-    peptide_all<-sort(unique(peptide_all))
-  }
-
-  sig_pep<-data.frame(1:length(peptide_all),sh_avc[peptide_all,c(1:3,5)])
-  colnames(sig_pep)[1]<-"nb"
+  sig <- .robot_sig_peptides(thP, th, states, replicates, pvalue, alpha, p_adjust, min_timepoints)
+  sig_pep <- data.frame(nb = seq_len(nrow(sig)), sig)
   return(sig_pep)}
 
 #' Returns indexes for peptides with significant difference between two sets
@@ -84,7 +75,10 @@ robot_indexes_df<-function(thP, th, replicates=3,
 #' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @param min_timepoints a peptide is selected when it is significant at at least this many time points. Default `1` (any time point, as before).
-#' @return Returns indexes of significant peptides
+#' @return Returns indexes of significant peptides: row numbers in the
+#'   states\[1\] vs states\[2\] table used by the robot plots. A significant
+#'   peptide that is not in that table (e.g. its sequence differs in a
+#'   mutant) is left out; [robot_indexes_df()] lists every significant peptide.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' tm_df<-output_tc(filepath=file_nm)
@@ -96,31 +90,11 @@ robot_indexes_df<-function(thP, th, replicates=3,
 robot_indexes<-function(thP, th, replicates=3,
                         pvalue=0.01, states, alpha=0.01, p_adjust="none", min_timepoints=1){
   if(missing(states)) states=unique(thP$Protein.State)
-
-  ## see robot_indexes_df() for the same accumulate-across-states pattern
-  peptide_all<-c()
-  for ( state in states[2:length(states)]) {
-
-    control_df<- thP[thP$Protein.State==states[1],]
-    variant_df<- thP[thP$Protein.State==state,]
-
-    control_df_up<- th[th$Protein.State==states[1],]
-    variant_df_up<- th[th$Protein.State==state,]
-
-    pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates, p_adjust = p_adjust)
-    lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
-    lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
-
-    sh_avc<-lav.proc[[1]]
-    sh_avv<-lav.proc[[2]]
-    sh_avc_up<-lav.proc_up[[1]]
-    sh_avv_up<-lav.proc_up[[2]]
-
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up,
-                                    replicates=replicates,  alpha)
-    peptide_all<-c(peptide_all, .robot_sig_rows(pv1, sh_avc_up, sh_avv_up, CI_all, pvalue, min_timepoints))
-    peptide_all<-sort(unique(peptide_all))
-
-  }
+  sig <- .robot_sig_peptides(thP, th, states, replicates, pvalue, alpha, p_adjust, min_timepoints)
+  ## row numbers in the states[1] vs states[2] table drawn by robot_2states_indexes()
+  sh_avc <- prep_timecourse_plot_ave(thP[thP$Protein.State == states[1], ],
+                                     thP[thP$Protein.State == states[2], ], replicates)[[1]]
+  key <- function(d) paste(d$Start, d$End, d$Sequence, d$Charge, sep = "\r")
+  peptide_all <- sort(which(key(sh_avc) %in% key(sig)))
   return(peptide_all)}
 

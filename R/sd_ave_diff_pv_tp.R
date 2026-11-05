@@ -65,8 +65,8 @@ ave_timepoint<-function(df, replicates=3) {
 #'   `<state>_..._<replicate>`: the number of replicates per block. Default 3.
 #' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
 #'   `"none"` (default, raw Welch p-values) or e.g. `"BH"`. P-values are
-#'   adjusted across all peptides and compared states within each labeling
-#'   time.
+#'   adjusted across the peptides of each compared state, separately for
+#'   each labeling time (the same family as everywhere in the package).
 #' @return Data.frame with p-values
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

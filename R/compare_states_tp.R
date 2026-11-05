@@ -83,9 +83,9 @@
 #'   or adjusted with `p_adjust`). Default `0.01`.
 #' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
 #'   `"none"` (default, raw Welch p-values, as in every other function) or
-#'   e.g. `"BH"`. Applied separately to the per-peptide omnibus p-values and
-#'   to the per-peptide-by-pair p-values (the latter across every pair
-#'   together, not within each pair on its own).
+#'   e.g. `"BH"`. Pairwise p-values are adjusted across the peptides of each
+#'   pair of states (the same family as everywhere in the package); the
+#'   omnibus p-values are adjusted across peptides.
 #' @param omnibus omnibus test across all states per peptide: `"welch"`
 #'   (default, Welch one-way ANOVA) or `"kruskal"` (Kruskal-Wallis).
 #' @param p_adjust_method deprecated; earlier versions adjusted with
@@ -268,7 +268,9 @@ compare_states_tp <- function(filepath, times, states = NULL,
   ## two overlapping regions is one test, not two.
   test_key <- paste(out$peptide_id, out$state1, out$state2, sep = "\r")
   first_test <- !duplicated(test_key)
-  adj_test <- stats::p.adjust(out$p_value[first_test], method = p_adjust)
+  tests <- out[first_test, c("state1", "state2", "p_value")]
+  adj_test <- stats::ave(tests$p_value, tests$state1, tests$state2,
+                         FUN = function(p) stats::p.adjust(p, method = p_adjust))
   out$p_adj <- adj_test[match(test_key, test_key[first_test])]
   uniq <- !duplicated(out$peptide_id)
   omni_adj_uniq <- stats::p.adjust(out$p_omnibus[uniq], method = p_adjust)

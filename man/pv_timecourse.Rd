@@ -14,8 +14,8 @@ pv_timecourse(df_c, df_v, replicates = 3, p_adjust = "none")
 \item{replicates}{number of replicates. Default set to 3.}
 
 \item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
-\code{"none"} (default) or e.g. \code{"BH"}, applied across all peptides and time
-points of the comparison.}
+\code{"none"} (default) or e.g. \code{"BH"}, applied across the peptides of the
+comparison, separately for each time point.}
 }
 \value{
 pvalue comparisons between two sets.

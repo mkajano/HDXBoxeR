@@ -13,7 +13,9 @@ output_UD_proc(filepath)
 data frame with reorganized data where in columns is procent deuteration for Protein States.
 }
 \description{
-Returns a data frame for Undeuterated control set
+Returns the in-exchange control (\code{Deut.Time} 0, e.g. \code{"0s"}) as percent
+deuteration: one row per peptide and protein state, one column per
+replicate.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

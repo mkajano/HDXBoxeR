@@ -10,4 +10,4 @@
 
 ## Notes for this submission
 
-* Update of HDXBoxeR (previous CRAN version 0.1.4); see NEWS.md.
+* Update of HDXBoxeR (previous CRAN version 0.0.2); see NEWS.md.

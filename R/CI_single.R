@@ -16,7 +16,7 @@
 #' @export
 CI_single<-function(s1, replicates=3, alpha=0.01){
   s1 <- as.numeric(unlist(s1))
-  tvalue=abs(qt(alpha, replicates*2-2))
+  tvalue=abs(qt(alpha/2, replicates*2-2))
   sp1 <- .hdx_pooled_sd(s1, rep(replicates, length(s1)))
   spa<-sqrt((sp1^2)/replicates)
   CI<-spa*tvalue ###

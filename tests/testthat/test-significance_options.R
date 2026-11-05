@@ -75,5 +75,7 @@ test_that("compare_states_tp(): raw p by default, Welch ANOVA omnibus, deprecate
   expect_false(isTRUE(all.equal(res$p_omnibus, kw$p_omnibus)))
   expect_warning(old <- suppressMessages(compare_states_tp(raw, times = "60.00s", p_adjust_method = "BH")),
                  "deprecated")
-  expect_equal(old$p_adj, p.adjust(old$p_value, "BH"))
+  ## adjusted per pair of states
+  pr <- old$state1 == "Unbound" & old$state2 == "bound"
+  expect_equal(old$p_adj[pr], p.adjust(old$p_value[pr], "BH"))
 })

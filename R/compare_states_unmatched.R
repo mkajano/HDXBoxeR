@@ -185,8 +185,8 @@
 #'   the per-peptide diagnostic. Default `0.01`.
 #' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
 #'   `"none"` (default) or e.g. `"BH"`, applied across every region-by-pair
-#'   test together (and separately across every region-by-pair-by-peptide
-#'   test for the per-peptide diagnostic).
+#'   test together, and, for the per-peptide diagnostic, across the
+#'   peptides of each pair of states.
 #' @param p_adjust_method deprecated; earlier versions used
 #'   `p_adjust_method = "BH"` by default. Supplying it sets `p_adjust`, with
 #'   a warning.
@@ -388,14 +388,16 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
   ## real but spatially localized effect that the pooled test above dilutes
   ## away (see @section "Pooled significance is not peptide significance").
   ## Same rule as the rest of the package: Welch p (raw, or adjusted with
-  ## p_adjust across every peptide-by-pair test in this call) < pvalue AND
+  ## p_adjust across the peptides of each pair) < pvalue AND
   ## |delta| > the pooled critical interval of that region and pair.
   peptide_sig_df <- do.call(rbind, peptide_sig_list)
   summary_df$n_peptides_tested <- 0L
   summary_df$n_peptides_significant <- 0L
   summary_df$frac_peptides_significant <- NA_real_
   if (!is.null(peptide_sig_df) && nrow(peptide_sig_df) > 0) {
-    peptide_sig_df$p_adj <- stats::p.adjust(peptide_sig_df$p_value, method = p_adjust)
+    ## one family per pair of states (as everywhere in the package)
+    peptide_sig_df$p_adj <- stats::ave(peptide_sig_df$p_value, peptide_sig_df$state1, peptide_sig_df$state2,
+                                       FUN = function(p) stats::p.adjust(p, method = p_adjust))
     peptide_sig_df$significant <- !is.na(peptide_sig_df$p_adj) & peptide_sig_df$p_adj < pvalue &
       !is.na(peptide_sig_df$delta) & abs(peptide_sig_df$delta) > peptide_sig_df$ci
     key_pep <- paste(peptide_sig_df$region, peptide_sig_df$state1, peptide_sig_df$state2, sep = "||")

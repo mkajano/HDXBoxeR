@@ -14,8 +14,8 @@ pv_timepoint(df, replicates = 3, p_adjust = "none")
 
 \item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
 \code{"none"} (default, raw Welch p-values) or e.g. \code{"BH"}. P-values are
-adjusted across all peptides and compared states within each labeling
-time.}
+adjusted across the peptides of each compared state, separately for
+each labeling time (the same family as everywhere in the package).}
 }
 \value{
 Data.frame with p-values

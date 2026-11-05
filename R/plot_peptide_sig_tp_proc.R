@@ -92,6 +92,7 @@ plot_peptide_sig_tp_proc<-function(input_proc, input_up, nb_pep_row=100,
                                    alpha=0.01,
                                    pvalue=0.01, replicates=3, p_adjust="none", pv_cutoff){
   if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  .hdx_check_aligned(input_proc, input_up)
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))

@@ -28,8 +28,8 @@ than one. Default: all (an error if there are several).}
 
 \item{combine_charges}{\code{FALSE} (default) keeps every charge state as its
 own peptide, as for HDXExaminer input. \code{TRUE} combines charge states
-of a peptide into one intensity-weighted mass per raw file (as DynamX
-and HaDeX do).}
+of a peptide into one intensity-weighted mass per raw file (as in the
+DynamX state export).}
 }
 \value{
 data frame of class \code{hdx_data}.

@@ -9,7 +9,7 @@
 * Interactive, linked views: `interactive_volcano()`, `interactive_fissure_vent()`,
   `interactive_woods()`, `interactive_fissure_explorer()` (plotly/crosstalk).
 * Multi-state comparisons: `compare_states_tp()` (three or more states,
-  Kruskal-Wallis omnibus plus pairwise hybrid tests with BH correction;
+  Welch ANOVA omnibus plus pairwise hybrid tests, optional BH correction;
   `by = "sequence"` or `by = "position"` peptide matching) and
   `compare_states_unmatched()` (region-level comparison when peptide maps
   differ between states, with a per-peptide diagnostic), with
@@ -179,7 +179,10 @@
   heat map, Woods and robot plots. `sd_source = "CI"` keeps the previous,
   wider band.
 * All critical-interval functions (`CI_2pts()`, `CI_tp()`, `CI_tc()`,
-  `CI_single()`) use the same t-value, `qt(alpha, df)`.
+  `CI_single()`, `compare_timecourse()`) use the same two-tailed t-value,
+  `qt(alpha/2, df)`, as in HDXBoxeR 0.0.2 and Janowska et al. (2024).
+* Multiple-testing correction (`p_adjust`) uses one family everywhere: the
+  peptides of one pair of states at one time point.
 * `sd_ci_timepoint()` uses the correct conversion from a two-sided interval
   to an SD (factor of 2 and `alpha/2`).
 * `general_info()` reports the real number of replicates.
@@ -201,6 +204,26 @@
 * `all_data_long_input()` no longer fails on an undefined variable;
   `boxer_input_to_long()` parses percent-deuteration columns correctly.
 * `vol_tp()` default palette size no longer reads `stats::df`.
+* Peptides are matched between states without the retention time, so a
+  small RT shift no longer splits one peptide into two rows.
+* `output_FD()`, `output_UD()` and their `_proc` versions return every
+  state (previously only the last one); `output_UD()` also finds an
+  undeuterated control written as `"0s"`.
+* `robot_indexes_df()` returns the peptide keys (Start, End, Sequence,
+  Charge); `robot_indexes()` returns rows of the table used by the robot
+  plots.
+* `general_info()` and `all_summary()`: coverage is computed over
+  `protein_range` (new argument), and redundancy over covered residues.
+  `all_summary()` works without back-exchange data.
+* `summary_sd_CI()` pools SDs correctly with uneven replicates.
+* The `_proc` functions stop when the uptake and percent tables are not
+  aligned row by row.
+* PyMOL scripts take the state names from the column names correctly.
+* `significant_peptide_uptake()` no longer fails on missing values.
+* `plot_fissure_vent()` gains `xlim`/`ylim`; its returned table includes
+  `Charge`.
+* `read_dynamx(fd = "last")` warns when states have different longest
+  exposures.
 
 ## Documentation and packaging
 
@@ -208,7 +231,7 @@
 * `?All_results_table` documents the example input file.
 * `URL` and `BugReports` added to DESCRIPTION.
 
-# HDXBoxeR 0.1.4
+# HDXBoxeR 0.0.2
 
 * Version published on CRAN; see Janowska et al. (2024) Bioinformatics,
   doi:10.1093/bioinformatics/btae479.

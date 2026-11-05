@@ -9,7 +9,7 @@
 ## width is its largest replicate count; a missing measurement is NA.
 ## A row is kept only if every group has at least `min_replicates` values.
 ## seq_match = FALSE: peptides must have the same Sequence in every group.
-## seq_match = TRUE: peptides are matched by position (Start, End, Search.RT,
+## seq_match = TRUE: peptides are matched by position (Start, End,
 ## Charge); differing sequences are joined with "." in the Sequence column.
 
 .hdx_wide <- function(a, states, times, replicates = NULL, min_replicates = 2,
@@ -41,11 +41,11 @@
   if (!is.null(replicates)) a <- a[a$.rep <= replicates, , drop = FALSE]
 
   if (layout == "tp") {
-    row_vars <- c("Deut.Time", "Start", "End", "Search.RT", "Charge")
+    row_vars <- c("Deut.Time", "Start", "End", "Charge")
     group_var <- "Protein.State"; group_levels <- states
     group_label <- function(g) paste0(gsub(" ", "", g), "_", value_tag)
   } else {
-    row_vars <- c("Protein.State", "Start", "End", "Search.RT", "Charge")
+    row_vars <- c("Protein.State", "Start", "End", "Charge")
     group_var <- "Deut.Time"; group_levels <- times
     group_label <- function(g) paste0("t", g, "_", value_tag)
   }
@@ -104,6 +104,13 @@
   ## descriptors of each kept row: first occurrence; Sequence per group
   first <- match(keys, row_key)
   desc <- a[first, c("Protein.State", "Deut.Time", "Start", "End", "Sequence", "Search.RT", "Charge")]
+  ## one retention time per peptide (median over all its measurements, all
+  ## states): RT is a descriptor, not part of peptide identity, and a shared
+  ## value keeps later merges of tables from different states consistent
+  rt_vars <- c("Start", "End", "Charge", if (!isTRUE(seq_match)) "Sequence")
+  rt_key <- do.call(paste, c(a[rt_vars], sep = "\r"))
+  rt_med <- tapply(suppressWarnings(as.numeric(a$Search.RT)), rt_key, stats::median, na.rm = TRUE)
+  desc$Search.RT <- as.numeric(rt_med[rt_key[first]])
   if (isTRUE(seq_match)) {
     seq_by_group <- sapply(group_levels, function(g) {
       sel <- grp == g
@@ -118,8 +125,10 @@
 
   n_dropped <- sum(!keep)
   if (n_dropped > 0) {
-    message(sprintf("%d peptide row(s) dropped: fewer than %d replicate value(s) in at least one %s",
-                    n_dropped, min_replicates, if (layout == "tp") "state" else "time point"))
+    absent <- !keep & apply(n_per_group == 0, 1, any)
+    unit <- if (layout == "tp") "state" else "time point"
+    message(sprintf("%d peptide row(s) dropped: %d not measured in every %s, %d with fewer than %d replicate value(s)",
+                    n_dropped, sum(absent), unit, n_dropped - sum(absent), min_replicates))
   }
 
   value_df <- do.call(cbind, lapply(seq_along(group_levels), function(j) {

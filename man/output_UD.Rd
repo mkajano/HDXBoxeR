@@ -13,7 +13,8 @@ output_UD(filepath)
 data frame with reorganized data where in columns is uptake data for Protein States.
 }
 \description{
-Returns a data frame for Full deuteration set
+Returns the in-exchange control (\code{Deut.Time} 0, e.g. \code{"0s"} or \code{"0.00s"}):
+one row per peptide and protein state, one column per replicate (uptake in Da).
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

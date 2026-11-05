@@ -68,9 +68,9 @@ or adjusted with \code{p_adjust}). Default \code{0.01}.}
 
 \item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
 \code{"none"} (default, raw Welch p-values, as in every other function) or
-e.g. \code{"BH"}. Applied separately to the per-peptide omnibus p-values and
-to the per-peptide-by-pair p-values (the latter across every pair
-together, not within each pair on its own).}
+e.g. \code{"BH"}. Pairwise p-values are adjusted across the peptides of each
+pair of states (the same family as everywhere in the package); the
+omnibus p-values are adjusted across peptides.}
 
 \item{omnibus}{omnibus test across all states per peptide: \code{"welch"}
 (default, Welch one-way ANOVA) or \code{"kruskal"} (Kruskal-Wallis).}

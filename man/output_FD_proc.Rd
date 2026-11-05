@@ -13,7 +13,8 @@ output_FD_proc(filepath)
 data frame with reorganized data where in columns is procent deuteration for Protein States.
 }
 \description{
-Returns a data frame for Full deuteration set
+Returns the fully deuterated (\code{"FD"}) control as percent deuteration: one
+row per peptide and protein state, one column per FD replicate.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

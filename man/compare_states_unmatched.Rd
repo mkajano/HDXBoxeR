@@ -58,8 +58,8 @@ the per-peptide diagnostic. Default \code{0.01}.}
 
 \item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
 \code{"none"} (default) or e.g. \code{"BH"}, applied across every region-by-pair
-test together (and separately across every region-by-pair-by-peptide
-test for the per-peptide diagnostic).}
+test together, and, for the per-peptide diagnostic, across the
+peptides of each pair of states.}
 
 \item{n_perm}{number of label permutations for \code{method = "resample"}.
 Default \code{1000}.}

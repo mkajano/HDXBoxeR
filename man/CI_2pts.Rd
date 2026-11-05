@@ -32,6 +32,9 @@ Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
 calculations for alpha 0.99
 }
 \details{
+The t-value is two-tailed, \verb{|qt(alpha/2, df)|}, as in the published
+version of the package.
+
 Unequal or missing replicates: each state's pooled SD weights every
 peptide's SD by its degrees of freedom (n_i - 1), the standard error of
 the difference is \code{sqrt(sp1^2/n1 + sp2^2/n2)} with n1, n2 the average

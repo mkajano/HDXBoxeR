@@ -27,20 +27,20 @@ test_that("pv_timepoint() is a Welch t-test of every state against the first", {
   }
 })
 
-test_that("CI_2pts() follows the Hageman & Weis pooled-SD formula with qt(alpha, 2n-2)", {
+test_that("CI_2pts() follows the Hageman & Weis pooled-SD formula with qt(alpha/2, 2n-2)", {
   s1 <- c(0.10, 0.12, 0.13, 0.09, 0.11, 0.10)
   s2 <- c(0.18, 0.11, 0.13, 0.08, 0.11, 0.06)
   for (n in c(2, 3, 4)) for (alpha in c(0.05, 0.01)) {
     ## pooled SD per state = sqrt(mean(s^2)) for equal n; SE of difference =
     ## sqrt((sp1^2 + sp2^2) / n); threshold = SE * |t(alpha, 2n - 2)|
-    expected <- sqrt((mean(s1^2) + mean(s2^2)) / n) * abs(qt(alpha, 2 * n - 2))
+    expected <- sqrt((mean(s1^2) + mean(s2^2)) / n) * abs(qt(alpha/2, 2 * n - 2))
     expect_equal(CI_2pts(s1, s2, replicates = n, alpha = alpha), expected)
   }
 })
 
 test_that("CI_single(), CI_tp() and CI_tc() agree with CI_2pts()", {
   s1 <- c(0.10, 0.12, 0.13, 0.09)
-  expect_equal(CI_single(s1, 3, 0.01), sqrt(mean(s1^2) / 3) * abs(qt(0.01, 4)))
+  expect_equal(CI_single(s1, 3, 0.01), sqrt(mean(s1^2) / 3) * abs(qt(0.005, 4)))
 
   a <- tp(make_hdx_csv(states = c("A", "B", "C")))
   s <- sd_timepoint(a, 3)
@@ -80,7 +80,7 @@ test_that("statistics with uneven and missing replicates use each state's own n"
   nA <- attr(s, "n", exact = TRUE)$A_X..Deut; nB <- attr(s, "n", exact = TRUE)$B_X..Deut
   spA <- sqrt(sum((nA - 1) * s$sd_A_X..Deut^2) / sum(nA - 1))
   spB <- sqrt(sum((nB - 1) * s$sd_B_X..Deut^2) / sum(nB - 1))
-  expected <- sqrt(spA^2 / mean(nA) + spB^2 / mean(nB)) * abs(qt(0.01, mean(nA) + mean(nB) - 2))
+  expected <- sqrt(spA^2 / mean(nA) + spB^2 / mean(nB)) * abs(qt(0.005, mean(nA) + mean(nB) - 2))
   expect_equal(CI_tp(s, alpha = 0.01), expected)
 })
 

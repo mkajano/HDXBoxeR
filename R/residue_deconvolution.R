@@ -15,21 +15,10 @@
 #' particularly at region boundaries where long peptides would otherwise
 #' blend signal from neighboring residues into a region's apparent value.
 #'
-#' @section Relationship to PyHDX:
-#' This function is a distinct method from PyHDX's ΔG fitting
-#' (<https://pyhdx.readthedocs.io/>), not a re-implementation of it, and the
-#' two should not be assumed equivalent. PyHDX (1) maps peptides to residues
-#' with a simple weighted average (weight `1/nb_exch_deut`, the same scheme
-#' used in [residue_level_average()], not a least-squares decomposition),
-#' and (2) then fits a kinetic model (ΔG per residue) *jointly* across all
-#' residues and all timepoints at once, with an explicit regularization term
-#' that penalizes differences between adjacent residues to resolve the
-#' non-identifiability inherent in overlapping-peptide data. This function
-#' instead solves each timepoint independently, with no term linking
-#' timepoints through a shared kinetic parameter. Set `lambda_smooth > 0` to
-#' add PyHDX's cross-residue smoothness idea (as an L2 penalty between
-#' adjacent residues, not PyHDX's exact fused-lasso-style term) to the
-#' per-timepoint fit; this does not add the joint temporal kinetic model.
+#' @section What it does not do:
+#' Each time point is solved on its own. There is no kinetic model and no
+#' link between time points. `lambda_smooth > 0` adds a penalty on the
+#' difference between neighboring residues within one time point.
 #'
 #' @param df data.frame, output of [output_tp()] called with `percent = FALSE`.
 #'   Uptake in Daltons is required because it is additive across residues;
@@ -45,10 +34,8 @@
 #'   residues toward the same value unless the peptide data specifically
 #'   distinguish them. The default of `0.1` is a modest starting point, not
 #'   a universally correct value - the right strength depends on peptide
-#'   redundancy and protein size (as is also true of PyHDX's equivalent
-#'   parameter). See `vignette("HDXBoxeR")`, section "Choosing
-#'   `lambda_smooth`", for a cross-validation procedure to tune it for your
-#'   own data.
+#'   redundancy and protein size. On the example data, values between 0 and
+#'   1 predicted left-out peptides equally well.
 #' @return data.frame with one row per residue and `Deut.Time`, and one column
 #'   per Protein.State/replicate (same naming as the `X..Deut` columns in
 #'   `df`), giving the deconvolved per-residue fractional uptake (0-1).

@@ -6,6 +6,9 @@
 #' Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
 #' calculations for alpha 0.99
 #'
+#' The t-value is two-tailed, `|qt(alpha/2, df)|`, as in the published
+#' version of the package.
+#'
 #' Unequal or missing replicates: each state's pooled SD weights every
 #' peptide's SD by its degrees of freedom (n_i - 1), the standard error of
 #' the difference is `sqrt(sp1^2/n1 + sp2^2/n2)` with n1, n2 the average
@@ -35,7 +38,7 @@ CI_2pts<-function(s1, s2, replicates=3, alpha=0.01, n1=NULL, n2=NULL){
   sp1 <- .hdx_pooled_sd(s1, n1)
   sp2 <- .hdx_pooled_sd(s2, n2)
   N1 <- mean(n1[!is.na(s1) & n1 >= 2]); N2 <- mean(n2[!is.na(s2) & n2 >= 2])
-  tvalue <- abs(qt(alpha, N1 + N2 - 2))
+  tvalue <- abs(qt(alpha/2, N1 + N2 - 2))
   spa <- sqrt(sp1^2 / N1 + sp2^2 / N2)
   CI <- spa * tvalue
   return(CI)

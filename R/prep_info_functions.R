@@ -1,94 +1,61 @@
 ######
 #' Provides summary table for all data.sets.
 #'
-#' Returns data frame sumamrizing general information about the data sets.
-#' Function returns: Protein states, timepoints, number of replicates,  # peptides, % coveregae, average peptide length and redundancy.
+#' Returns a data frame summarizing each protein state: time points, number
+#' of replicates, number of peptides, sequence coverage, average peptide
+#' length and redundancy.
+#'
+#' Peptides are those found at every time point of the state with at least
+#' two replicates (as in [output_tp()]); each peptide sequence counts once
+#' for coverage, length and redundancy (charge states are not counted
+#' twice).
+#' \itemize{
+#'   \item coverage: percent of residues in `protein_range` covered by at
+#'     least one peptide;
+#'   \item redundancy: average number of peptides covering a covered residue;
+#'   \item `# replicates`: replicates per time point (a range when they
+#'     differ).
+#' }
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
+#' @param protein_range residue range for the coverage, `c(first, last)`.
+#'   Default: from the first to the last residue covered by any peptide in
+#'   the data (the same range for every state).
 #' @return Returns summary table.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- general_info(file_nm)
+#' general_info(file_nm, protein_range = c(1, 225))
 #' @export
-general_info<- function(filepath){
+general_info<- function(filepath, protein_range = NULL){
+  raw <- .hdx_raw(filepath)
+  a <- arg_df(raw)
+  states <- unique(a$Protein.State)
+  if (is.null(protein_range)) protein_range <- c(min(a$Start), max(a$End))
+  span <- protein_range[1]:protein_range[2]
 
-  states=arguments_call1(filepath)
-  times=arguments_call2(filepath, states)
-  replicates=arguments_call3(filepath, states, times)
-
-  a<-arg_df(filepath)
-  rownames(a)<-1:dim(a)[1] ##name rows
-
-  ##loop below will go through Protein states, timepoints and Experiments to get replicates
-  ##it will save a dataframe in wide format instead of long format, result of this loop is dataframe named "b"
-
-  ##creates temporary df, temp1, with Protein states going through all unique protein states
-
-  summ<-c()
-  b<-c()
-  ##creates temporary df, temp1, with Protein states going through all unique protein states
-  for (state in states){
-    temp1<-a[which(a$Protein.State ==state),]
-    summ<-c(summ, state)
-    st_l<-c()
-    nbs=0
-    tmps<-paste(as.vector(unique(temp1$Deut.Time)),collapse=" ")
-    summ<-c(summ, tmps)
-bp2<-c()
-    ## replicates = smallest number of distinct experiments at any of this
-    ## state's common timepoints (same rule output_tp() uses), not
-    ## n(Experiment)/n(Deut.Time), which is wrong whenever experiment names
-    ## are reused across timepoints
-    summ<-c(summ, arguments_call3(filepath, state, times))
-    for (time in unique(temp1$Deut.Time)){##
-
-      temp2<-temp1[which(temp1$Deut.Time ==time ),]##creates temporary df, temp2 from one state of protein with the same timepoints
-      nb=0
-      nbs=nbs+1
-      df_nm_st<-paste(time, "_", nbs,sep="")
-      st_l<-c(st_l, df_nm_st)
-      bs<-c()
-
-      for (exp in unique(temp2$Experiment)[1:replicates]){
-        nb=nb+1
-        df_nm<-paste("b",nb,sep="")
-        temp3<-temp2[which(temp2$Experiment == exp),]
-        n_tmp<-names(temp3)
-        nms<-c(n_tmp[1],paste("t",time,n_tmp[2],"_",nb,sep=""),paste("t",time,n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
-               paste("t",time, "_",n_tmp[9],"_",nb,sep=""), paste("t",time, "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
-        colnames(temp3)<-nms
-        assign(df_nm, temp3)
-        bs<-c(bs, df_nm) ##creates number of data.frames that equals to number of replicates
-        df_List<-mget(bs)
-        ##will merge all the replicates dataframes to bp dataframe
-        bp<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
-                                                     'Charge')), df_List)}
-      assign(df_nm_st, bp)
-    }
-    df_List2<-mget(st_l)
-    bp2<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
-                                                  'Charge')), df_List2)
-
-    summ<-c(summ, dim(bp2)[1])
-
-    cvr<-coverage_residue(bp2,start_col = 2, end_col = 3)[min(bp2$Start):max(bp2$End)]
-    cvrLong<-coverage_residue(bp2,start_col = 2, end_col = 3)
-    ppt_cov<-round((length(cvr)-length(which(cvr==0)))/length(cvr)*100, digits=2)
-    av<-round(mean(bp2$End-bp2$Start+1),digits=2)  ## residues in Start..End
-
-    redund<-c()
-    for (nb1 in 1:dim(bp2)[1]){
-      r1<-sum(cvrLong[bp2[nb1,2]:bp2[nb1,3]])/(bp2[nb1,3]-bp2[nb1,2]+1)
-      redund<-c(redund, r1)
-    }
-    summ<-c(summ,  ppt_cov, av, round(mean(redund), digits=2))
-    b=rbind(b, bp2)
-  }
-
-  sum1<-data.frame(matrix(summ,nrow=length(unique(a$Protein.State)), byrow = TRUE))
-  names(sum1)<-c("Protein.State", "Timepoints", "# replicates", "# peptides", "peptide coverage %", "<Peptide Length>", "<Redundancy>")
-  return(sum1)}
-
-
-
-
+  rows <- lapply(states, function(state) {
+    t_state <- unique(a$Deut.Time[a$Protein.State == state])
+    t_state <- t_state[order(suppressWarnings(as.numeric(sub("s$", "", t_state))))]
+    w <- suppressMessages(output_tp(raw, states = state, times = t_state))
+    pep <- unique(w[, c("Start", "End", "Sequence")])
+    n_rep <- tapply(a$Experiment[a$Protein.State == state], a$Deut.Time[a$Protein.State == state],
+                    function(e) length(unique(e)))
+    cov <- integer(max(c(span, pep$End)))
+    for (i in seq_len(nrow(pep))) cov[pep$Start[i]:pep$End[i]] <- cov[pep$Start[i]:pep$End[i]] + 1L
+    cov_span <- cov[span]
+    data.frame(
+      Protein.State = state,
+      Timepoints = paste(t_state, collapse = " "),
+      `# replicates` = if (min(n_rep) == max(n_rep)) as.character(min(n_rep)) else paste0(min(n_rep), "-", max(n_rep)),
+      `# peptides` = nrow(unique(w[, c("Start", "End", "Sequence", "Charge")])),
+      `peptide coverage %` = round(100 * mean(cov_span > 0), 2),
+      `<Peptide Length>` = round(mean(pep$End - pep$Start + 1), 2),
+      `<Redundancy>` = round(sum(cov_span) / sum(cov_span > 0), 2),
+      check.names = FALSE, stringsAsFactors = FALSE)
+  })
+  out <- do.call(rbind, rows)
+  rownames(out) <- states
+  attr(out, "protein_range") <- protein_range
+  out
+}

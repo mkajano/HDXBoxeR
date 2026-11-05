@@ -18,6 +18,8 @@ params:
   percent: FALSE
   metadata: NULL
   results_file: NULL
+  Dfact: 0.85
+  protein_range: NULL
 ---
 
 ```{r setup, include = FALSE}
@@ -49,7 +51,8 @@ tab(data.frame(
 
 ```{r}
 tab(hdx_summary_table(d, metadata = if (is.null(params$metadata)) list() else params$metadata,
-                      alpha = params$alpha))
+                      alpha = params$alpha, pvalue = params$pvalue, Dfact = params$Dfact,
+                      protein_range = params$protein_range))
 ```
 
 ## Data quality

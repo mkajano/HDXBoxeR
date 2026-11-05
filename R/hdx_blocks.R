@@ -63,26 +63,37 @@
   }, numeric(1))
 }
 
+## the _proc functions use a percent table and an uptake table row by row:
+## they must describe the same peptides in the same order
+.hdx_check_aligned <- function(input_proc, input_up) {
+  key <- function(d) paste(d$Deut.Time, d$Start, d$End, d$Sequence, d$Charge)
+  if (nrow(input_proc) != nrow(input_up) || !identical(key(input_proc), key(input_up))) {
+    stop("input_proc and input_up must contain the same peptides in the same order: ",
+         "make both with output_tp() from the same data, states and times ",
+         "(percent = TRUE and percent = FALSE).", call. = FALSE)
+  }
+  invisible(TRUE)
+}
+
 ## warning for a renamed argument (old name still accepted)
 .hdx_deprecated <- function(old, new) {
   warning(sprintf("argument '%s' is deprecated; use '%s' instead.", old, new), call. = FALSE)
 }
 
 ## Multiple-testing adjustment of a p-value table (columns 7+ hold p-values).
-## Family: for output_tp() tables (with Deut.Time), all peptides x compared
-## states within each labeling time; otherwise all peptides x columns.
-## Column 7 of a pv_timepoint() table is the reference state compared with
-## itself (p = 1) and is left out. "none" returns the table unchanged.
+## Family, everywhere in the package: the peptides of one pair of states at
+## one time point. For pv_timepoint() tables each column is one pair and
+## rows are split by Deut.Time; for pv_timecourse() tables each column is
+## one time point of one pair. Column 7 of a pv_timepoint() table is the
+## reference state compared with itself and is left out.
 .hdx_adjust_pv <- function(pv, p_adjust = "none", skip_first = TRUE) {
   p_adjust <- match.arg(p_adjust, stats::p.adjust.methods)
   if (p_adjust == "none") return(pv)
   cols <- seq.int(if (skip_first) 8 else 7, ncol(pv))
-  if (length(cols) == 0) return(pv)
+  if (length(cols) == 0 || cols[1] > ncol(pv)) return(pv)
   groups <- if ("Deut.Time" %in% colnames(pv)) split(seq_len(nrow(pv)), pv$Deut.Time) else list(seq_len(nrow(pv)))
-  for (g in groups) {
-    m <- as.matrix(pv[g, cols, drop = FALSE])
-    m[] <- stats::p.adjust(m, method = p_adjust)
-    pv[g, cols] <- m
+  for (g in groups) for (j in cols) {
+    pv[g, j] <- stats::p.adjust(pv[g, j], method = p_adjust)
   }
   pv
 }

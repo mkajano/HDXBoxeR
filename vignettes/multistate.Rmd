@@ -140,7 +140,7 @@ res_unmatched$coverage
 Read the first columns first: `frac_peptides_significant` is the fraction of the shared peptides that differ by the rule above.
 The pooled test after it is only approximate.
 
-Here the pooled test is not significant (p = 0.29 and 0.58), but 5/9 nterm peptides and 7/19 cterm peptides differ.
+Here the pooled test is not significant (p = 0.29 and 0.58), but 5/9 nterm peptides and 6/19 cterm peptides differ.
 A non-significant pooled result does **not** mean nothing changed.
 
 `frac_shared_all_states` in `coverage` is the fraction of peptides found in every state.

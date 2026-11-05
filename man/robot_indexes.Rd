@@ -33,7 +33,10 @@ robot_indexes(
 \item{min_timepoints}{a peptide is selected when it is significant at at least this many time points. Default \code{1} (any time point, as before).}
 }
 \value{
-Returns indexes of significant peptides
+Returns indexes of significant peptides: row numbers in the
+states[1] vs states[2] table used by the robot plots. A significant
+peptide that is not in that table (e.g. its sequence differs in a
+mutant) is left out; \code{\link[=robot_indexes_df]{robot_indexes_df()}} lists every significant peptide.
 }
 \description{
 Function to help decide which peptides will be drawn on Robot plots.

@@ -1,7 +1,30 @@
+## controls (fully deuterated "FD", in-exchange "0.00s") as one row per
+## peptide and state, one column per replicate - built with the same engine
+## as output_tc(); a single replicate is enough for a control
+.hdx_control_table <- function(filepath, label, percent) {
+  raw <- .hdx_raw(filepath)
+  if (label != "FD") {
+    ## the in-exchange control can be written "0s", "0.00s", "0" ...
+    tnum <- suppressWarnings(as.numeric(sub("s$", "", raw$Deut.Time)))
+    zero <- unique(raw$Deut.Time[!is.na(tnum) & tnum == 0])
+    if (length(zero)) label <- zero[1]
+  }
+  a <- raw[raw$Deut.Time == label, .hdx_required, drop = FALSE]
+  a$X..Deut <- suppressWarnings(as.numeric(a$X..Deut))
+  a$Deut.. <- suppressWarnings(as.numeric(a$Deut..))
+  a <- a[!is.na(if (percent) a$Deut.. else a$X..Deut), , drop = FALSE]
+  if (nrow(a) == 0) stop("no '", label, "' rows with values in the input", call. = FALSE)
+  out <- .hdx_wide(a, states = unique(a$Protein.State), times = label, min_replicates = 1,
+                   percent = percent, layout = "tc")
+  out[, c("Protein.State", "Start", "End", "Sequence", "Search.RT", "Charge",
+          colnames(out)[7:ncol(out)])]
+}
+
 ####################
 #' Prepares output for HDX-MS Full deuteration data
 #'
-#' Returns a data frame for Full deuteration set
+#' Returns the fully deuterated (`"FD"`) control: one row per peptide and
+#' protein state, one column per FD replicate (uptake in Da).
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is uptake data for Protein States.
@@ -10,68 +33,15 @@
 #' a<-output_FD(file_nm)
 #'
 #' @export
-  output_FD<- function(filepath){
-
-
-    arg_df_FD<-function(filepath){
-      a <- .hdx_raw(filepath)
-
-
-      a <- a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
-                "Charge", "Search.RT", "X..Deut", "Deut..")]
-
-      FD<-a[which(a$Deut.Time == c("FD")), ]
-
-      return(FD)
-    }
-
-FD<-arg_df_FD(filepath)
-
-
-
-  a<-na.omit(FD)
-  rownames(a)<-1:dim(a)[1] ##name rows
-  #### Full deuteration to analysis.
-  nbs=0
-  fd<-c()
-
-  ##creates temporary df, temp1, with Protein states going through all unique protein states
-  for (state in unique(FD$Protein.State)){
-    st<-gsub(c(' '),'',state)
-    df_nm_st<-paste(st, "_", nbs,sep="")
-    nbs=nbs+1
-    temp1<-FD[which(FD$Protein.State ==state),]
-    st_l<-c()
-    nb=0
-    fs<-c()
-    for (exp in unique(temp1$Experiment)){
-      nb=nb+1
-      df_nm<-paste("FD_",nb,sep="")
-      temp2<-temp1[which(temp1$Experiment == exp),]
-      n_tmp<-names(temp2)
-      nms<-c(n_tmp[1],paste("t_FD",n_tmp[2],"_",nb,sep=""),paste("t_FD",n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
-             paste("t_FD", "_",n_tmp[9],"_",nb,sep=""), paste("t_FD", "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
-      colnames(temp2)<-nms
-      assign(df_nm, temp2)
-      fs<-c(fs, df_nm) ##creates number of data.frames that equals to number of replicates
-      df_List<-mget(fs)
-      ##will merge all the replicates dataframes to bp dataframe
-      fp<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
-                                                   'Charge')), df_List)}
-    assign(df_nm_st, fp)
-    }
-
-  nb_X..deut=grep("X..Deut", colnames(fp))
-  uptake.fp<-data.frame(fp[,c(1, 4:8, nb_X..deut)])
-  nb_deut=grep("Deut.._", colnames(fp))
-  procent.fp<-data.frame(fp[,c(1, 4:8, nb_deut)])
-
-  return(uptake.fp)}
+output_FD<- function(filepath){
+  .hdx_control_table(filepath, "FD", percent = FALSE)
+}
 
 ####################
 #' Prepares output for HDX-MS  Undeuterated sample data.
 #'
-#' Returns a data frame for Full deuteration set
+#' Returns the in-exchange control (`Deut.Time` 0, e.g. `"0s"` or `"0.00s"`):
+#' one row per peptide and protein state, one column per replicate (uptake in Da).
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is uptake data for Protein States.
@@ -80,47 +50,14 @@ FD<-arg_df_FD(filepath)
 #' a<- output_UD(file_nm)
 #' @export
 output_UD<- function(filepath){
-  a<-.hdx_raw(filepath)
-  a<-a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence", "Charge", "Search.RT", "X..Deut", "Deut..")] ##choose only useful columns
-  rownames(a)<-1:dim(a)[1] ##name rows
-  a<-na.omit(a) ##remove missing values, removes non-deuterated state
-  zero<-a[which(a$Deut.Time == '0.00s'),] ##this line can be used to take advantage of control sample
-  nbs=0
-  ud<-c()
-  ##creates temporary df, temp1, with Protein states going through all unique protein states
-  for (state in unique(zero$Protein.State)){
-    st<-gsub(c(' '),'',state)
-    df_nm_st<-paste(st, "_", nbs,sep="")
-    nbs=nbs+1
-    temp1<-zero[which(zero$Protein.State ==state),]
-    st_l<-c()
-    nb=0
-    us<-c()
-    for (exp in unique(temp1$Experiment)){
-      nb=nb+1
-      df_nm<-paste("zero_",nb,sep="")
-      temp2<-temp1[which(temp1$Experiment == exp),]
-      n_tmp<-names(temp2)
-      nms<-c(n_tmp[1],paste("t_zero",n_tmp[2],"_",nb,sep=""),paste("t_zero",n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
-             paste("t_zero", "_",n_tmp[9],"_",nb,sep=""), paste("t_zero", "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
-      colnames(temp2)<-nms
-      assign(df_nm, temp2)
-      us<-c(us, df_nm) ##creates number of data.frames that equals to number of replicates
-      df_List<-mget(us)
-      ##will merge all the replicates dataframes to bp dataframe
-      ud<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
-                                                   'Charge')), df_List)}
-    assign(df_nm_st, ud) }
-  nb_X..deut=grep("X..Deut", colnames(ud))
-  uptake.ud<-data.frame(ud[,c(1, 4:8, nb_X..deut)])
-  nb_deut=grep("Deut.._", colnames(ud))
-  procent.ud<-data.frame(ud[,c(1, 4:8, nb_deut)])
-  return(uptake.ud)}
+  .hdx_control_table(filepath, "0.00s", percent = FALSE)
+}
 
 ####################
 #' Prepares output for HDX-MS Full deuteration data  for procent deuteration.
 #'
-#' Returns a data frame for Full deuteration set
+#' Returns the fully deuterated (`"FD"`) control as percent deuteration: one
+#' row per peptide and protein state, one column per FD replicate.
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is procent deuteration for Protein States.
@@ -129,57 +66,15 @@ output_UD<- function(filepath){
 #' a<- output_FD_proc(file_nm)
 #' @export
 output_FD_proc<- function(filepath){
-  a<-.hdx_raw(filepath)
-  a<-a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence", "Charge", "Search.RT", "X..Deut", "Deut..")]
-  if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
-    undeut<-a[which(a$Deut.Time == '0s'),]}
-  if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
-    a<-a[-which(a$Deut.Time == c('0.00s')),]}
-  if (all(a$Deut.Time == 'FD')== FALSE & length(unique(a$Deut.Time == 'FD'))==2){
-    FD<-a[which(a$Deut.Time == 'FD'),]
-    a<-a[-which(a$Deut.Time == c('FD')),]}
-
-  a<-na.omit(a)
-  rownames(a)<-1:dim(a)[1] ##name rows
-  #### Full deuteration to analysis.
-  nbs=0
-  fd<-c()
-  ##creates temporary df, temp1, with Protein states going through all unique protein states
-  for (state in unique(FD$Protein.State)){
-    temp1<-FD[which(FD$Protein.State ==state),]
-    st<-gsub(c(' '),'',state)
-    df_nm_st<-paste(st, "_", nbs,sep="")
-    nbs=nbs+1
-    st_l<-c()
-    nb=0
-    fs<-c()
-    for (exp in unique(temp1$Experiment)){
-      nb=nb+1
-      df_nm<-paste("FD_",nb,sep="")
-      temp2<-temp1[which(temp1$Experiment == exp),]
-      n_tmp<-names(temp2)
-      nms<-c(n_tmp[1],paste("t_FD",n_tmp[2],"_",nb,sep=""),paste("t_FD",n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
-             paste("t_FD", "_",n_tmp[9],"_",nb,sep=""), paste("t_FD", "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
-      colnames(temp2)<-nms
-      assign(df_nm, temp2)
-      fs<-c(fs, df_nm) ##creates number of data.frames that equals to number of replicates
-      df_List<-mget(fs)
-      ##will merge all the replicates dataframes to bp dataframe
-      fp<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
-                                                   'Charge')), df_List)}
-    assign(df_nm_st, fp) }
-
-  nb_X..deut=grep("X..Deut", colnames(fp))
-  uptake.fp<-data.frame(fp[,c(1, 4:8, nb_X..deut)])
-  nb_deut=grep("Deut.._", colnames(fp))
-  procent.fp<-data.frame(fp[,c(1, 4:8, nb_deut)])
-
-  return(procent.fp)}
+  .hdx_control_table(filepath, "FD", percent = TRUE)
+}
 
 ####################
 #' Prepares output for HDX-MS Undeuterated data for procent deuteration.
 #'
-#' Returns a data frame for Undeuterated control set
+#' Returns the in-exchange control (`Deut.Time` 0, e.g. `"0s"`) as percent
+#' deuteration: one row per peptide and protein state, one column per
+#' replicate.
 #'
 #' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @return data frame with reorganized data where in columns is procent deuteration for Protein States.
@@ -188,47 +83,5 @@ output_FD_proc<- function(filepath){
 #' a<- output_UD_proc(file_nm)
 #' @export
 output_UD_proc<- function(filepath){
-  a<-.hdx_raw(filepath)
-  a<-a[,c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence", "Charge", "Search.RT", "X..Deut", "Deut..")]
-  if (all(a$Deut.Time == '0s')== FALSE & length(unique(a$Deut.Time == '0s'))==2){
-    undeut<-a[which(a$Deut.Time == '0s'),]}
-  if (all(a$Deut.Time == '0.00s')== FALSE & length(unique(a$Deut.Time == '0.00s'))==2){
-    a<-a[-which(a$Deut.Time == c('0.00s')),]}
-  if (all(a$Deut.Time == 'FD')== FALSE & length(unique(a$Deut.Time == 'FD'))==2){
-    FD<-a[which(a$Deut.Time == 'FD'),]
-    a<-a[-which(a$Deut.Time == c('FD')),]}
-  zero<-a[which(a$Deut.Time == '0.00s'),]
-  nbs=0
-  a<-na.omit(a)
-  rownames(a)<-1:dim(a)[1] ##name rows
-  ud<-c()
-  ##creates temporary df, temp1, with Protein states going through all unique protein states
-  for (state in unique(zero$Protein.State)){
-    st<-gsub(c(' '),'',state)
-    df_nm_st<-paste(st, "_", nbs,sep="")
-    nbs=nbs+1
-    temp1<-zero[which(zero$Protein.State ==state),]
-    st_l<-c()
-    nb=0
-    us<-c()
-    for (exp in unique(temp1$Experiment)){
-      nb=nb+1
-      df_nm<-paste("zero_",nb,sep="")
-      temp2<-temp1[which(temp1$Experiment == exp),]
-      n_tmp<-names(temp2)
-      nms<-c(n_tmp[1],paste("t_zero",n_tmp[2],"_",nb,sep=""),paste("t_zero",n_tmp[3],"_",nb,sep=""),n_tmp[4:8] ,
-             paste("t_zero", "_",n_tmp[9],"_",nb,sep=""), paste("t_zero", "_", n_tmp[10],"_",nb,sep="")) ## creates names for the dataframe
-      colnames(temp2)<-nms
-      assign(df_nm, temp2)
-      us<-c(us, df_nm) ##creates number of data.frames that equals to number of replicates
-      df_List<-mget(us)
-      ##will merge all the replicates dataframes to bp dataframe
-      ud<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Start','End', 'Sequence', 'Search.RT',
-                                                   'Charge')), df_List)}
-    assign(df_nm_st, ud) }
-  nb_X..deut=grep("X..Deut", colnames(ud))
-  uptake.ud<-data.frame(ud[,c(1, 4:8, nb_X..deut)])
-  nb_deut=grep("Deut.._", colnames(ud))
-  procent.ud<-data.frame(ud[,c(1, 4:8, nb_deut)])
-
-  return(procent.ud)}
+  .hdx_control_table(filepath, "0.00s", percent = TRUE)
+}

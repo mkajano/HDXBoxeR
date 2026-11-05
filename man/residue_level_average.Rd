@@ -28,19 +28,14 @@ A fast, simple companion to \code{\link[=residue_deconvolution]{residue_deconvol
 at each Protein.State/replicate/timepoint, computes a weighted mean of
 percent deuteration across every peptide that covers that residue, with
 each peptide weighted by \code{1 / nb_exch_deut(peptide)} - i.e. shorter, more
-localized peptides contribute more than long ones. This is the same
-peptide-to-residue weighting scheme used by PyHDX's residue mapping (its
-"Z matrix", see Smit et al., PyHDX, \url{https://pyhdx.readthedocs.io/})
-before PyHDX goes on to fit a kinetic model per residue. This function
-stops at the mapping step and does not fit any kinetic model or
-cross-residue regularization - see Details.
+localized peptides contribute more than long ones. No kinetic model and
+no smoothing between residues are used.
 }
 \details{
-Unlike \code{\link[=residue_deconvolution]{residue_deconvolution()}}, this does not attempt to separate the
-contribution of overlapping peptides algebraically, so a residue near the
-edge of a long peptide will still carry some signal from its neighbors.
-Provided as a quick, PyHDX-consistent baseline to compare against
-\code{\link[=residue_deconvolution]{residue_deconvolution()}}.
+Unlike \code{\link[=residue_deconvolution]{residue_deconvolution()}}, this does not separate the
+contribution of overlapping peptides, so a residue near the
+edge of a long peptide still carries some signal from its neighbors.
+Use it as a quick baseline to compare with \code{\link[=residue_deconvolution]{residue_deconvolution()}}.
 }
 \examples{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

@@ -34,6 +34,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="",
                                                 alpha=0.01,
                                                 pvalue=0.01, replicates=3, order.pep=TRUE, p_adjust="none", resno_offset=0, pv_cutoff){
   if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  .hdx_check_aligned(input_proc, input_up)
   dfup=input_up
   df=input_proc
 
@@ -84,7 +85,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="",
 
 
     ###write outputs per each state in the
-    nm1<-str_sub(colnames(df1[8:dim(df1)[2]]), start=4, end=-8)
+    nm1<-sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", sub("^av_", "", colnames(df1)[8:dim(df1)[2]]))
     for (j in 1:dim(si_apc)[2]){
       output_name<-paste("pymol_all_peptides_proc_", nm1[j],"_", deut.time, ".txt", sep="")
 

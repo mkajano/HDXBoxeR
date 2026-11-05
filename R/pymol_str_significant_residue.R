@@ -100,7 +100,7 @@ pymol_script_significant_residue<-function(df, path="",
       set_colors<-c(set_colors, paste("set_color ", col_nm[i],", [",  rgb_col[1,i],
                                       ",", rgb_col[2,i], ",", rgb_col[3,i], "]", sep=""))}
     ###write outputs per each state in the
-    nm1<-str_sub(colnames(df1[8:dim(df1)[2]]), start=4, end=-9)
+    nm1<-sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", sub("^av_", "", colnames(df1)[8:dim(df1)[2]]))
     for (j in 1:dim(si_apc)[2]){
       output_name<-paste("pymol_maxuptake_", nm1[j],"_", deut_time, ".txt", sep="")
       res.txt<-c()

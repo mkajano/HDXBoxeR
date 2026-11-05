@@ -16,7 +16,9 @@ render_report(
   p_adjust = "none",
   percent = FALSE,
   metadata = list(),
-  title = "HDX-MS report"
+  title = "HDX-MS report",
+  Dfact = 0.85,
+  protein_range = NULL
 )
 }
 \arguments{
@@ -38,6 +40,12 @@ in the working directory.}
 \code{\link[=hdx_summary_table]{hdx_summary_table()}}.}
 
 \item{title}{report title.}
+
+\item{Dfact}{D2O fraction of the labeling buffer, for back-exchange.
+Default \code{0.85}.}
+
+\item{protein_range}{residue range for the coverage, as in
+\code{\link[=general_info]{general_info()}}.}
 }
 \value{
 the path of the report, invisibly.

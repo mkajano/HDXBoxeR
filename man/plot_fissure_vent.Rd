@@ -17,10 +17,10 @@ plot_fissure_vent(
   length1 = NA,
   xlim = NULL,
   ylim = NULL,
-  p_adjust = "none",
   sig_col = "firebrick",
   nonsig_col = "grey60",
   fill_alpha = 0.3,
+  p_adjust = "none",
   ...
 )
 }
@@ -64,13 +64,6 @@ two-sample t-test interval (\code{sd_ci_timepoint()}); those are SDs of the
 
 \item{ylim}{y axis limit}
 
-\item{p_adjust}{multiple-testing correction of the per-peptide Welch
-p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default) or e.g.
-\code{"BH"}, applied across the peptides of each time point. The
-significance outline uses the adjusted p-value; the ellipses stay
-calibrated to the raw p-value (touching the diagonal means raw
-p >= \code{pvalue}).}
-
 \item{sig_col}{border/fill color for significant peptides (outside the CI
 band AND clearing the diagonal). Default \code{"firebrick"}.}
 
@@ -80,6 +73,13 @@ criteria. Default \code{"grey60"}.}
 \item{fill_alpha}{transparency (0-1) applied to each ellipse's fill only
 (the border stays opaque); \code{0} is fully transparent, \code{1} fully opaque.
 Default \code{0.3}. Ignored when \code{position_col} is supplied.}
+
+\item{p_adjust}{multiple-testing correction of the per-peptide Welch
+p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default) or e.g.
+\code{"BH"}, applied across the peptides of each time point. The
+significance outline uses the adjusted p-value; the ellipses stay
+calibrated to the raw p-value (touching the diagonal means raw
+p >= \code{pvalue}).}
 
 \item{...}{other plotting parameters, passed to DrawEllipse}
 }

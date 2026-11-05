@@ -36,8 +36,8 @@ hdx_results_table(
 \item{pvalue}{p-value cutoff. Default \code{0.01}.}
 
 \item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
-\code{"none"} (default) or e.g. \code{"BH"}, across all peptides and pairs
-within each time point.}
+\code{"none"} (default) or e.g. \code{"BH"}, across the peptides of each pair of
+states at each time point.}
 
 \item{percent}{value scale as in \code{\link[=output_tp]{output_tp()}}: \code{FALSE} (Da, default),
 \code{TRUE}, \code{"FD"} or \code{"per_residue"}.}

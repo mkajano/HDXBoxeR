@@ -168,8 +168,8 @@ read_hdxexaminer <- function(path) {
 #'   than one. Default: all (an error if there are several).
 #' @param combine_charges `FALSE` (default) keeps every charge state as its
 #'   own peptide, as for HDXExaminer input. `TRUE` combines charge states
-#'   of a peptide into one intensity-weighted mass per raw file (as DynamX
-#'   and HaDeX do).
+#'   of a peptide into one intensity-weighted mass per raw file (as in the
+#'   DynamX state export).
 #' @return data frame of class `hdx_data`.
 #' @seealso [read_hdx()]
 #' @export
@@ -273,7 +273,15 @@ read_dynamx <- function(path, type = c("auto", "cluster", "state"), fd = NULL,
 .dynamx_fd <- function(out, fd) {
   if (is.null(fd)) return(out)
   if (identical(fd, "last")) {
-    labs <- unique(out$Deut.Time[out$Deut.Time != .hdx_time_label(0)])
+    last_by_state <- vapply(unique(out$Protein.State), function(s) {
+      sel <- out$Protein.State == s & out$Deut.Time != .hdx_time_label(0)
+      max(as.numeric(sub("s$", "", out$Deut.Time[sel])))
+    }, numeric(1))
+    if (length(unique(last_by_state)) > 1) {
+      warning("fd = \"last\": the states have different longest exposures (",
+              paste(sprintf("%s: %gs", names(last_by_state), last_by_state), collapse = ", "),
+              "); each state's own longest exposure is used as its FD control", call. = FALSE)
+    }
     for (s in unique(out$Protein.State)) {
       sel <- out$Protein.State == s & out$Deut.Time != .hdx_time_label(0)
       tsec <- as.numeric(sub("s$", "", out$Deut.Time[sel]))

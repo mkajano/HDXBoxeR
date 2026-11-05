@@ -61,7 +61,7 @@ combines the per-time standard errors, \code{p_value} is a Welch-type
 t-test of the sum (Welch-Satterthwaite degrees of freedom), and
 \code{ci_sum} is a global critical interval for summed differences: the
 per-time pooled Hageman & Weis standard errors combined over time
-points, times \verb{|qt(alpha, df)|}, as in Deuteros 2.0. \code{sig_summed}
+points, times \verb{|qt(alpha/2, df)|}. \code{sig_summed}
 uses the package-wide rule: (adjusted) p < \code{pvalue} AND
 |summed_delta| > \code{ci_sum}.}
 \item{Per time point}{the usual peptide rule at each time (Welch p,

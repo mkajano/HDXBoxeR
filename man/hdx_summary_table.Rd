@@ -7,9 +7,11 @@
 hdx_summary_table(
   filepath,
   metadata = list(),
-  replicates = 3,
+  replicates = NULL,
   Dfact = 0.85,
   alpha = 0.01,
+  pvalue = 0.01,
+  protein_range = NULL,
   file = NULL
 )
 }
@@ -21,12 +23,18 @@ hdx_summary_table(
 A single value applies to every state; a vector gives one value per
 state. They are listed first.}
 
-\item{replicates}{passed to \code{\link[=summary_sd_CI]{summary_sd_CI()}}. Default \code{3}.}
+\item{replicates}{optional maximum number of replicates per state.
+Default \code{NULL} uses every replicate.}
 
 \item{Dfact}{D2O fraction of the labeling buffer for back-exchange.
 Default \code{0.85}.}
 
 \item{alpha}{alpha of the critical interval. Default \code{0.01}.}
+
+\item{pvalue}{p-value cutoff, reported with the threshold. Default \code{0.01}.}
+
+\item{protein_range}{residue range for the coverage, as in
+\code{\link[=general_info]{general_info()}}. Default: first to last covered residue.}
 
 \item{file}{optional output file: \code{.csv} or \code{.md} (markdown table).}
 }
@@ -40,10 +48,11 @@ Methods 16:595) for publishing HDX-MS data: one row per item, one column
 per protein state. Items computed from the data: time course, controls,
 replicates, number of peptides, sequence coverage, average peptide
 length, redundancy, back-exchange (mean and range), repeatability
-(pooled replicate SD) and the significance threshold (critical interval
-at \code{alpha}). Items that only you know (labeling buffer, pH,
-temperature, quench, protease, LC/MS, software ...) are added from
-\code{metadata}.
+(pooled replicate SD, Da) and the significance threshold: the critical
+interval used when each state is compared with the first state (the
+same values as in \code{\link[=hdx_results_table]{hdx_results_table()}}). Items that only you know
+(labeling buffer, pH, temperature, quench, protease, LC/MS, software
+...) are added from \code{metadata}.
 }
 \examples{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

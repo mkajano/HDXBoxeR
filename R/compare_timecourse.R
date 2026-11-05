@@ -12,7 +12,7 @@
 #'     t-test of the sum (Welch-Satterthwaite degrees of freedom), and
 #'     `ci_sum` is a global critical interval for summed differences: the
 #'     per-time pooled Hageman & Weis standard errors combined over time
-#'     points, times `|qt(alpha, df)|`, as in Deuteros 2.0. `sig_summed`
+#'     points, times `|qt(alpha/2, df)|`. `sig_summed`
 #'     uses the package-wide rule: (adjusted) p < `pvalue` AND
 #'     |summed_delta| > `ci_sum`.}
 #'   \item{Per time point}{the usual peptide rule at each time (Welch p,
@@ -77,7 +77,7 @@ compare_timecourse <- function(filepath, state1, state2, times, alpha = 0.01, pv
     N1 <- mean(a$n1[ok]); N2 <- mean(a$n2[ok])
     se_t[[t]] <- sqrt(sp1^2 / N1 + sp2^2 / N2)
     df_t[[t]] <- N1 + N2 - 2
-    ci_t[[t]] <- se_t[[t]] * abs(stats::qt(alpha, df_t[[t]]))
+    ci_t[[t]] <- se_t[[t]] * abs(stats::qt(alpha/2, df_t[[t]]))
     padj <- stats::p.adjust(a$p[sel], method = p_adjust)
     a$sig[sel] <- !is.na(padj) & padj < pvalue & !is.na(a$delta[sel]) & abs(a$delta[sel]) > ci_t[[t]]
   }
@@ -99,7 +99,7 @@ compare_timecourse <- function(filepath, state1, state2, times, alpha = 0.01, pv
                stringsAsFactors = FALSE, check.names = FALSE)
   })
   out <- do.call(rbind, rows)
-  ci_sum <- sqrt(sum(se_t^2)) * abs(stats::qt(alpha, sum(df_t)))
+  ci_sum <- sqrt(sum(se_t^2)) * abs(stats::qt(alpha/2, sum(df_t)))
   out$p_adj <- stats::p.adjust(out$p_value, method = p_adjust)
   out$ci_sum <- ci_sum
   out$sig_summed <- !is.na(out$p_adj) & out$p_adj < pvalue & abs(out$summed_delta) > ci_sum

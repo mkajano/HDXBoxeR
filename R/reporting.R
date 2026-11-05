@@ -49,8 +49,8 @@
 #' @param alpha alpha of the pooled critical interval. Default `0.01`.
 #' @param pvalue p-value cutoff. Default `0.01`.
 #' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
-#'   `"none"` (default) or e.g. `"BH"`, across all peptides and pairs
-#'   within each time point.
+#'   `"none"` (default) or e.g. `"BH"`, across the peptides of each pair of
+#'   states at each time point.
 #' @param percent value scale as in [output_tp()]: `FALSE` (Da, default),
 #'   `TRUE`, `"FD"` or `"per_residue"`.
 #' @param replicates optional maximum number of replicates per state.
@@ -98,7 +98,8 @@ hdx_results_table <- function(filepath, states, times, reference, all_pairs = FA
     }
   }
   out <- do.call(rbind, rows)
-  out$p_adj <- stats::ave(out$p_value, out$Deut.Time, FUN = function(p) stats::p.adjust(p, method = p_adjust))
+  out$p_adj <- stats::ave(out$p_value, out$Deut.Time, out$state1, out$state2,
+                          FUN = function(p) stats::p.adjust(p, method = p_adjust))
   out$is_sig <- !is.na(out$p_adj) & out$p_adj < pvalue & !is.na(out$delta) & abs(out$delta) > out$ci
   out <- out[, c("Deut.Time", "Start", "End", "Sequence", "Charge", "state1", "state2", "mean1", "sd1", "n1",
                  "mean2", "sd2", "n2", "delta", "p_value", "p_adj", "ci", "is_sig")]
@@ -142,6 +143,10 @@ hdx_results_table <- function(filepath, states, times, reference, all_pairs = FA
 #' @param metadata named list of extra summary-table items, as in
 #'   [hdx_summary_table()].
 #' @param title report title.
+#' @param Dfact D2O fraction of the labeling buffer, for back-exchange.
+#'   Default `0.85`.
+#' @param protein_range residue range for the coverage, as in
+#'   [general_info()].
 #' @return the path of the report, invisibly.
 #' @examples
 #' \dontrun{
@@ -153,7 +158,7 @@ hdx_results_table <- function(filepath, states, times, reference, all_pairs = FA
 render_report <- function(filepath, output_file = "hdx_report.html", states = NULL, times = NULL,
                           reference = NULL, regions = NULL, alpha = 0.01, pvalue = 0.01,
                           p_adjust = "none", percent = FALSE, metadata = list(),
-                          title = "HDX-MS report") {
+                          title = "HDX-MS report", Dfact = 0.85, protein_range = NULL) {
   for (pkg in c("rmarkdown", "knitr")) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
       stop("render_report() needs the '", pkg, "' package: install.packages('", pkg, "')", call. = FALSE)
@@ -176,7 +181,8 @@ render_report <- function(filepath, output_file = "hdx_report.html", states = NU
                     params = list(data = data_rds, title = title, states = states, times = times,
                                   reference = reference, regions = regions, alpha = alpha,
                                   pvalue = pvalue, p_adjust = p_adjust, percent = percent,
-                                  metadata = metadata, results_file = results_file))
+                                  metadata = metadata, results_file = results_file,
+                                  Dfact = Dfact, protein_range = protein_range))
   message("report written to ", output_file)
   invisible(output_file)
 }
@@ -188,20 +194,25 @@ render_report <- function(filepath, output_file = "hdx_report.html", states = NU
 #' per protein state. Items computed from the data: time course, controls,
 #' replicates, number of peptides, sequence coverage, average peptide
 #' length, redundancy, back-exchange (mean and range), repeatability
-#' (pooled replicate SD) and the significance threshold (critical interval
-#' at `alpha`). Items that only you know (labeling buffer, pH,
-#' temperature, quench, protease, LC/MS, software ...) are added from
-#' `metadata`.
+#' (pooled replicate SD, Da) and the significance threshold: the critical
+#' interval used when each state is compared with the first state (the
+#' same values as in [hdx_results_table()]). Items that only you know
+#' (labeling buffer, pH, temperature, quench, protease, LC/MS, software
+#' ...) are added from `metadata`.
 #'
 #' @param filepath input file or table, as for [output_tp()].
 #' @param metadata named list of extra items, e.g.
 #'   `list("HDX reaction details" = "20 mM HEPES pD 7.4, 90% D2O, 20 C")`.
 #'   A single value applies to every state; a vector gives one value per
 #'   state. They are listed first.
-#' @param replicates passed to [summary_sd_CI()]. Default `3`.
+#' @param replicates optional maximum number of replicates per state.
+#'   Default `NULL` uses every replicate.
 #' @param Dfact D2O fraction of the labeling buffer for back-exchange.
 #'   Default `0.85`.
 #' @param alpha alpha of the critical interval. Default `0.01`.
+#' @param pvalue p-value cutoff, reported with the threshold. Default `0.01`.
+#' @param protein_range residue range for the coverage, as in
+#'   [general_info()]. Default: first to last covered residue.
 #' @param file optional output file: `.csv` or `.md` (markdown table).
 #' @return data frame with columns `Item` and one per state (invisibly
 #'   when `file` is given).
@@ -212,11 +223,25 @@ render_report <- function(filepath, output_file = "hdx_report.html", states = NU
 #'   "HDX reaction details" = "PBS pD 7.4, 85% D2O, 22 C",
 #'   "Data analysis software" = "HDExaminer 3; HDXBoxeR"))
 #' @export
-hdx_summary_table <- function(filepath, metadata = list(), replicates = 3, Dfact = 0.85,
-                              alpha = 0.01, file = NULL) {
+hdx_summary_table <- function(filepath, metadata = list(), replicates = NULL, Dfact = 0.85,
+                              alpha = 0.01, pvalue = 0.01, protein_range = NULL, file = NULL) {
   raw <- .hdx_raw(filepath)
-  s <- suppressMessages(all_summary(raw, replicates = replicates, Dfact = Dfact, alpha = alpha))
+  s <- suppressMessages(all_summary(raw, replicates = replicates, Dfact = Dfact, alpha = alpha,
+                                    protein_range = protein_range))
   states <- s$Protein.State
+  ## significance threshold: the critical interval actually used for each
+  ## state vs the first (reference) state, across time points (Da)
+  res <- suppressMessages(hdx_results_table(raw, states = states, alpha = alpha, pvalue = pvalue,
+                                            replicates = replicates))
+  thr <- vapply(states, function(st) {
+    if (st == states[1]) return("reference state")
+    ci <- unique(round(res$ci[res$state2 == st], 2))
+    rng <- if (length(ci) == 1) sprintf("%.2f", ci) else sprintf("%.2f-%.2f", min(ci), max(ci))
+    sprintf("|difference| > %s Da (critical interval, alpha = %s) and Welch p < %s", rng, alpha, pvalue)
+  }, character(1))
+  bx <- ifelse(is.na(s$`<BackHX>`), "not available",
+               sprintf("%s (%s - %s)", s$`<BackHX>`, s$`BackHX Range From`, s$To))
+  pr <- attr(general_info(raw, protein_range = protein_range), "protein_range")
   ctrl <- vapply(states, function(st) {
     tt <- unique(raw$Deut.Time[raw$Protein.State == st])
     paste(c(if ("0s" %in% tt) "undeuterated (0s)", if ("FD" %in% tt) "fully deuterated (FD)"),
@@ -227,12 +252,12 @@ hdx_summary_table <- function(filepath, metadata = list(), replicates = 3, Dfact
     "HDX controls" = ifelse(ctrl == "", "none", ctrl),
     "Number of replicates" = s$`# replicates`,
     "Number of peptides" = s$`# peptides`,
-    "Sequence coverage (%)" = s$`peptide coverage %`,
+    "Sequence coverage (%)" = sprintf("%s (residues %s-%s)", s$`peptide coverage %`, pr[1], pr[2]),
     "Average peptide length" = s$`<Peptide Length>`,
     "Redundancy" = s$`<Redundancy>`,
-    "Back-exchange (%): mean (range)" = sprintf("%s (%s - %s)", s$`<BackHX>`, s$`BackHX Range From`, s$To),
-    "Repeatability (pooled SD)" = s$st.dev,
-    "Significant differences in HDX" = sprintf("> %s (critical interval, alpha = %s) and Welch p", s$CI, alpha)
+    "Back-exchange (%): mean (range)" = bx,
+    "Repeatability (pooled SD, Da)" = s$st.dev,
+    "Significant differences in HDX" = thr
   )
   items <- c(metadata, computed)
   rows <- lapply(names(items), function(nm) {
@@ -244,7 +269,9 @@ hdx_summary_table <- function(filepath, metadata = list(), replicates = 3, Dfact
   out <- do.call(rbind.data.frame, c(rows, stringsAsFactors = FALSE))
   colnames(out) <- c("Item", states)
   rownames(out) <- NULL
-  out <- .hdx_stamp(out, list(replicates = replicates, Dfact = Dfact, alpha = alpha))
+  out <- .hdx_stamp(out, list(replicates = if (is.null(replicates)) "all" else replicates,
+                              Dfact = Dfact, alpha = alpha, pvalue = pvalue,
+                              protein_range = pr))
   if (!is.null(file)) {
     if (grepl("\\.md$", file, ignore.case = TRUE)) {
       md <- c(paste("|", paste(colnames(out), collapse = " | "), "|"),

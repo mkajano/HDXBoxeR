@@ -82,7 +82,7 @@ pymol_script_significant_peptide<-function(df,path="",
 
 
     ###write outputs per each state in the
-    nm1<-str_sub(colnames(df1[8:dim(df1)[2]]), start=4, end=-9)
+    nm1<-sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", sub("^av_", "", colnames(df1)[8:dim(df1)[2]]))
     for (j in 1:dim(si_apc)[2]){
       output_name<-paste("pymol_all_peptides_", nm1[j],"_", deut_time, ".txt", sep="")
 

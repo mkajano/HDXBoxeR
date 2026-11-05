@@ -6,8 +6,8 @@
 #' @param df_v dataframe for variant
 #' @param replicates number of replicates. Default set to 3.
 #' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
-#'   `"none"` (default) or e.g. `"BH"`, applied across all peptides and time
-#'   points of the comparison.
+#'   `"none"` (default) or e.g. `"BH"`, applied across the peptides of the
+#'   comparison, separately for each time point.
 #' @return pvalue comparisons between two sets.
 #' @keywords internal
 #' @export
