@@ -117,6 +117,14 @@ read_hdxexaminer <- function(path) {
   a
 }
 
+## theoretical maximum uptake as HDXExaminer ("Deut %") and DynamX
+## (MaxUptake) count it: length - 1 - prolines after the first residue.
+## Modification suffixes ("SEQ+mod") are ignored.
+.hdx_theoretical_max <- function(sequence) {
+  s <- sub("\\+.*$", "", sequence)
+  nchar(s) - 1 - stringr::str_count(substr(s, 2, nchar(s)), "P")
+}
+
 ## seconds -> HDXExaminer-style time label. Times of 1 s or more are rounded
 ## to whole seconds: DynamX stores minutes with 3 decimals (10 s = 0.167 min
 ## = 10.02 s), which would otherwise give labels like "10.02s".
@@ -300,7 +308,8 @@ read_dynamx <- function(path, type = c("auto", "cluster", "state"), fd = NULL,
 #' @param charge optional column with the charge state (default: every
 #'   peptide charge 1).
 #' @param percent optional column with percent deuteration; by default
-#'   `100 * uptake / nb_exch_deut()`.
+#'   `100 * uptake / (length - 1 - prolines after the first residue)`, the
+#'   theoretical maximum HDXExaminer and DynamX use.
 #' @param rt optional column with retention time (default 0).
 #' @param centroid optional column with the measured centroid m/z (needed
 #'   only for [backHX_calculations()]).
@@ -350,7 +359,7 @@ as_hdx_long <- function(data, state, time, replicate, start, end, sequence, upta
     X..Deut = as.numeric(data[[uptake]]),
     stringsAsFactors = FALSE
   )
-  out$Deut.. <- if (is.null(percent)) 100 * out$X..Deut / nb_exch_deut(out) else as.numeric(data[[percent]])
+  out$Deut.. <- if (is.null(percent)) 100 * out$X..Deut / .hdx_theoretical_max(out$Sequence) else as.numeric(data[[percent]])
   out$Exp.Cent <- if (is.null(centroid)) NA_real_ else as.numeric(data[[centroid]])
   out$X..Deut[is_ud] <- NA_real_; out$Deut..[is_ud] <- NA_real_
   class(out) <- c("hdx_data", "data.frame")

@@ -14,7 +14,7 @@
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
 #' @param seq_match How peptides are matched between states. `FALSE` (default): a peptide is kept only if the same Sequence, Start, End, Search.RT and Charge are found in every state (exact sequence identity). `TRUE`: peptides are matched by position only (Start, End, Search.RT and Charge), ignoring Sequence, so peptides covering e.g. a point mutation are kept; where the sequences differ between states they are joined with "." in the `Sequence` column.
 #' @param csv Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.
-#' @param percent Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.
+#' @param percent What the values are. `FALSE` (default): deuterium uptake in Da. `TRUE`: percent deuteration as reported by the input (HDXExaminer's `Deut %`, i.e. relative to the theoretical maximum; for DynamX 100 x uptake / `MaxUptake`). `"FD"`: percent of the measured fully deuterated control, 100 x uptake / FD uptake of the same peptide and state (FD replicates averaged, charge states pooled); this corrects for back-exchange and D2O content. Peptides without a usable FD value (missing, or FD uptake <= 0) keep their row with empty (`NA`) values.
 #' @return data frame with reorganized data where in columns is the deuteration uptake for Protein States. Attributes `"replicates"` (number of replicate columns per state), `"states"`, `"times"` and `"percent"` record how it was built.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -46,7 +46,8 @@ output_tp<- function(filepath, replicates, states, times, seq_match=FALSE, csv="
   }
   all1 <- .hdx_wide(a, states = states, times = times, replicates = replicates,
                     min_replicates = min_replicates, seq_match = seq_match,
-                    percent = percent, layout = "tp")
+                    percent = percent, layout = "tp",
+                    fd = if (identical(percent, "FD")) .hdx_fd_table(.hdx_raw(filepath)) else NULL)
   .hdx_msg("Number of replicates used:",
            paste0(names(attr(all1, "replicates")), "=", attr(all1, "replicates")))
 

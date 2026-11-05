@@ -34,7 +34,8 @@ deuterium uptake in Da.}
 peptide charge 1).}
 
 \item{percent}{optional column with percent deuteration; by default
-\code{100 * uptake / nb_exch_deut()}.}
+\verb{100 * uptake / (length - 1 - prolines after the first residue)}, the
+theoretical maximum HDXExaminer and DynamX use.}
 
 \item{rt}{optional column with retention time (default 0).}
 

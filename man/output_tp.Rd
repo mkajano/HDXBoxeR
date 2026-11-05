@@ -29,7 +29,7 @@ output_tp(
 
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 
-\item{percent}{Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.}
+\item{percent}{What the values are. \code{FALSE} (default): deuterium uptake in Da. \code{TRUE}: percent deuteration as reported by the input (HDXExaminer's \verb{Deut \%}, i.e. relative to the theoretical maximum; for DynamX 100 x uptake / \code{MaxUptake}). \code{"FD"}: percent of the measured fully deuterated control, 100 x uptake / FD uptake of the same peptide and state (FD replicates averaged, charge states pooled); this corrects for back-exchange and D2O content. Peptides without a usable FD value (missing, or FD uptake <= 0) keep their row with empty (\code{NA}) values.}
 
 \item{min_replicates}{a peptide is kept only if it has at least this many replicate values in every state at that time. Default \code{2}, the minimum for a standard deviation and a t-test.}
 

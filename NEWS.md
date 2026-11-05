@@ -23,6 +23,24 @@
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
   structure mapping, data quality.
 
+## Fully deuterated control and quality checks
+
+* `output_tp()`/`output_tc()` gain `percent = "FD"`: percent of the measured
+  fully deuterated control, `100 * uptake / FD uptake` of the same peptide
+  and state (FD replicates averaged, charge states pooled), which corrects
+  for back-exchange and D2O content. Peptides without a usable FD value
+  (missing, or FD uptake <= 0) keep their row with empty (`NA`) values.
+  `percent = TRUE` still returns the input's own percent deuteration
+  (HDXExaminer `Deut %`, relative to the theoretical maximum).
+* New `peptide_qc()` lists per peptide and state: missing undeuterated
+  control, uptake reported as 0 at every time (a missing reference rather
+  than a real measurement), negative uptake, FD uptake, theoretical
+  maximum, FD fraction, and FD missing / <= 0 / above the maximum. It only
+  reports; nothing is removed.
+* `as_hdx_long()` computes default percent deuteration against the same
+  theoretical maximum as HDXExaminer and DynamX (length - 1 - prolines
+  after the first residue).
+
 ## Input formats
 
 * New `read_hdx()` reads HDXExaminer "All results" tables and Waters

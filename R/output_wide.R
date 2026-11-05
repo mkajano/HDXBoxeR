@@ -13,14 +13,17 @@
 ## Charge); differing sequences are joined with "." in the Sequence column.
 
 .hdx_wide <- function(a, states, times, replicates = NULL, min_replicates = 2,
-                      seq_match = FALSE, percent = FALSE, layout = c("tp", "tc")) {
+                      seq_match = FALSE, percent = FALSE, layout = c("tp", "tc"),
+                      fd = NULL) {
   layout <- match.arg(layout)
+  fd_mode <- identical(percent, "FD")
   value_col <- if (isTRUE(percent)) "Deut.." else "X..Deut"
-  value_tag <- value_col
+  value_tag <- if (fd_mode) "Deut.." else value_col
 
   a <- a[a$Protein.State %in% states & a$Deut.Time %in% times, , drop = FALSE]
   a$.value <- suppressWarnings(as.numeric(a[[value_col]]))
   a <- a[!is.na(a$.value), , drop = FALSE]
+  if (fd_mode) a$.fd <- .hdx_fd_lookup(a, fd, seq_match)
 
   ## replicate number within state x time, in file order of Experiment
   st_time <- paste(a$Protein.State, a$Deut.Time, sep = "\r")
@@ -70,6 +73,24 @@
   if (is.null(dim(n_per_group))) n_per_group <- matrix(n_per_group, nrow = 1)
   keep <- apply(n_per_group >= min_replicates, 1, all)
 
+  ## percent of the fully deuterated control: rows are kept or dropped on the
+  ## uptake values above; a peptide without a usable FD value keeps its row
+  ## with NA values
+  if (fd_mode) {
+    blocks <- lapply(seq_along(group_levels), function(j) {
+      f <- rep(NA_real_, length(keys))
+      sel <- grp == group_levels[j]
+      f[ki[sel]] <- a$.fd[sel]
+      100 * blocks[[j]] / f
+    })
+    empty <- do.call(cbind, lapply(blocks, function(m) rowSums(!is.na(m)) == 0))
+    no_fd <- sum(keep & rowSums(empty) > 0)
+    if (no_fd > 0) {
+      message(sprintf("%d peptide row(s) have no usable fully deuterated (FD) value in at least one %s: left empty (NA)",
+                      no_fd, if (layout == "tp") "state" else "time point"))
+    }
+  }
+
   ## descriptors of each kept row: first occurrence; Sequence per group
   first <- match(keys, row_key)
   desc <- a[first, c("Protein.State", "Deut.Time", "Start", "End", "Sequence", "Search.RT", "Charge")]
@@ -115,8 +136,40 @@
   attr(out, "replicates") <- reps
   attr(out, "states") <- states
   attr(out, "times") <- times
-  attr(out, "percent") <- isTRUE(percent)
+  attr(out, "percent") <- if (fd_mode) "FD" else isTRUE(percent)
   out
+}
+
+## Mean fully deuterated (FD) uptake (Da) per state and peptide, from the
+## "FD" rows of the raw input. Charge states are pooled: uptake in Da does
+## not depend on charge. FD uptake <= 0 cannot be used and is NA.
+.hdx_fd_table <- function(raw) {
+  fd <- raw[raw$Deut.Time == "FD", , drop = FALSE]
+  fd$X..Deut <- suppressWarnings(as.numeric(fd$X..Deut))
+  fd <- fd[!is.na(fd$X..Deut), , drop = FALSE]
+  if (nrow(fd) == 0) {
+    return(data.frame(Protein.State = character(0), Start = integer(0), End = integer(0),
+                      Sequence = character(0), fd = numeric(0)))
+  }
+  out <- stats::aggregate(X..Deut ~ Protein.State + Start + End + Sequence, data = fd, FUN = mean)
+  names(out)[names(out) == "X..Deut"] <- "fd"
+  out$fd[out$fd <= 0] <- NA_real_
+  out
+}
+
+## FD value for every measurement row of `a`; with position matching
+## (seq_match = TRUE) the sequence is ignored
+.hdx_fd_lookup <- function(a, fd, seq_match) {
+  if (is.null(fd) || nrow(fd) == 0) return(rep(NA_real_, nrow(a)))
+  if (isTRUE(seq_match)) {
+    fd <- stats::aggregate(fd ~ Protein.State + Start + End, data = fd, FUN = mean, na.action = stats::na.pass)
+    k_fd <- paste(fd$Protein.State, fd$Start, fd$End, sep = "\r")
+    k_a <- paste(a$Protein.State, a$Start, a$End, sep = "\r")
+  } else {
+    k_fd <- paste(fd$Protein.State, fd$Start, fd$End, fd$Sequence, sep = "\r")
+    k_a <- paste(a$Protein.State, a$Start, a$End, a$Sequence, sep = "\r")
+  }
+  fd$fd[match(k_a, k_fd)]
 }
 
 ## message helper: one line, no stray NULL from message(cat(...))
