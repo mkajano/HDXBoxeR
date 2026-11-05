@@ -66,6 +66,26 @@ test_that("output_prep() works with uneven replicates", {
   expect_false(any(is.nan(out[["Mean.Deut.Uptake_[Da]"]])))
 })
 
+test_that("output_prep() reports replicates per time point; hdx_summary_table() keeps the states order", {
+  expect_message(output_prep(file_nm, output_name = tempfile(fileext = ".csv")), "Unbound=3")
+  s <- suppressMessages(hdx_summary_table(file_nm, states = c("bound", "Unbound")))
+  expect_equal(colnames(s)[2:3], c("bound", "Unbound"))
+  expect_equal(s[s$Item == "Significant differences in HDX", "bound"], "reference state")
+})
+
+test_that("output_UD() keeps a missing value of a measured 0.00s control as NA", {
+  r <- read.csv(file_nm, check.names = FALSE)
+  i <- which(r$`Deut Time` == "0.00s")[1]
+  r$`# Deut`[i] <- NA
+  f <- tempfile(fileext = ".csv"); utils::write.csv(r, f, row.names = FALSE)
+  ud <- output_UD(f)
+  ## that peptide is not filled with 0 (it has no value, so it is left out)
+  hit <- ud[ud$Protein.State == r$`Protein State`[i] & ud$Start == r$Start[i] &
+              ud$End == r$End[i] & ud$Charge == r$Charge[i], 7:ncol(ud), drop = FALSE]
+  expect_false(any(as.matrix(hit) == 0, na.rm = TRUE))
+  expect_equal(nrow(ud), nrow(output_UD(file_nm)) - 1)
+})
+
 test_that("PyMOL scripts work with the default path", {
   a <- suppressMessages(output_tp(file_nm))
   old <- setwd(tempdir()); on.exit(setwd(old))

@@ -52,7 +52,9 @@ output_prep<-function(filepath, output_name, states, replicates = NULL, times, p
     }))
     a <- a[sort(keep), , drop = FALSE]
   }
-  n_rep <- tapply(a$Experiment, a$Protein.State, function(e) length(unique(e)))
+  ## replicates per state and time point (experiment names differ by time)
+  n_st <- tapply(a$Experiment, list(a$Protein.State, a$Deut.Time), function(e) length(unique(e)))
+  n_rep <- apply(n_st, 1, function(v) { v <- v[!is.na(v)]; if (min(v) == max(v)) min(v) else paste0(min(v), "-", max(v)) })
   .hdx_msg("Number of replicates used:", paste0(names(n_rep), "=", n_rep))
 
   ## Exp.Cent is a centroid m/z: the peptide mass column reports the neutral

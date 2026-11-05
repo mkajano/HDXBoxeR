@@ -233,6 +233,8 @@ hdx_summary_table <- function(filepath, metadata = list(), replicates = NULL, Df
     miss <- setdiff(states, raw$Protein.State)
     if (length(miss)) stop("state(s) not found: ", paste(miss, collapse = ", "), call. = FALSE)
     raw <- raw[raw$Protein.State %in% states, , drop = FALSE]
+    ## the first state given is the reference: put it first in the data
+    raw <- raw[order(match(raw$Protein.State, states)), , drop = FALSE]
   }
   s <- suppressMessages(all_summary(raw, replicates = replicates, Dfact = Dfact, alpha = alpha,
                                     protein_range = protein_range))

@@ -26,6 +26,7 @@
 backHX_calculations<- function(filepath, Dfact=0.85){
 
   a <- .hdx_raw(filepath)
+  a$Exp.Cent <- suppressWarnings(as.numeric(a$Exp.Cent))
   if (all(is.na(a$Exp.Cent))) {
     stop("back-exchange needs measured centroids (Exp Cent), which this input does not have",
          call. = FALSE)

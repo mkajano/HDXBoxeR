@@ -45,7 +45,8 @@ legend_states_PerD_bottom<-function (df, cols)
 {
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
-  nm1 <- unique(.hdx_strip_suffix(colnames(df[7:dim(df)[2]])))
+  ## time-course columns are "t<time>": show the time without the "t"
+  nm1 <- unique(sub("^t(?=[0-9])", "", .hdx_strip_suffix(colnames(df[7:dim(df)[2]])), perl = TRUE))
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0,
                                                         0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")

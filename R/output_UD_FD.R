@@ -21,8 +21,12 @@
     has_val <- tapply(!is.na(v), a$Deut.Time, sum)
     keep_lab <- if (any(has_val > 0)) names(which.max(has_val)) else names(which.max(table(a$Deut.Time)))
     a <- a[a$Deut.Time == keep_lab, , drop = FALSE]
-    a$X..Deut[is.na(a$X..Deut)] <- 0
-    a$Deut..[is.na(a$Deut..)] <- 0
+    ## only an undeuterated control with no values at all is filled; a
+    ## measured control (e.g. "0.00s") keeps its missing values as NA
+    if (has_val[keep_lab] == 0) {
+      a$X..Deut[is.na(a$X..Deut)] <- 0
+      a$Deut..[is.na(a$Deut..)] <- 0
+    }
   }
   a <- a[!is.na(if (percent) a$Deut.. else a$X..Deut), , drop = FALSE]
   if (nrow(a) == 0) stop("no '", paste(labels, collapse = "'/'"), "' rows with values in the input",
