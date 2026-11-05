@@ -1,4 +1,4 @@
-# HDXBoxeR (development version)
+# HDXBoxeR 0.1.0
 
 ## New features
 
