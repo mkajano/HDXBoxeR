@@ -41,7 +41,7 @@ jobs:
         continue-on-error: true
         run: |
           tlmgr update --self || true
-          tlmgr install inconsolata || true
+          tlmgr install inconsolata courier helvetic times psnfss || true
       - uses: r-lib/actions/check-r-package@v2
         with:
           args: ${{ matrix.config.manual && 'c("--as-cran")' || 'c("--no-manual", "--as-cran")' }}
