@@ -22,7 +22,9 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
   fig.align = "center",
-  eval = has_deps
+  eval = has_deps,
+  message = FALSE,
+  warning = FALSE
 )
 ```
 
