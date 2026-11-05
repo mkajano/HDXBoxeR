@@ -97,7 +97,7 @@ ppar_wider<-function(mfrow2){
                        xaxp = c(0.6, 1.4, 4), xaxs = "r", xaxt = "s",
                        xpd = FALSE, yaxp = c(0.6, 1.4, 4), yaxs = "r",
                        yaxt = "s", ylbias = 0.2),
-                  .Names = c("xlog", "ylog", "adj", "ann", "ask", "bg",
+                  names = c("xlog", "ylog", "adj", "ann", "ask", "bg",
                              "bty", "cex", "cex.axis", "cex.lab", "cex.main", "cex.sub",
                              "col", "col.axis", "col.lab", "col.main", "col.sub", "crt",
                              "err", "family", "fg", "fig", "fin", "font", "font.axis",
