@@ -23,6 +23,43 @@
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
   structure mapping, data quality.
 
+## Statistics: one significance rule, regions and time courses
+
+* One significance rule everywhere: a peptide differs when its Welch
+  p-value is below `pvalue` AND its difference exceeds the pooled
+  critical interval. p-values are raw by default; every function that
+  calls significance now takes `p_adjust` (e.g. `"BH"`), including
+  `pv_timepoint()`, `pv_timecourse()`, the heat map, volcano, Woods, robot
+  and peptide plots, the PyMOL scripts, `plot_fissure_vent()`, the
+  interactive plots, `diff_peptides_prep()` and `verbose_timepoint_output()`.
+* `compare_states_tp()`: raw p-values by default (`p_adjust = "none"`;
+  previously BH) and a Welch one-way ANOVA as the reported omnibus test
+  (`omnibus = "kruskal"` for the previous Kruskal-Wallis test).
+  `p_adjust_method` is deprecated. A peptide in two overlapping regions now
+  enters the multiple-testing correction once.
+* `residue_regions()`: peptides are called by the package-wide rule
+  (previously BH-adjusted p < `fdr_cutoff` with no critical interval;
+  `fdr_cutoff` still works, deprecated, and reproduces that rule). Charge
+  states of one peptide count once towards `min_peptides`, and the
+  per-residue effect is the difference per exchangeable amide.
+* `compare_states_unmatched()`: the per-peptide diagnostic uses the
+  package-wide rule, is listed first in `summary`, and its per-peptide
+  results are returned as `peptides`; the pooled test is documented as
+  approximate. `p_adjust` replaces `p_adjust_method` (default now `"none"`).
+* New `compare_regions()`: region-level two-way ANOVA (peptide + state) for
+  matched peptides, with each peptide as its own control; pairwise state
+  contrasts, a state x peptide heterogeneity test, and an optional model
+  over all time points with a state x time test.
+* New `compare_timecourse()`: per-peptide summed difference over the time
+  course with a global critical interval, and the number of time points at
+  which a peptide is significant. `robot_indexes()`, `robot_indexes_df()`
+  and `robot_plot_All()` gain `min_timepoints`.
+* New `percent = "per_residue"` in `output_tp()`/`output_tc()`: uptake per
+  exchangeable amide, so peptide length does not affect the
+  critical-interval half of the rule.
+* `plot_fissure_vent()` returns (invisibly) the table of what it drew.
+* The multi-state vignette is now `vignette("multistate")`.
+
 ## Fully deuterated control and quality checks
 
 * `output_tp()`/`output_tc()` gain `percent = "FD"`: percent of the measured

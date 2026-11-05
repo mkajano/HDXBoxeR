@@ -18,6 +18,7 @@
 #' @param ylim y-axis range
 #' @param alpha critical interval, to have more restrictive use lower values, default=0.01
 #' @import RColorBrewer
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return Robot maps for timecourses for 2 protein states and selected indexes.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -30,7 +31,7 @@
 #' @export
 
 robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
-                                pvalue=0.01, alpha=0.01, ylim, xlim){
+                                pvalue=0.01, alpha=0.01, ylim, xlim, p_adjust="none"){
 
   if(missing(xlim)) xlim=c(min(thP$Start), max(thP$End))
   if(missing(ylim)) ylim=c(-110, 120)
@@ -44,7 +45,7 @@ robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,
   control_df_up<- th[th$Protein.State==states[1],]
   variant_df_up<- th[th$Protein.State==states[2],]
 
-  pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
+  pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates, p_adjust = p_adjust)
   lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
   lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 

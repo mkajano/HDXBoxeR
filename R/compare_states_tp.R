@@ -2,15 +2,17 @@
 #'
 #' Every other significance function in this package (`plot_fissure_vent()`,
 #' `diff_peptides_prep()`, `robot_indexes()`) compares exactly two states at
-#' a time - three or more states means looping pairwise yourself, with no
-#' correction for now running many more simultaneous tests. This function
-#' does two things instead: (1) an omnibus Kruskal-Wallis test per peptide
-#' across *all* requested states (does this peptide differ across any of
-#' them at all) - reported, not used to gate significance (see Details) -
-#' and (2) the package's usual Hageman & Weis hybrid test (pooled
-#' `CI_2pts()` + per-pair Welch p-value) for every pair of states (or every
-#' `reference` vs. the rest, if `reference` is given), with p-values
-#' adjusted across every peptide-by-pair test at this timepoint together.
+#' a time. This function does two things for three or more states: (1) an
+#' omnibus test per peptide across *all* requested states (does this
+#' peptide differ across any of them at all) - by default a Welch one-way
+#' ANOVA ([stats::oneway.test()], unequal variances), reported but not used
+#' to gate significance (see Details) - and (2) the package's usual
+#' Hageman & Weis hybrid test (pooled `CI_2pts()` + per-pair Welch p-value)
+#' for every pair of states (or every `reference` vs. the rest, if
+#' `reference` is given). A pair is significant when its Welch p-value
+#' (raw by default, or adjusted with `p_adjust` across every peptide-by-pair
+#' test at this timepoint) is below `pvalue` AND its difference exceeds the
+#' pooled CI - the same rule as every other function in the package.
 #'
 #' @section Which replicate SD feeds the pooled CI:
 #' Each state's own raw replicate SD, pooled via `CI_2pts()` - the same
@@ -28,23 +30,20 @@
 #' This function instead calls `output_tp()` **separately per pair**, so a
 #' peptide only needs to be present in the *two* states of that specific
 #' pair to be tested there - "available-case" matching. The one place
-#' complete-case is unavoidable is the omnibus test itself: Kruskal-Wallis
+#' complete-case is unavoidable is the omnibus test itself: it
 #' cannot test a peptide against a group it has no data for, so the omnibus
 #' p-value is computed from the peptide set present in *all* requested
 #' states (via one additional `output_tp()` call with every state), and
 #' peptides outside that set simply get `NA` in `p_omnibus`/`p_omnibus_adj`.
 #'
-#' @section Why the omnibus test is advisory, not a gate:
-#' With the small replicate counts typical here (often `replicates = 3`),
-#' Kruskal-Wallis's exact null distribution is extremely coarse (with 3
-#' states of 3 replicates each, the smallest attainable p-value is
-#' 6/1680 ~ 0.0036) and its chi-squared approximation is unreliable at this
-#' size. Using it as a hard gate stacks a second, statistically shaky
-#' filter on top of the BH-adjusted pairwise p-value with no clear combined
-#' error-rate guarantee. `is_sig` therefore depends only on the per-pair
-#' adjusted p-value and the pooled CI - the direct N-state generalization of
-#' the shipped two-state criterion - and `p_omnibus`/`p_omnibus_adj` are
-#' reported alongside for context, not enforced.
+#' @section The omnibus test:
+#' The default omnibus test is a Welch one-way ANOVA, which keeps useful
+#' power at the small replicate counts typical of HDX (3 per state). The
+#' rank-based Kruskal-Wallis test (`omnibus = "kruskal"`) is available but
+#' is very coarse at this size: with 3 states of 3 replicates its smallest
+#' attainable p-value is about 0.0036. Either way the omnibus p-value is
+#' reported for context (`p_omnibus`, and `p_omnibus_adj` adjusted across
+#' peptides with `p_adjust`); `is_sig` depends only on the per-pair rule.
 #'
 #' @param filepath filepath to the input file (same format as
 #'   [output_tp()]/[nm_states()] expect) - this function calls
@@ -80,27 +79,36 @@
 #'   differ.
 #' @param alpha alpha for the pooled critical interval (`CI_2pts()`),
 #'   applied per pair. Default `0.01`.
-#' @param pvalue significance cutoff applied to the (BH-adjusted) per-pair
-#'   p-value. Default `0.01`.
-#' @param p_adjust_method passed to [stats::p.adjust()]; applied separately
-#'   to the vector of per-peptide omnibus p-values and the vector of
-#'   per-peptide-by-pair p-values (the latter across every pair together,
-#'   not within each pair on its own). Default `"BH"`.
+#' @param pvalue significance cutoff applied to the per-pair p-value (raw,
+#'   or adjusted with `p_adjust`). Default `0.01`.
+#' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
+#'   `"none"` (default, raw Welch p-values, as in every other function) or
+#'   e.g. `"BH"`. Applied separately to the per-peptide omnibus p-values and
+#'   to the per-peptide-by-pair p-values (the latter across every pair
+#'   together, not within each pair on its own).
+#' @param omnibus omnibus test across all states per peptide: `"welch"`
+#'   (default, Welch one-way ANOVA) or `"kruskal"` (Kruskal-Wallis).
+#' @param p_adjust_method deprecated; earlier versions adjusted with
+#'   `p_adjust_method = "BH"` by default. Supplying it sets `p_adjust`, with
+#'   a warning.
 #' @param percent passed to [output_tp()] - `FALSE` (default) compares
-#'   uptake in Daltons, `TRUE` compares percent deuteration.
+#'   uptake in Daltons, `TRUE` percent deuteration, `"FD"` percent of the
+#'   fully deuterated control, `"per_residue"` uptake per exchangeable amide
+#'   (removes peptide length from the critical-interval condition).
 #' @return data.frame with one row per peptide-by-state-pair (by region, if
 #'   `regions` is supplied): `peptide_id`, `Start`, `End`, `Sequence`,
 #'   `state1`, `state2`, `delta` (`state2 - state1`), `p_value` (raw
 #'   per-pair Welch p-value), `ci` (pooled CI for that pair), `p_adj`
-#'   (BH-adjusted per-pair p-value), `p_omnibus`/`p_omnibus_adj` (`NA` for
-#'   peptides absent from at least one requested state), and `is_sig`.
+#'   (per-pair p-value after `p_adjust`; equal to `p_value` when `"none"`),
+#'   `p_omnibus`/`p_omnibus_adj` (`NA` for peptides absent from at least one
+#'   requested state), and `is_sig`.
 #' @seealso [plot_fissure_vent()], [diff_peptides_prep()], [CI_2pts()],
 #'   [compare_states_unmatched()]
 #' @examples
 #' \donttest{
 #' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' # the shipped example only has two states; compare_states_tp() needs 3+.
-#' # See vignette("anova") for a worked example that
+#' # See vignette("multistate") for a worked example that
 #' # constructs a synthetic third state to demonstrate this function.
 #' }
 #' @export
@@ -108,8 +116,15 @@ compare_states_tp <- function(filepath, times, states = NULL,
                                by = c("sequence", "position"),
                                reference = NULL, regions = NULL,
                                replicates = NULL, alpha = 0.01, pvalue = 0.01,
-                               p_adjust_method = "BH", percent = FALSE) {
+                               p_adjust = "none", omnibus = c("welch", "kruskal"),
+                               percent = FALSE, p_adjust_method) {
   by <- match.arg(by)
+  omnibus <- match.arg(omnibus)
+  if (!missing(p_adjust_method)) {
+    warning("p_adjust_method is deprecated: use p_adjust (default now \"none\").", call. = FALSE)
+    p_adjust <- p_adjust_method
+  }
+  p_adjust <- match.arg(p_adjust, stats::p.adjust.methods)
   ## output_tp(seq_match = FALSE) merges on Sequence+Start+End+Charge (exact
   ## sequence identity); seq_match = TRUE merges on Start+End+Charge only and
   ## joins differing sequences with "." - i.e. position matching
@@ -168,6 +183,13 @@ compare_states_tp <- function(filepath, times, states = NULL,
       grp  <- rep(states, times = lengths(cols))
       ok <- !is.na(vals)
       if (length(unique(grp[ok])) < length(states) || length(unique(vals[ok])) < 2) return(NA_real_)
+      if (omnibus == "welch") {
+        ## Welch ANOVA needs >= 2 values per state
+        if (any(table(grp[ok]) < 2)) return(NA_real_)
+        p <- tryCatch(stats::oneway.test(v ~ g, data = data.frame(v = vals[ok], g = factor(grp[ok])),
+                                         var.equal = FALSE)$p.value, error = function(e) NA_real_)
+        return(if (is.finite(p)) p else NA_real_)
+      }
       tryCatch(stats::kruskal.test(vals[ok], factor(grp[ok]))$p.value, error = function(e) NA_real_)
     }, numeric(1))
   }
@@ -240,12 +262,16 @@ compare_states_tp <- function(filepath, times, states = NULL,
     stop(sprintf("no peptides found for any pair at Deut.Time == '%s'", times))
   }
 
-  ## BH over every peptide x pair test together, THEN gate on the pooled
-  ## CI - never subset to CI-passing peptides before adjusting, or the
-  ## realized FDR is no longer what p.adjust() promises.
-  out$p_adj <- stats::p.adjust(out$p_value, method = p_adjust_method)
+  ## adjust over every distinct peptide x pair test together, THEN gate on
+  ## the pooled CI - never subset to CI-passing peptides before adjusting,
+  ## or the realized FDR is no longer what p.adjust() promises. A peptide in
+  ## two overlapping regions is one test, not two.
+  test_key <- paste(out$peptide_id, out$state1, out$state2, sep = "\r")
+  first_test <- !duplicated(test_key)
+  adj_test <- stats::p.adjust(out$p_value[first_test], method = p_adjust)
+  out$p_adj <- adj_test[match(test_key, test_key[first_test])]
   uniq <- !duplicated(out$peptide_id)
-  omni_adj_uniq <- stats::p.adjust(out$p_omnibus[uniq], method = p_adjust_method)
+  omni_adj_uniq <- stats::p.adjust(out$p_omnibus[uniq], method = p_adjust)
   out$p_omnibus_adj <- omni_adj_uniq[match(out$peptide_id, out$peptide_id[uniq])]
 
   out$is_sig <- !is.na(out$p_adj) & (abs(out$delta) > out$ci) & (out$p_adj < pvalue)

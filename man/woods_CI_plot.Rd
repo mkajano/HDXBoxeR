@@ -12,6 +12,7 @@ woods_CI_plot(
   states,
   alpha = 0.01,
   ylim = c(0, 120),
+  p_adjust = "none",
   ...
 )
 }
@@ -29,6 +30,8 @@ woods_CI_plot(
 \item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 
 \item{ylim}{y axis limit}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 
 \item{...}{other variables}
 }

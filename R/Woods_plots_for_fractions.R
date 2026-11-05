@@ -15,6 +15,7 @@
 #' @param ylim y axis limit
 #' @param ... other variables
 #' @param alpha critical interval, to have more restrictive use lower values, default=0.01
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return Woods plots with chosen statistically different peptides
 #' @examples
 #' \donttest{
@@ -25,7 +26,7 @@
 #' }
 #' @export
 woods_CI_plot_frac<-function(th, replicates=3,
-                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,1.2), ...){
+                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,1.2), p_adjust="none", ...){
   if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -64,7 +65,7 @@ woods_CI_plot_frac<-function(th, replicates=3,
     control_df_up<- th[th$Protein.State==states[1],]
     variant_df_up<- th[th$Protein.State==state,]
 
-    pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
+    pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates, p_adjust = p_adjust)
     lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
     lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 

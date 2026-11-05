@@ -72,12 +72,13 @@ peptide_pv_tp<-function(df, pv, sd, nb_row, ranges=c(-Inf, seq(-30, 30, by=10), 
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param nb_pep_row number of peptides in each row. Plotting parameter. Default set to 100.
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return plot with peptides which are significantly different between sets.
 #' @export
 plot_peptide_sig_tp<-function(df1, replicates=3, nb_pep_row=100,
                               ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-                              alpha=0.01,pv_cutoff=0.01){
-  pv1<-pv_timepoint(df1,  replicates)
+                              alpha=0.01,pv_cutoff=0.01, p_adjust="none"){
+  pv1<-pv_timepoint(df1,  replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(df1, replicates)
   av1<-ave_timepoint(df1, replicates)
   oldpar<-par(no.readonly = TRUE)

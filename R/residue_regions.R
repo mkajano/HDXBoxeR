@@ -3,51 +3,53 @@
 #' Takes a peptide-level comparison between two states at one timepoint and
 #' derives contiguous residue regions that are consistently destabilized
 #' (more exposed) or protected (less exposed), rather than reporting a flat
-#' list of significant peptides. A peptide-level significance call is
-#' length-biased - a long peptide can clear a flat critical-interval cutoff
-#' from a diffuse, unremarkable per-residue effect just by accumulating a
-#' large summed Da difference - so this function gates on FDR-corrected
-#' per-peptide p-values (scale-invariant to peptide length) instead, ranks
-#' by per-residue effect size (delta divided by peptide length), and only
-#' lets a residue into a region once at least `min_peptides` independent
-#' peptides of the *same direction* cover it and clear the FDR cutoff.
-#' Requiring multiple corroborating peptides guards against a single long
-#' peptide alone driving a region's inclusion.
+#' list of significant peptides. A peptide counts as significant by the same
+#' rule as everywhere else in the package: Welch p-value below `pvalue`
+#' (raw, or adjusted with `p_adjust`) AND absolute difference above the
+#' pooled Hageman & Weis critical interval. A residue enters a region only
+#' once at least `min_peptides` distinct significant peptides of the *same
+#' direction* cover it, so a single peptide alone cannot create a region.
+#' Charge states of the same peptide count once.
 #'
-#' @param df output of [output_tp()] (or `output_tp_proc()`) called with
-#'   `percent = FALSE`, i.e. deuteration uptake in Daltons - this function
-#'   works in Da so that `delta` is additive across residues, same
-#'   requirement as [residue_deconvolution()].
+#' The per-residue effect reported for a region is each covering peptide's
+#' difference divided by its number of exchangeable amides
+#' ([nb_exch_deut()]), averaged over the peptides covering each residue.
+#'
+#' @param df output of [output_tp()] called with `percent = FALSE`, i.e.
+#'   deuteration uptake in Daltons - this function works in Da so that
+#'   `delta` is additive across residues, same requirement as
+#'   [residue_deconvolution()].
 #' @param state1 First protein state, matched the same way as in
-#'   [plot_fissure_vent()] (substring match against the raw replicate
-#'   column names - does not need to be the exact column name).
+#'   [plot_fissure_vent()].
 #' @param state2 Second protein state, same matching rule.
 #' @param times a single Deut.Time value to derive regions for (e.g.
 #'   `"1800.00s"`). Call this function once per timepoint of interest and
 #'   `rbind()` the results if you want regions across multiple timepoints.
-#' @param replicates number of replicates in sample. Default set to 3.
-#' @param fdr_cutoff BH-adjusted p-value cutoff for a peptide to count as
-#'   significant. Default `0.05`. Unlike [plot_fissure_vent()]'s per-peptide
-#'   p-value (a raw, uncorrected Welch p-value), this is FDR-corrected
-#'   across every peptide tested in this comparison, since region-finding
-#'   involves many more simultaneous per-peptide tests than eyeballing one
-#'   plot.
-#' @param min_peptides minimum number of independent, same-direction,
-#'   FDR-significant peptides that must cover a residue before that residue
-#'   is included in a region. Default `2`.
+#' @param replicates number of replicates in sample, only used for tables
+#'   without named replicate columns. Default set to 3.
+#' @param pvalue p-value cutoff for a peptide to count as significant.
+#'   Default `0.01`.
+#' @param p_adjust multiple-testing correction of the per-peptide Welch
+#'   p-values, passed to [stats::p.adjust()]: `"none"` (default) or e.g.
+#'   `"BH"`, applied across the peptides of the comparison.
+#' @param min_peptides minimum number of distinct, same-direction,
+#'   significant peptides that must cover a residue before that residue is
+#'   included in a region. Default `2`.
 #' @param gap_tolerance maximum number of consecutive non-covered residues
 #'   allowed inside one region before it is split into two. Default `2`.
-#' @param alpha alpha used only for the diagnostic pooled Hageman & Weis
-#'   critical interval reported alongside each region (via
-#'   [sd_timepoint()]/[CI_2pts()], the same pooled threshold
-#'   [plot_fissure_vent()] draws as its grey band) - not used as the
-#'   region-inclusion gate itself. Default `0.01`.
+#' @param alpha alpha of the pooled Hageman & Weis critical interval
+#'   ([CI_2pts()]), the same threshold [plot_fissure_vent()] draws as its
+#'   grey band. Default `0.01`.
+#' @param fdr_cutoff deprecated. Earlier versions called a peptide
+#'   significant when its BH-adjusted p-value was below `fdr_cutoff`, without
+#'   the critical-interval condition. Supplying it reproduces that rule, with
+#'   a warning.
 #' @return data.frame with one row per region: `direction`
 #'   ("destabilized"/"protected"), `region_start`, `region_end`,
-#'   `n_residues`, `n_peptides` (distinct FDR-significant, same-direction
+#'   `n_residues`, `n_peptides` (distinct significant, same-direction
 #'   peptides overlapping the region), `mean_per_residue_delta` (Da per
-#'   residue), and `pooled_CI_Da` (the diagnostic Hageman & Weis pooled
-#'   threshold for this comparison, repeated on every row for reference).
+#'   exchangeable amide), and `pooled_CI_Da` (the pooled critical interval
+#'   for this comparison, repeated on every row for reference).
 #' @seealso [plot_fissure_vent()], [residue_deconvolution()],
 #'   [residue_level_average()]
 #' @examples
@@ -56,49 +58,58 @@
 #' residue_regions(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
 #' @export
 residue_regions <- function(df, state1, state2, times, replicates = 3,
-                             fdr_cutoff = 0.05, min_peptides = 2,
-                             gap_tolerance = 2, alpha = 0.01) {
+                             pvalue = 0.01, p_adjust = "none", min_peptides = 2,
+                             gap_tolerance = 2, alpha = 0.01, fdr_cutoff) {
+  legacy <- !missing(fdr_cutoff)
+  if (legacy) {
+    warning("fdr_cutoff is deprecated: use pvalue (with p_adjust = \"BH\"). ",
+            "Using the previous rule: BH-adjusted p < fdr_cutoff, no critical-interval condition.",
+            call. = FALSE)
+    pvalue <- fdr_cutoff; p_adjust <- "BH"
+  }
 
   sub_df <- df[df$Deut.Time == times, ]
   if (nrow(sub_df) == 0) {
     stop(sprintf("no rows with Deut.Time == '%s'", times))
   }
 
-  resolve_raw_cols <- function(state, cols, replicates) {
-    .hdx_state_cols(state, cols)
-  }
-  raw_cols1 <- resolve_raw_cols(state1, colnames(sub_df), replicates)
-  raw_cols2 <- resolve_raw_cols(state2, colnames(sub_df), replicates)
+  raw_cols1 <- .hdx_state_cols(state1, colnames(sub_df))
+  raw_cols2 <- .hdx_state_cols(state2, colnames(sub_df))
+  m1 <- .hdx_block_matrix(sub_df, raw_cols1); m2 <- .hdx_block_matrix(sub_df, raw_cols2)
 
-  # per-peptide delta (state2 - state1, Da) and Welch p-value, same
-  # per-peptide test as plot_fissure_vent()'s significance half - computed
-  # independently here (not shared code) since this function only needs
-  # the p-value and point delta, not a calibrated confidence interval.
-  test <- lapply(seq_len(nrow(sub_df)), function(r) {
-    x1 <- as.numeric(sub_df[r, raw_cols1]); x2 <- as.numeric(sub_df[r, raw_cols2])
-    tt <- tryCatch(t.test(x1, x2), error = function(e) NULL)
-    if (is.null(tt) || is.na(tt$p.value)) {
-      return(c(delta = NA_real_, p_value = NA_real_))
-    }
-    c(delta = mean(x2, na.rm = TRUE) - mean(x1, na.rm = TRUE), p_value = tt$p.value)
-  })
-  test <- do.call(rbind, test)
+  sd1 <- sd_timepoint(sub_df, replicates)
+  sd_prefixes <- c("sd_ci_", "sd_")
+  sd_state1 <- .hdx_summary_col(state1, colnames(sd1), sd_prefixes)
+  sd_state2 <- .hdx_summary_col(state2, colnames(sd1), sd_prefixes)
+  pooled_CI <- CI_2pts(sd1[[sd_state1]], sd1[[sd_state2]], replicates, alpha,
+                       n1 = .hdx_n_for(sd1, sd_state1), n2 = .hdx_n_for(sd1, sd_state2))
 
-  pep <- data.frame(sub_df[, c("Start", "End")], delta = test[, "delta"], p_value = test[, "p_value"])
-  pep$length <- pep$End - pep$Start + 1
-  pep$per_residue_delta <- pep$delta / pep$length
-  pep$p_adj <- stats::p.adjust(pep$p_value, method = "BH")
-  pep$fdr_sig <- !is.na(pep$p_adj) & pep$p_adj < fdr_cutoff
+  pep <- data.frame(sub_df[, c("Start", "End", "Sequence")],
+                    delta = .hdx_row_mean(m2) - .hdx_row_mean(m1),
+                    p_value = .hdx_row_welch(m1, m2), stringsAsFactors = FALSE)
+  pep$p_adj <- stats::p.adjust(pep$p_value, method = p_adjust)
+  pep$sig <- !is.na(pep$p_adj) & pep$p_adj < pvalue &
+    (legacy | (!is.na(pep$delta) & abs(pep$delta) > pooled_CI))
+  n_exch <- nb_exch_deut(pep)
+  pep$per_residue_delta <- ifelse(n_exch > 0, pep$delta / n_exch, NA_real_)
+  ## one entry per distinct peptide: charge states of the same peptide are
+  ## not independent evidence
+  pep$pep_id <- paste(pep$Start, pep$End, pep$Sequence, sep = "_")
 
   max_pos <- max(pep$End)
 
-  # for each residue, how many independent FDR-significant peptides of the
-  # given direction cover it, and their mean per-residue delta
-  residue_hit_counts <- function(direction) {
+  # for each residue, how many distinct significant peptides of the given
+  # direction cover it, and their mean per-residue delta
+  same_dir <- function(direction) {
+    hit <- pep[pep$sig & !is.na(pep$per_residue_delta) &
+                 (if (direction == "destabilized") pep$per_residue_delta > 0 else pep$per_residue_delta < 0), ]
+    if (nrow(hit) == 0) return(hit)
+    agg <- stats::aggregate(per_residue_delta ~ pep_id + Start + End, data = hit, FUN = mean)
+    agg
+  }
+  residue_hit_counts <- function(hit) {
     counts <- integer(max_pos)
     sum_prd <- numeric(max_pos)
-    hit <- pep[pep$fdr_sig & (if (direction == "destabilized") pep$per_residue_delta > 0
-                               else pep$per_residue_delta < 0), ]
     for (i in seq_len(nrow(hit))) {
       rng <- hit$Start[i]:hit$End[i]
       rng <- rng[rng >= 1 & rng <= max_pos]
@@ -117,24 +128,17 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
     lapply(seq_along(starts), function(i) c(pos[starts[i]], pos[ends[i]]))
   }
 
-  sd1 <- sd_timepoint(sub_df, replicates)
-  sd_prefixes <- c("sd_ci_", "sd_")
-  sd_state1 <- .hdx_summary_col(state1, colnames(sd1), sd_prefixes)
-  sd_state2 <- .hdx_summary_col(state2, colnames(sd1), sd_prefixes)
-  pooled_CI <- CI_2pts(sd1[[sd_state1]], sd1[[sd_state2]], replicates, alpha,
-                       n1 = .hdx_n_for(sd1, sd_state1), n2 = .hdx_n_for(sd1, sd_state2))
-
   out <- list()
   for (direction in c("destabilized", "protected")) {
-    hc <- residue_hit_counts(direction)
+    hit <- same_dir(direction)
+    hc <- residue_hit_counts(hit)
     confirmed <- which(hc$counts >= min_peptides)
     regions <- cluster_regions(confirmed)
 
     for (r in regions) {
       lo <- r[1]; hi <- r[2]
       rng <- lo:hi
-      sign_ok <- if (direction == "destabilized") `>` else `<`
-      covering <- pep[pep$End >= lo & pep$Start <= hi & pep$fdr_sig & sign_ok(pep$per_residue_delta, 0), ]
+      covering <- hit[hit$End >= lo & hit$Start <= hi, ]
       out[[length(out) + 1]] <- data.frame(
         direction = direction, region_start = lo, region_end = hi,
         n_residues = length(rng), n_peptides = nrow(covering),
@@ -150,7 +154,9 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
                        mean_per_residue_delta = numeric(0), pooled_CI_Da = numeric(0)))
   }
   result <- do.call(rbind, out)
-  result[order(result$direction, result$region_start), ]
+  result <- result[order(result$direction, result$region_start), ]
+  rownames(result) <- NULL
+  result
 }
 
 #' Roll up derived regions against named residue subsets

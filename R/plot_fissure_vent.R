@@ -78,8 +78,17 @@
 #' @param fill_alpha transparency (0-1) applied to each ellipse's fill only
 #'   (the border stays opaque); `0` is fully transparent, `1` fully opaque.
 #'   Default `0.3`. Ignored when `position_col` is supplied.
+#' @param p_adjust multiple-testing correction of the per-peptide Welch
+#'   p-values, passed to [stats::p.adjust()]: `"none"` (default) or e.g.
+#'   `"BH"`, applied across the peptides of each time point. The
+#'   significance outline uses the adjusted p-value; the ellipses stay
+#'   calibrated to the raw p-value (touching the diagonal means raw
+#'   p >= `pvalue`).
 #' @return Fissure vent plot showing peptide-level deuteration in state1 vs
 #'   state2, with the CI band and per-peptide uncertainty ellipses.
+#'   Invisibly, a data frame with one row per drawn peptide: time, Start,
+#'   End, Sequence, both state averages, `delta`, `p_value`, `p_adj`, `ci`
+#'   and `is_sig`.
 #' @examples
 #' \donttest{
 #' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -94,7 +103,7 @@
 
 plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha = 0.01, pvalue = 0.01,
                                position_col = NA, sd_source = "raw", length1 = NA,
-                               xlim = NULL, ylim = NULL,
+                               xlim = NULL, ylim = NULL, p_adjust = "none",
                                sig_col = "firebrick", nonsig_col = "grey60", fill_alpha = 0.3, ...) {
 
   av1 <- ave_timepoint(df, replicates)
@@ -183,7 +192,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   # each other when an ellipse's edge crosses one but not the other.
   points(c(-10, 110), c(-10, 110), type = "l", lwd = 2)
 
-  draw_one <- function(idx, ci, col_default, use_position_col) {
+  draw_one <- function(idx, ci, col_default, use_position_col, p_sig) {
     n_skipped <- 0
     for (pep in idx) {
       # a peptide can have an NA/NaN ellipse (e.g. identical-valued
@@ -197,7 +206,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
         next
       }
       delta <- abs(av1[pep, av_state2] - av1[pep, av_state1])
-      is_sig <- (delta > ci) && !is.na(pv_state1v2[pep]) && (pv_state1v2[pep] < pvalue)
+      is_sig <- (delta > ci) && !is.na(p_sig[[as.character(pep)]]) && (p_sig[[as.character(pep)]] < pvalue)
       base_col  <- if (is_sig) sig_col else nonsig_col
       border_col <- if (use_position_col) position_col[pep] else base_col
       fill_col   <- if (use_position_col) position_col[pep] else grDevices::adjustcolor(base_col, alpha.f = fill_alpha)
@@ -209,6 +218,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   }
 
   use_position_col <- !is.na(position_col[1])
+  drawn <- list()
   for (i in seq_along(times)) {
     ind1 <- select_indices(av1, times = times[i], length = length1)
     if (length(ind1) == 0) {
@@ -220,6 +230,17 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
     message(sprintf("time %s: CI = %.3f", times[i], ci))
     points(c(-10, 110), c(-10, 110) + ci, type = "l", col = "grey70", lty = 2)
     points(c(-10, 110), c(-10, 110) - ci, type = "l", col = "grey70", lty = 2)
-    draw_one(ind1, ci, "grey30", use_position_col)
+    p_adj <- stats::setNames(stats::p.adjust(pv_state1v2[ind1], method = p_adjust), ind1)
+    draw_one(ind1, ci, "grey30", use_position_col, p_adj)
+    delta <- av1[ind1, av_state2] - av1[ind1, av_state1]
+    drawn[[length(drawn) + 1]] <- data.frame(
+      Deut.Time = av1$Deut.Time[ind1], Start = av1$Start[ind1], End = av1$End[ind1],
+      Sequence = av1$Sequence[ind1], state1_av = av1[ind1, av_state1], state2_av = av1[ind1, av_state2],
+      delta = delta, p_value = pv_state1v2[ind1], p_adj = as.numeric(p_adj), ci = ci,
+      is_sig = !is.na(p_adj) & abs(delta) > ci & p_adj < pvalue,
+      stringsAsFactors = FALSE)
   }
+  out <- do.call(rbind, drawn)
+  rownames(out) <- NULL
+  invisible(out)
 }

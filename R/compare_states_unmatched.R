@@ -30,13 +30,19 @@
   if (length(shared_ids) == 0) {
     return(data.frame(peptide_id = character(0), p_value = numeric(0), stringsAsFactors = FALSE))
   }
-  p_vals <- vapply(shared_ids, function(pid) {
+  stats_one <- function(pid) {
     x <- bd_region$deut_value[bd_region$Protein.State == s1 & bd_region$peptide_id == pid]
     y <- bd_region$deut_value[bd_region$Protein.State == s2 & bd_region$peptide_id == pid]
-    if (sum(!is.na(x)) < 2 || sum(!is.na(y)) < 2) return(NA_real_)
-    tryCatch(stats::t.test(x, y)$p.value, error = function(e) NA_real_)
-  }, numeric(1))
-  data.frame(peptide_id = shared_ids, p_value = p_vals, stringsAsFactors = FALSE)
+    x <- x[!is.na(x)]; y <- y[!is.na(y)]
+    p <- if (length(x) < 2 || length(y) < 2) NA_real_ else
+      tryCatch(stats::t.test(x, y)$p.value, error = function(e) NA_real_)
+    c(p_value = if (is.finite(p)) p else NA_real_,
+      delta = if (length(x) && length(y)) mean(y) - mean(x) else NA_real_,
+      sd1 = if (length(x) >= 2) stats::sd(x) else NA_real_, n1 = length(x),
+      sd2 = if (length(y) >= 2) stats::sd(y) else NA_real_, n2 = length(y))
+  }
+  st <- do.call(rbind, lapply(shared_ids, stats_one))
+  data.frame(peptide_id = shared_ids, st, stringsAsFactors = FALSE, row.names = NULL)
 }
 
 #' Compare pooled peptide-level HDX uptake across states without matching peptides
@@ -69,6 +75,16 @@
 #' has more sequence available in exposed regions to fully deuterate),
 #' not by biology. Restricting to one structurally coherent region at a
 #' time keeps the pooled distribution closer to unimodal and interpretable.
+#'
+#' @section Read the per-peptide diagnostic first:
+#' `summary` lists the matched per-peptide diagnostic first
+#' (`n_peptides_tested`, `n_peptides_significant`,
+#' `frac_peptides_significant`), then the pooled region test. The pooled
+#' test is approximate: it treats the region's peptides as independent
+#' samples although overlapping peptides share residues, and it compares
+#' peptide means without their replicate variance. For peptides measured in
+#' every state, [compare_regions()] (a two-way ANOVA with peptide as a
+#' block) is the more powerful region-level test.
 #'
 #' @section Pooled significance is not peptide significance:
 #' The pooled test above answers "does this region's *typical* exchange
@@ -113,13 +129,11 @@
 #'     intrinsic exchange rate) - trades that off against normalizing away
 #'     part of the signal, which is why it is opt-in, not the default.}
 #' }
-#' Whichever is chosen, the per-peptide diagnostic
-#' (`n_peptides_significant`/`frac_peptides_significant`, see below) is
-#' unaffected by this choice for peptides tested individually: dividing one
-#' peptide's own two states by the same per-peptide constant does not change
-#' a paired t-test's p-value. Only the *pooled* result
-#' (`shift_hl`/`p_value`/`p_omnibus`, which pools values across different
-#' peptides) depends on `value`.
+#' The per-peptide p-values do not depend on this choice (dividing one
+#' peptide's two states by the same constant does not change a t-test's
+#' p-value), but the critical-interval half of the per-peptide rule and the
+#' *pooled* result (`shift_hl`/`p_value`/`p_omnibus`, which pools values
+#' across different peptides) are computed on the chosen scale.
 #'
 #' @section `method`:
 #' \describe{
@@ -167,10 +181,15 @@
 #'   filter `p_adj < pvalue` there themselves), but `pvalue` does gate the
 #'   per-peptide `frac_peptides_significant` diagnostic - see "Pooled
 #'   significance is not peptide significance". Default `0.01`.
-#' @param p_adjust_method passed to [stats::p.adjust()], applied across
-#'   every region-by-pair test together (and separately across every
-#'   region-by-pair-by-peptide test for `frac_peptides_significant`).
-#'   Default `"BH"`.
+#' @param alpha alpha of the pooled Hageman & Weis critical interval used by
+#'   the per-peptide diagnostic. Default `0.01`.
+#' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
+#'   `"none"` (default) or e.g. `"BH"`, applied across every region-by-pair
+#'   test together (and separately across every region-by-pair-by-peptide
+#'   test for the per-peptide diagnostic).
+#' @param p_adjust_method deprecated; earlier versions used
+#'   `p_adjust_method = "BH"` by default. Supplying it sets `p_adjust`, with
+#'   a warning.
 #' @param n_perm number of label permutations for `method = "resample"`.
 #'   Default `1000`.
 #' @param n_boot number of bootstrap resamples for `method = "resample"`'s
@@ -189,7 +208,9 @@
 #'   applies here), and `data` (the pooled `deut_value` values the tests
 #'   actually ran on - one row per region-by-state-by-peptide, or per
 #'   replicate under `method = "classic"` - for plotting with
-#'   [plot_compare_states_unmatched()]).
+#'   [plot_compare_states_unmatched()]), and `peptides` (the matched
+#'   per-peptide results behind the diagnostic: `delta`, `p_value`, `p_adj`,
+#'   `ci` and `significant` per region, pair and peptide).
 #' @seealso [compare_states_tp()], [all_data_long_input()],
 #'   [residue_level_average()], [plot_compare_states_unmatched()],
 #'   [plot_coverage_diagnostics()]
@@ -206,10 +227,16 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
                                       value = c("raw", "percent", "frac_deut"),
                                       method = c("peptide", "classic", "resample"),
                                       reference = NULL,
-                                      replicates = 3, pvalue = 0.01,
-                                      p_adjust_method = "BH", n_perm = 1000, n_boot = 1000) {
+                                      replicates = 3, pvalue = 0.01, alpha = 0.01,
+                                      p_adjust = "none", n_perm = 1000, n_boot = 1000,
+                                      p_adjust_method) {
   value <- match.arg(value)
   method <- match.arg(method)
+  if (!missing(p_adjust_method)) {
+    warning("p_adjust_method is deprecated: use p_adjust (default now \"none\").", call. = FALSE)
+    p_adjust <- p_adjust_method
+  }
+  p_adjust <- match.arg(p_adjust, stats::p.adjust.methods)
   if (missing(regions) || is.null(regions) || length(regions) == 0) {
     stop("regions is required - whole-protein pooling mixes very different exchange behavior ",
          "(protected core vs. exposed loops) and is not a reliable summary. Supply at least one ",
@@ -328,6 +355,8 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
       }
       pep_pv <- .peptide_matched_pvals(b_region, s1, s2)
       if (nrow(pep_pv) > 0) {
+        ## pooled Hageman & Weis CI from the matched peptides' replicate SDs
+        pep_pv$ci <- CI_2pts(pep_pv$sd1, pep_pv$sd2, alpha = alpha, n1 = pep_pv$n1, n2 = pep_pv$n2)
         peptide_sig_list[[length(peptide_sig_list) + 1]] <<- data.frame(
           region = rname, state1 = s1, state2 = s2, pep_pv, stringsAsFactors = FALSE)
       }
@@ -343,20 +372,22 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
   if (is.null(summary_df) || nrow(summary_df) == 0) {
     stop("no peptides found in any requested region.")
   }
-  summary_df$p_adj <- stats::p.adjust(summary_df$p_value, method = p_adjust_method)
+  summary_df$p_adj <- stats::p.adjust(summary_df$p_value, method = p_adjust)
 
   ## per-peptide matched significance rate per region-by-pair: catches a
   ## real but spatially localized effect that the pooled test above dilutes
   ## away (see @section "Pooled significance is not peptide significance").
-  ## p-values adjusted together across every peptide-by-pair test in this
-  ## call, same family-wise scope as summary_df$p_adj above.
+  ## Same rule as the rest of the package: Welch p (raw, or adjusted with
+  ## p_adjust across every peptide-by-pair test in this call) < pvalue AND
+  ## |delta| > the pooled critical interval of that region and pair.
   peptide_sig_df <- do.call(rbind, peptide_sig_list)
   summary_df$n_peptides_tested <- 0L
   summary_df$n_peptides_significant <- 0L
   summary_df$frac_peptides_significant <- NA_real_
   if (!is.null(peptide_sig_df) && nrow(peptide_sig_df) > 0) {
-    peptide_sig_df$p_adj <- stats::p.adjust(peptide_sig_df$p_value, method = p_adjust_method)
-    peptide_sig_df$significant <- !is.na(peptide_sig_df$p_adj) & peptide_sig_df$p_adj < pvalue
+    peptide_sig_df$p_adj <- stats::p.adjust(peptide_sig_df$p_value, method = p_adjust)
+    peptide_sig_df$significant <- !is.na(peptide_sig_df$p_adj) & peptide_sig_df$p_adj < pvalue &
+      !is.na(peptide_sig_df$delta) & abs(peptide_sig_df$delta) > peptide_sig_df$ci
     key_pep <- paste(peptide_sig_df$region, peptide_sig_df$state1, peptide_sig_df$state2, sep = "||")
     key_sum <- paste(summary_df$region, summary_df$state1, summary_df$state2, sep = "||")
     n_tested <- tapply(!is.na(peptide_sig_df$p_value), key_pep, sum)
@@ -368,7 +399,13 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
                                                      summary_df$n_peptides_significant / summary_df$n_peptides_tested,
                                                      NA_real_)
   }
+  ## the matched per-peptide diagnostic first; the pooled (approximate)
+  ## region test after it
+  first <- c("region", "state1", "state2", "n_peptides_tested", "n_peptides_significant",
+             "frac_peptides_significant")
+  summary_df <- summary_df[, c(first, setdiff(colnames(summary_df), first))]
   rownames(summary_df) <- NULL
+  if (!is.null(peptide_sig_df)) rownames(peptide_sig_df) <- NULL
 
   coverage_df <- do.call(rbind, coverage)
   rownames(coverage_df) <- NULL
@@ -376,5 +413,6 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
   data_df <- do.call(rbind, pooled_data)
   rownames(data_df) <- NULL
 
-  list(summary = summary_df, coverage = coverage_df, data = data_df, value = value)
+  list(summary = summary_df, coverage = coverage_df, data = data_df, peptides = peptide_sig_df,
+       value = value)
 }

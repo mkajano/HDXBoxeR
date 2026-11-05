@@ -4,7 +4,14 @@
 \alias{plots_vol_tp}
 \title{Returns volcano plots for timepoints in the data frame}
 \usage{
-plots_vol_tp(df, replicates = 3, pv_cutoff = 0.01, alpha = 0.01, cola)
+plots_vol_tp(
+  df,
+  replicates = 3,
+  pv_cutoff = 0.01,
+  alpha = 0.01,
+  cola,
+  p_adjust = "none"
+)
 }
 \arguments{
 \item{df}{output from functions output_tp}
@@ -16,6 +23,8 @@ plots_vol_tp(df, replicates = 3, pv_cutoff = 0.01, alpha = 0.01, cola)
 \item{alpha}{cutoff for Critical interval. Default=0.01}
 
 \item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 }
 \value{
 volcano plots

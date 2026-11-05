@@ -63,19 +63,24 @@ ave_timepoint<-function(df, replicates=3) {
 #' @param df output from functions output_tp or output_tc.
 #' @param replicates only used for tables whose value columns are not named
 #'   `<state>_..._<replicate>`: the number of replicates per block. Default 3.
+#' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
+#'   `"none"` (default, raw Welch p-values) or e.g. `"BH"`. P-values are
+#'   adjusted across all peptides and compared states within each labeling
+#'   time.
 #' @return Data.frame with p-values
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
 #' pv<-pv_timepoint(df=a)
+#' pv_bh<-pv_timepoint(df=a, p_adjust="BH")
 #' @export
-pv_timepoint<-function(df, replicates=3) {
+pv_timepoint<-function(df, replicates=3, p_adjust="none") {
   blocks <- .hdx_blocks(df, replicates)
   m1 <- .hdx_block_matrix(df, blocks[[1]])
   pv2 <- data.frame(lapply(blocks, function(cols) .hdx_row_welch(m1, .hdx_block_matrix(df, cols))))
   colnames(pv2) <- paste0("pv_", names(blocks))
   pv2 <- data.frame(df[, 1:6], pv2)
-  return(pv2)}
+  return(.hdx_adjust_pv(pv2, p_adjust))}
 
 
 #' Returns data frame with difference of averages between State1 and other states provided.

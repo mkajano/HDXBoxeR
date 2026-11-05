@@ -17,6 +17,7 @@ plot_fissure_vent(
   length1 = NA,
   xlim = NULL,
   ylim = NULL,
+  p_adjust = "none",
   sig_col = "firebrick",
   nonsig_col = "grey60",
   fill_alpha = 0.3,
@@ -63,6 +64,13 @@ two-sample t-test interval (\code{sd_ci_timepoint()}); those are SDs of the
 
 \item{ylim}{y axis limit}
 
+\item{p_adjust}{multiple-testing correction of the per-peptide Welch
+p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default) or e.g.
+\code{"BH"}, applied across the peptides of each time point. The
+significance outline uses the adjusted p-value; the ellipses stay
+calibrated to the raw p-value (touching the diagonal means raw
+p >= \code{pvalue}).}
+
 \item{sig_col}{border/fill color for significant peptides (outside the CI
 band AND clearing the diagonal). Default \code{"firebrick"}.}
 
@@ -78,6 +86,9 @@ Default \code{0.3}. Ignored when \code{position_col} is supplied.}
 \value{
 Fissure vent plot showing peptide-level deuteration in state1 vs
 state2, with the CI band and per-peptide uncertainty ellipses.
+Invisibly, a data frame with one row per drawn peptide: time, Start,
+End, Sequence, both state averages, \code{delta}, \code{p_value}, \code{p_adj}, \code{ci}
+and \code{is_sig}.
 }
 \description{
 modification of the volcano plot.

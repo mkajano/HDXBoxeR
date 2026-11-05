@@ -86,6 +86,7 @@ heat_map_tp_proc<-function(df,dfup, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return heat map for average uptake per residue for significant peptides.
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -99,13 +100,13 @@ heat_map_tp_proc<-function(df,dfup, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
 plot_heat_map_tp_proc<-function(input_proc, input_up, mar_x=3.5,
                                 ranges=c(-Inf, -3,-2,-1, 0,1, 2,3, Inf),
                                 alpha=0.01,
-                                pv_cutoff=0.01, replicates=3){
+                                pv_cutoff=0.01, replicates=3, p_adjust="none"){
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
 
 
-  pv1<-pv_timepoint(input_up, replicates)
+  pv1<-pv_timepoint(input_up, replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(input_up, replicates)
   av1<-ave_timepoint(input_proc, replicates)
   avu<-ave_timepoint(input_up, replicates)

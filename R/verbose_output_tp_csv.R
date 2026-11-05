@@ -8,6 +8,7 @@
 #' @param output_name name of the output in csv format.
 #' @param replicates number of replicates used
 #' @param ... other variables for output_tp
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return csv with analysis for uptake file, standard deviation, p-values for all protein states.
 #' @examples
 #' \donttest{
@@ -18,9 +19,9 @@
 #' states=names_states, replicates=3, times="3.00s")
 #' }
 #' @export
-verbose_timepoint_output<-function(filepath, output_name, replicates=3, ...){
+verbose_timepoint_output<-function(filepath, output_name, replicates=3, ..., p_adjust="none"){
   df<-output_tp(filepath, ...)
-  pv1<-pv_timepoint(df, replicates)
+  pv1<-pv_timepoint(df, replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(df, replicates)
   av1<-ave_timepoint(df, replicates)
   df_List<-list(av1, s1, pv1)

@@ -10,21 +10,22 @@ residue_regions(
   state2,
   times,
   replicates = 3,
-  fdr_cutoff = 0.05,
+  pvalue = 0.01,
+  p_adjust = "none",
   min_peptides = 2,
   gap_tolerance = 2,
-  alpha = 0.01
+  alpha = 0.01,
+  fdr_cutoff
 )
 }
 \arguments{
-\item{df}{output of \code{\link[=output_tp]{output_tp()}} (or \code{output_tp_proc()}) called with
-\code{percent = FALSE}, i.e. deuteration uptake in Daltons - this function
-works in Da so that \code{delta} is additive across residues, same
-requirement as \code{\link[=residue_deconvolution]{residue_deconvolution()}}.}
+\item{df}{output of \code{\link[=output_tp]{output_tp()}} called with \code{percent = FALSE}, i.e.
+deuteration uptake in Daltons - this function works in Da so that
+\code{delta} is additive across residues, same requirement as
+\code{\link[=residue_deconvolution]{residue_deconvolution()}}.}
 
 \item{state1}{First protein state, matched the same way as in
-\code{\link[=plot_fissure_vent]{plot_fissure_vent()}} (substring match against the raw replicate
-column names - does not need to be the exact column name).}
+\code{\link[=plot_fissure_vent]{plot_fissure_vent()}}.}
 
 \item{state2}{Second protein state, same matching rule.}
 
@@ -32,50 +33,56 @@ column names - does not need to be the exact column name).}
 \code{"1800.00s"}). Call this function once per timepoint of interest and
 \code{rbind()} the results if you want regions across multiple timepoints.}
 
-\item{replicates}{number of replicates in sample. Default set to 3.}
+\item{replicates}{number of replicates in sample, only used for tables
+without named replicate columns. Default set to 3.}
 
-\item{fdr_cutoff}{BH-adjusted p-value cutoff for a peptide to count as
-significant. Default \code{0.05}. Unlike \code{\link[=plot_fissure_vent]{plot_fissure_vent()}}'s per-peptide
-p-value (a raw, uncorrected Welch p-value), this is FDR-corrected
-across every peptide tested in this comparison, since region-finding
-involves many more simultaneous per-peptide tests than eyeballing one
-plot.}
+\item{pvalue}{p-value cutoff for a peptide to count as significant.
+Default \code{0.01}.}
 
-\item{min_peptides}{minimum number of independent, same-direction,
-FDR-significant peptides that must cover a residue before that residue
-is included in a region. Default \code{2}.}
+\item{p_adjust}{multiple-testing correction of the per-peptide Welch
+p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default) or e.g.
+\code{"BH"}, applied across the peptides of the comparison.}
+
+\item{min_peptides}{minimum number of distinct, same-direction,
+significant peptides that must cover a residue before that residue is
+included in a region. Default \code{2}.}
 
 \item{gap_tolerance}{maximum number of consecutive non-covered residues
 allowed inside one region before it is split into two. Default \code{2}.}
 
-\item{alpha}{alpha used only for the diagnostic pooled Hageman & Weis
-critical interval reported alongside each region (via
-\code{\link[=sd_timepoint]{sd_timepoint()}}/\code{\link[=CI_2pts]{CI_2pts()}}, the same pooled threshold
-\code{\link[=plot_fissure_vent]{plot_fissure_vent()}} draws as its grey band) - not used as the
-region-inclusion gate itself. Default \code{0.01}.}
+\item{alpha}{alpha of the pooled Hageman & Weis critical interval
+(\code{\link[=CI_2pts]{CI_2pts()}}), the same threshold \code{\link[=plot_fissure_vent]{plot_fissure_vent()}} draws as its
+grey band. Default \code{0.01}.}
+
+\item{fdr_cutoff}{deprecated. Earlier versions called a peptide
+significant when its BH-adjusted p-value was below \code{fdr_cutoff}, without
+the critical-interval condition. Supplying it reproduces that rule, with
+a warning.}
 }
 \value{
 data.frame with one row per region: \code{direction}
 ("destabilized"/"protected"), \code{region_start}, \code{region_end},
-\code{n_residues}, \code{n_peptides} (distinct FDR-significant, same-direction
+\code{n_residues}, \code{n_peptides} (distinct significant, same-direction
 peptides overlapping the region), \code{mean_per_residue_delta} (Da per
-residue), and \code{pooled_CI_Da} (the diagnostic Hageman & Weis pooled
-threshold for this comparison, repeated on every row for reference).
+exchangeable amide), and \code{pooled_CI_Da} (the pooled critical interval
+for this comparison, repeated on every row for reference).
 }
 \description{
 Takes a peptide-level comparison between two states at one timepoint and
 derives contiguous residue regions that are consistently destabilized
 (more exposed) or protected (less exposed), rather than reporting a flat
-list of significant peptides. A peptide-level significance call is
-length-biased - a long peptide can clear a flat critical-interval cutoff
-from a diffuse, unremarkable per-residue effect just by accumulating a
-large summed Da difference - so this function gates on FDR-corrected
-per-peptide p-values (scale-invariant to peptide length) instead, ranks
-by per-residue effect size (delta divided by peptide length), and only
-lets a residue into a region once at least \code{min_peptides} independent
-peptides of the \emph{same direction} cover it and clear the FDR cutoff.
-Requiring multiple corroborating peptides guards against a single long
-peptide alone driving a region's inclusion.
+list of significant peptides. A peptide counts as significant by the same
+rule as everywhere else in the package: Welch p-value below \code{pvalue}
+(raw, or adjusted with \code{p_adjust}) AND absolute difference above the
+pooled Hageman & Weis critical interval. A residue enters a region only
+once at least \code{min_peptides} distinct significant peptides of the \emph{same
+direction} cover it, so a single peptide alone cannot create a region.
+Charge states of the same peptide count once.
+}
+\details{
+The per-residue effect reported for a region is each covering peptide's
+difference divided by its number of exchangeable amides
+(\code{\link[=nb_exch_deut]{nb_exch_deut()}}), averaged over the peptides covering each residue.
 }
 \examples{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

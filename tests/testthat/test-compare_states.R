@@ -208,7 +208,10 @@ test_that("compare_states_unmatched() flags dilution: pooled non-sig but peptide
                     colnames(res$summary)))
   expect_true(all(res$summary$p_adj > 0.01))
   expect_true(all(res$summary$frac_peptides_significant > 0))
-  expect_equal(res$summary$n_peptides_significant, c(5L, 8L))
+  ## p < 0.01 AND |delta| > pooled CI (the package-wide rule); with the
+  ## p-value alone cterm would have 8
+  expect_equal(res$summary$n_peptides_significant, c(5L, 7L))
+  expect_true(all(c("delta", "p_value", "p_adj", "ci", "significant") %in% colnames(res$peptides)))
   expect_equal(res$summary$n_peptides_tested, c(9L, 19L))
 })
 

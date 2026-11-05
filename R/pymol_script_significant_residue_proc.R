@@ -11,6 +11,7 @@
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return pymol script with residues colored based on average of procent deuteration per residue.
 #' @examples
 #' \donttest{
@@ -25,7 +26,7 @@
 pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
                                                 ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 alpha=0.01,
-                                                pv_cutoff=0.01, replicates=3){
+                                                pv_cutoff=0.01, replicates=3, p_adjust="none"){
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
@@ -35,7 +36,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
   dfup=input_up
   df=input_proc
   for ( deut.time in(unique(df$Deut.Time))){
-    pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates)
+    pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates, p_adjust = p_adjust)
     sd<-sd_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates)
     dfu<-ave_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates = replicates)
     df1<-ave_timepoint(df[df$Deut.Time==deut.time,], replicates = replicates)

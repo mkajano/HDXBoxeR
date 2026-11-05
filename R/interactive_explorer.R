@@ -27,7 +27,7 @@
 ## exactly "p >= pvalue" - see vignette("fissure_vent")), computed
 ## independently here rather than by calling plot_fissure_vent() (which
 ## draws a base-R plot as a side effect and isn't a data-returning function).
-.hdx_comparison_table <- function(df, state1, state2, times, replicates, alpha, pvalue) {
+.hdx_comparison_table <- function(df, state1, state2, times, replicates, alpha, pvalue, p_adjust = "none") {
   sub_df <- df[df$Deut.Time == times, ]
   if (nrow(sub_df) == 0) {
     stop(sprintf("no rows with Deut.Time == '%s'", times))
@@ -82,7 +82,8 @@
     ci = ci,
     stringsAsFactors = FALSE
   )
-  tbl$is_sig <- !is.na(tbl$p_value) & (abs(tbl$delta) > tbl$ci) & (tbl$p_value < pvalue)
+  tbl$p_adj <- stats::p.adjust(tbl$p_value, method = p_adjust)
+  tbl$is_sig <- !is.na(tbl$p_adj) & (abs(tbl$delta) > tbl$ci) & (tbl$p_adj < pvalue)
   tbl$hover <- sprintf("%s\nStart-End: %d-%d\n%s: %.2f  %s: %.2f\ndelta: %.2f   p = %.3g%s",
                         tbl$Sequence, tbl$Start, tbl$End, state1, tbl$state1_val,
                         state2, tbl$state2_val, tbl$delta, tbl$p_value,
@@ -94,9 +95,9 @@
   tbl
 }
 
-.hdx_shared <- function(df, state1, state2, times, replicates, alpha, pvalue, shared_data, group_prefix) {
+.hdx_shared <- function(df, state1, state2, times, replicates, alpha, pvalue, shared_data, group_prefix, p_adjust = "none") {
   if (!is.null(shared_data)) return(shared_data)
-  tbl <- .hdx_comparison_table(df, state1, state2, times, replicates, alpha, pvalue)
+  tbl <- .hdx_comparison_table(df, state1, state2, times, replicates, alpha, pvalue, p_adjust)
   crosstalk::SharedData$new(tbl, key = ~peptide_id,
                              group = paste0(group_prefix, "_", paste(sample(letters, 8), collapse = "")))
 }
@@ -124,6 +125,9 @@
 #'   either parameter) - only which points/lines count as significant.
 #' @param pvalue per-peptide significance cutoff. Default `0.01`. See
 #'   `alpha` for vector/dropdown behavior.
+#' @param p_adjust multiple-testing correction of the per-peptide Welch
+#'   p-values, passed to [stats::p.adjust()]: `"none"` (default) or e.g.
+#'   `"BH"`, applied across the peptides of the comparison.
 #' @param shared_data optional `crosstalk::SharedData` object (as built
 #'   internally by [interactive_fissure_explorer()]) so this plot's
 #'   selection is linked to other plots sharing the same object. If `NULL`
@@ -141,13 +145,13 @@
 #' }
 #' @export
 interactive_volcano <- function(df, state1, state2, times, replicates = 3,
-                                 alpha = 0.01, pvalue = 0.01, shared_data = NULL) {
+                                 alpha = 0.01, pvalue = 0.01, shared_data = NULL, p_adjust = "none") {
   .hdx_require_interactive()
   n_combo <- max(length(alpha), length(pvalue))
   alpha   <- rep_len(alpha, n_combo)
   pvalue  <- rep_len(pvalue, n_combo)
 
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data, "hdx_volcano")
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data, "hdx_volcano", p_adjust = p_adjust)
   base_tbl <- sd_obj$data(withSelection = FALSE)
 
   ## positions (delta, -log10(p_value)) are the same for every combo - only
@@ -155,7 +159,7 @@ interactive_volcano <- function(df, state1, state2, times, replicates = 3,
   ## only needs its is_sig column, aligned to base_tbl's row order (the order
   ## actually plotted, which may come from an externally-supplied shared_data).
   raw_tables <- lapply(seq_len(n_combo), function(k) {
-    .hdx_comparison_table(df, state1, state2, times, replicates, alpha[k], pvalue[k])
+    .hdx_comparison_table(df, state1, state2, times, replicates, alpha[k], pvalue[k], p_adjust)
   })
   tables <- lapply(raw_tables, function(t) t[match(base_tbl$peptide_id, t$peptide_id), ])
   ## a peptide with identical replicate values in both states has an
@@ -217,13 +221,13 @@ interactive_volcano <- function(df, state1, state2, times, replicates = 3,
 #' }
 #' @export
 interactive_fissure_vent <- function(df, state1, state2, times, replicates = 3,
-                                      alpha = 0.01, pvalue = 0.01, shared_data = NULL) {
+                                      alpha = 0.01, pvalue = 0.01, shared_data = NULL, p_adjust = "none") {
   .hdx_require_interactive()
   n_combo <- max(length(alpha), length(pvalue))
   alpha   <- rep_len(alpha, n_combo)
   pvalue  <- rep_len(pvalue, n_combo)
 
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data, "hdx_fissure")
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data, "hdx_fissure", p_adjust = p_adjust)
   base_tbl <- sd_obj$data(withSelection = FALSE)
 
   ## positions (state1_val, state2_val) are the same for every combo - only
@@ -232,7 +236,7 @@ interactive_fissure_vent <- function(df, state1, state2, times, replicates = 3,
   ## `ci`, aligned to base_tbl's row order (the order actually plotted, which
   ## may come from an externally-supplied shared_data).
   raw_tables <- lapply(seq_len(n_combo), function(k) {
-    .hdx_comparison_table(df, state1, state2, times, replicates, alpha[k], pvalue[k])
+    .hdx_comparison_table(df, state1, state2, times, replicates, alpha[k], pvalue[k], p_adjust)
   })
   cis <- vapply(raw_tables, function(t) attr(t, "ci"), numeric(1))
   tables <- lapply(raw_tables, function(t) t[match(base_tbl$peptide_id, t$peptide_id), ])
@@ -310,9 +314,9 @@ interactive_fissure_vent <- function(df, state1, state2, times, replicates = 3,
 #' }
 #' @export
 interactive_woods <- function(df, state1, state2, times, replicates = 3,
-                               alpha = 0.01, pvalue = 0.01, shared_data = NULL) {
+                               alpha = 0.01, pvalue = 0.01, shared_data = NULL, p_adjust = "none") {
   .hdx_require_interactive()
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha, pvalue, shared_data, "hdx_woods")
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha, pvalue, shared_data, "hdx_woods", p_adjust = p_adjust)
   tbl <- sd_obj$data(withSelection = FALSE)
 
   seg <- function(val_col, label, col_sig, col_nonsig) {
@@ -369,9 +373,9 @@ interactive_woods <- function(df, state1, state2, times, replicates = 3,
 #' }
 #' @export
 significant_peptides_table <- function(df, state1, state2, times, replicates = 3,
-                                        alpha = 0.01, pvalue = 0.01, shared_data = NULL) {
+                                        alpha = 0.01, pvalue = 0.01, shared_data = NULL, p_adjust = "none") {
   .hdx_require_interactive(need_dt = TRUE)
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha, pvalue, shared_data, "hdx_table")
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha, pvalue, shared_data, "hdx_table", p_adjust = p_adjust)
 
   ## build the display table and sort it as ONE data.frame, so peptide_id
   ## (the crosstalk join key) always travels with the row it identifies -
@@ -415,6 +419,9 @@ significant_peptides_table <- function(df, state1, state2, times, replicates = 3
 #'   plot and table always reflect `alpha[1]`/`pvalue[1]` (the same
 #'   combination the cross-widget hover-highlighting key is built from).
 #' @param pvalue per-peptide significance cutoff. Default `0.01`. See `alpha`.
+#' @param p_adjust multiple-testing correction of the per-peptide Welch
+#'   p-values, passed to [stats::p.adjust()]: `"none"` (default) or e.g.
+#'   `"BH"`, applied across the peptides of the comparison.
 #' @return an `htmltools` tag list (a `crosstalk::bscols()` layout of
 #'   several widgets, not a single htmlwidget) - viewable in the RStudio
 #'   viewer, embeddable in an R Markdown document, or saved standalone with
@@ -431,14 +438,14 @@ significant_peptides_table <- function(df, state1, state2, times, replicates = 3
 #' }
 #' @export
 interactive_fissure_explorer <- function(df, state1, state2, times, replicates = 3,
-                                          alpha = 0.01, pvalue = 0.01) {
+                                          alpha = 0.01, pvalue = 0.01, p_adjust = "none") {
   .hdx_require_interactive(need_dt = TRUE, need_htmltools = TRUE)
-  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], NULL, "hdx_explorer")
+  sd_obj <- .hdx_shared(df, state1, state2, times, replicates, alpha[1], pvalue[1], NULL, "hdx_explorer", p_adjust = p_adjust)
 
-  volcano <- interactive_volcano(df, state1, state2, times, replicates, alpha, pvalue, shared_data = sd_obj)
-  fissure <- interactive_fissure_vent(df, state1, state2, times, replicates, alpha, pvalue, shared_data = sd_obj)
-  woods <- interactive_woods(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data = sd_obj)
-  tbl <- significant_peptides_table(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data = sd_obj)
+  volcano <- interactive_volcano(df, state1, state2, times, replicates, alpha, pvalue, shared_data = sd_obj, p_adjust = p_adjust)
+  fissure <- interactive_fissure_vent(df, state1, state2, times, replicates, alpha, pvalue, shared_data = sd_obj, p_adjust = p_adjust)
+  woods <- interactive_woods(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data = sd_obj, p_adjust = p_adjust)
+  tbl <- significant_peptides_table(df, state1, state2, times, replicates, alpha[1], pvalue[1], shared_data = sd_obj, p_adjust = p_adjust)
 
   htmltools::browsable(htmltools::tagList(
     crosstalk::bscols(widths = c(6, 6), volcano, fissure),

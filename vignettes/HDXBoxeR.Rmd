@@ -286,12 +286,14 @@ for (lam in lambda_grid) {
 print(round(cv_error, 3))
 ```
 
-On this example dataset, held-out prediction error is lowest at
-`lambda_smooth = 0` and increases (slightly) as smoothing increases - i.e.
-for this particular protein and coverage depth, the unregularized fit
-already generalizes about as well as it can, and smoothing trades a small
-amount of prediction accuracy for a smoother-looking profile rather than
-buying any accuracy back.
+On this example dataset the held-out prediction error barely depends on
+`lambda_smooth`: across five different random fold splits, the mean error
+for every value from 0 to 1 is within about 1% of the others, while the
+error itself varies about twofold from one split to the next, and which
+value comes out "best" changes with the split. For this protein and
+coverage depth the choice makes no measurable difference to how well the
+fit predicts new peptides, so the default is kept; smoothing mainly makes
+the per-residue profile smoother.
 
 This is not the last word on the question, though, and it is worth knowing
 the two ways CV and a domain-informed check can disagree. Cross-validation

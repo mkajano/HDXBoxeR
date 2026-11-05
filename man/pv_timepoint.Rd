@@ -4,13 +4,18 @@
 \alias{pv_timepoint}
 \title{Calculation of pvalue between first protein state and any other state from all_states file}
 \usage{
-pv_timepoint(df, replicates = 3)
+pv_timepoint(df, replicates = 3, p_adjust = "none")
 }
 \arguments{
 \item{df}{output from functions output_tp or output_tc.}
 
 \item{replicates}{only used for tables whose value columns are not named
 \verb{<state>_..._<replicate>}: the number of replicates per block. Default 3.}
+
+\item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
+\code{"none"} (default, raw Welch p-values) or e.g. \code{"BH"}. P-values are
+adjusted across all peptides and compared states within each labeling
+time.}
 }
 \value{
 Data.frame with p-values
@@ -25,4 +30,5 @@ replicates identical).
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
 pv<-pv_timepoint(df=a)
+pv_bh<-pv_timepoint(df=a, p_adjust="BH")
 }

@@ -4,7 +4,7 @@
 \alias{pv_timecourse}
 \title{pvalue calculation between two sets of the data at certain timepoint}
 \usage{
-pv_timecourse(df_c, df_v, replicates = 3)
+pv_timecourse(df_c, df_v, replicates = 3, p_adjust = "none")
 }
 \arguments{
 \item{df_c}{dataframe of control}
@@ -12,6 +12,10 @@ pv_timecourse(df_c, df_v, replicates = 3)
 \item{df_v}{dataframe for variant}
 
 \item{replicates}{number of replicates. Default set to 3.}
+
+\item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
+\code{"none"} (default) or e.g. \code{"BH"}, applied across all peptides and time
+points of the comparison.}
 }
 \value{
 pvalue comparisons between two sets.

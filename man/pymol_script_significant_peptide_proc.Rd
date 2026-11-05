@@ -12,7 +12,8 @@ pymol_script_significant_peptide_proc(
   alpha = 0.01,
   pv_cutoff = 0.01,
   replicates = 3,
-  order.pep = TRUE
+  order.pep = TRUE,
+  p_adjust = "none"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ pymol_script_significant_peptide_proc(
 \item{replicates}{number of replicates in sample. Default set to 3.}
 
 \item{order.pep}{flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 }
 \value{
 pymol script with colors assigned per peptide

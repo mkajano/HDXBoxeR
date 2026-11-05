@@ -11,7 +11,8 @@ interactive_fissure_explorer(
   times,
   replicates = 3,
   alpha = 0.01,
-  pvalue = 0.01
+  pvalue = 0.01,
+  p_adjust = "none"
 )
 }
 \arguments{
@@ -39,6 +40,10 @@ plot and table always reflect \code{alpha[1]}/\code{pvalue[1]} (the same
 combination the cross-widget hover-highlighting key is built from).}
 
 \item{pvalue}{per-peptide significance cutoff. Default \code{0.01}. See \code{alpha}.}
+
+\item{p_adjust}{multiple-testing correction of the per-peptide Welch
+p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default) or e.g.
+\code{"BH"}, applied across the peptides of the comparison.}
 }
 \value{
 an \code{htmltools} tag list (a \code{crosstalk::bscols()} layout of

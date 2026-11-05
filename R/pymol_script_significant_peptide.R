@@ -10,6 +10,7 @@
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param order.pep flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return pymol script with colors assigned per peptide
 #' @examples
 #' \donttest{
@@ -24,7 +25,7 @@
 pymol_script_significant_peptide<-function(df,path="",
                                            ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                            alpha=0.01,
-                                           pv_cutoff=0.01, replicates=3, order.pep=TRUE){
+                                           pv_cutoff=0.01, replicates=3, order.pep=TRUE, p_adjust="none"){
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
@@ -32,7 +33,7 @@ pymol_script_significant_peptide<-function(df,path="",
   #####from HDX get data and
   for ( deut_time in(unique(df$Deut.Time))){
 
-    pv<-pv_timepoint(df[df$Deut.Time==deut_time,], replicates)
+    pv<-pv_timepoint(df[df$Deut.Time==deut_time,], replicates, p_adjust = p_adjust)
     sd<-sd_timepoint(df[df$Deut.Time==deut_time,], replicates)
     df1<-ave_timepoint(df[df$Deut.Time==deut_time,], replicates)
 

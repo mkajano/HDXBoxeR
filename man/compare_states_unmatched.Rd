@@ -14,9 +14,11 @@ compare_states_unmatched(
   reference = NULL,
   replicates = 3,
   pvalue = 0.01,
-  p_adjust_method = "BH",
+  alpha = 0.01,
+  p_adjust = "none",
   n_perm = 1000,
-  n_boot = 1000
+  n_boot = 1000,
+  p_adjust_method
 )
 }
 \arguments{
@@ -50,16 +52,23 @@ filter \code{p_adj < pvalue} there themselves), but \code{pvalue} does gate the
 per-peptide \code{frac_peptides_significant} diagnostic - see "Pooled
 significance is not peptide significance". Default \code{0.01}.}
 
-\item{p_adjust_method}{passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}, applied across
-every region-by-pair test together (and separately across every
-region-by-pair-by-peptide test for \code{frac_peptides_significant}).
-Default \code{"BH"}.}
+\item{alpha}{alpha of the pooled Hageman & Weis critical interval used by
+the per-peptide diagnostic. Default \code{0.01}.}
+
+\item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
+\code{"none"} (default) or e.g. \code{"BH"}, applied across every region-by-pair
+test together (and separately across every region-by-pair-by-peptide
+test for the per-peptide diagnostic).}
 
 \item{n_perm}{number of label permutations for \code{method = "resample"}.
 Default \code{1000}.}
 
 \item{n_boot}{number of bootstrap resamples for \code{method = "resample"}'s
 confidence interval. Default \code{1000}.}
+
+\item{p_adjust_method}{deprecated; earlier versions used
+\code{p_adjust_method = "BH"} by default. Supplying it sets \code{p_adjust}, with
+a warning.}
 }
 \value{
 a list with \code{value} (the \code{value} argument actually used, echoed
@@ -76,7 +85,9 @@ compared, a diagnostic for how much the matched-vs-unmatched confound
 applies here), and \code{data} (the pooled \code{deut_value} values the tests
 actually ran on - one row per region-by-state-by-peptide, or per
 replicate under \code{method = "classic"} - for plotting with
-\code{\link[=plot_compare_states_unmatched]{plot_compare_states_unmatched()}}).
+\code{\link[=plot_compare_states_unmatched]{plot_compare_states_unmatched()}}), and \code{peptides} (the matched
+per-peptide results behind the diagnostic: \code{delta}, \code{p_value}, \code{p_adj},
+\code{ci} and \code{significant} per region, pair and peptide).
 }
 \description{
 A deliberately different tool from \code{\link[=compare_states_tp]{compare_states_tp()}}: instead of
@@ -110,6 +121,18 @@ governed mostly by which peptides happened to be identified (composition
 has more sequence available in exposed regions to fully deuterate),
 not by biology. Restricting to one structurally coherent region at a
 time keeps the pooled distribution closer to unimodal and interpretable.
+}
+
+\section{Read the per-peptide diagnostic first}{
+
+\code{summary} lists the matched per-peptide diagnostic first
+(\code{n_peptides_tested}, \code{n_peptides_significant},
+\code{frac_peptides_significant}), then the pooled region test. The pooled
+test is approximate: it treats the region's peptides as independent
+samples although overlapping peptides share residues, and it compares
+peptide means without their replicate variance. For peptides measured in
+every state, \code{\link[=compare_regions]{compare_regions()}} (a two-way ANOVA with peptide as a
+block) is the more powerful region-level test.
 }
 
 \section{Pooled significance is not peptide significance}{
@@ -158,13 +181,11 @@ peptide mechanically carries a larger raw Da value regardless of its
 intrinsic exchange rate) - trades that off against normalizing away
 part of the signal, which is why it is opt-in, not the default.}
 }
-Whichever is chosen, the per-peptide diagnostic
-(\code{n_peptides_significant}/\code{frac_peptides_significant}, see below) is
-unaffected by this choice for peptides tested individually: dividing one
-peptide's own two states by the same per-peptide constant does not change
-a paired t-test's p-value. Only the \emph{pooled} result
-(\code{shift_hl}/\code{p_value}/\code{p_omnibus}, which pools values across different
-peptides) depends on \code{value}.
+The per-peptide p-values do not depend on this choice (dividing one
+peptide's two states by the same constant does not change a t-test's
+p-value), but the critical-interval half of the per-peptide rule and the
+\emph{pooled} result (\code{shift_hl}/\code{p_value}/\code{p_omnibus}, which pools values
+across different peptides) are computed on the chosen scale.
 }
 
 \section{\code{method}}{

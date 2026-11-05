@@ -63,6 +63,25 @@
   }, numeric(1))
 }
 
+## Multiple-testing adjustment of a p-value table (columns 7+ hold p-values).
+## Family: for output_tp() tables (with Deut.Time), all peptides x compared
+## states within each labeling time; otherwise all peptides x columns.
+## Column 7 of a pv_timepoint() table is the reference state compared with
+## itself (p = 1) and is left out. "none" returns the table unchanged.
+.hdx_adjust_pv <- function(pv, p_adjust = "none", skip_first = TRUE) {
+  p_adjust <- match.arg(p_adjust, stats::p.adjust.methods)
+  if (p_adjust == "none") return(pv)
+  cols <- seq.int(if (skip_first) 8 else 7, ncol(pv))
+  if (length(cols) == 0) return(pv)
+  groups <- if ("Deut.Time" %in% colnames(pv)) split(seq_len(nrow(pv)), pv$Deut.Time) else list(seq_len(nrow(pv)))
+  for (g in groups) {
+    m <- as.matrix(pv[g, cols, drop = FALSE])
+    m[] <- stats::p.adjust(m, method = p_adjust)
+    pv[g, cols] <- m
+  }
+  pv
+}
+
 ## per-row count of non-missing replicates in a block
 .hdx_row_n <- function(m) rowSums(!is.na(m))
 

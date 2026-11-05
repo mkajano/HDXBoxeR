@@ -4,7 +4,13 @@
 \alias{diff_peptides_prep}
 \title{Peptides significantly different between states}
 \usage{
-diff_peptides_prep(df, replicates = 3, pv_cutoff = 0.01, alpha = 0.01)
+diff_peptides_prep(
+  df,
+  replicates = 3,
+  pv_cutoff = 0.01,
+  alpha = 0.01,
+  p_adjust = "none"
+)
 }
 \arguments{
 \item{df}{differences in averages data.frame calculated using diff_ave function}
@@ -14,6 +20,8 @@ diff_peptides_prep(df, replicates = 3, pv_cutoff = 0.01, alpha = 0.01)
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
 \item{alpha}{critical interval, here is multiple sets are using maximum CI is used.}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 }
 \value{
 list of the dataframes

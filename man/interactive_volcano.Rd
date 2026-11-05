@@ -12,7 +12,8 @@ interactive_volcano(
   replicates = 3,
   alpha = 0.01,
   pvalue = 0.01,
-  shared_data = NULL
+  shared_data = NULL,
+  p_adjust = "none"
 )
 }
 \arguments{
@@ -44,6 +45,10 @@ selection is linked to other plots sharing the same object. If \code{NULL}
 (default), a new one is built and this plot works standalone. The
 linked \emph{key} (which peptide is which) always follows \code{shared_data};
 only the significance coloring/dropdown below is local to this plot.}
+
+\item{p_adjust}{multiple-testing correction of the per-peptide Welch
+p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default) or e.g.
+\code{"BH"}, applied across the peptides of the comparison.}
 }
 \value{
 a \code{plotly} htmlwidget.

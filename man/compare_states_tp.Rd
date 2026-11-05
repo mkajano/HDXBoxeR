@@ -14,8 +14,10 @@ compare_states_tp(
   replicates = NULL,
   alpha = 0.01,
   pvalue = 0.01,
-  p_adjust_method = "BH",
-  percent = FALSE
+  p_adjust = "none",
+  omnibus = c("welch", "kruskal"),
+  percent = FALSE,
+  p_adjust_method
 )
 }
 \arguments{
@@ -61,37 +63,50 @@ differ.}
 \item{alpha}{alpha for the pooled critical interval (\code{CI_2pts()}),
 applied per pair. Default \code{0.01}.}
 
-\item{pvalue}{significance cutoff applied to the (BH-adjusted) per-pair
-p-value. Default \code{0.01}.}
+\item{pvalue}{significance cutoff applied to the per-pair p-value (raw,
+or adjusted with \code{p_adjust}). Default \code{0.01}.}
 
-\item{p_adjust_method}{passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}; applied separately
-to the vector of per-peptide omnibus p-values and the vector of
-per-peptide-by-pair p-values (the latter across every pair together,
-not within each pair on its own). Default \code{"BH"}.}
+\item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
+\code{"none"} (default, raw Welch p-values, as in every other function) or
+e.g. \code{"BH"}. Applied separately to the per-peptide omnibus p-values and
+to the per-peptide-by-pair p-values (the latter across every pair
+together, not within each pair on its own).}
+
+\item{omnibus}{omnibus test across all states per peptide: \code{"welch"}
+(default, Welch one-way ANOVA) or \code{"kruskal"} (Kruskal-Wallis).}
 
 \item{percent}{passed to \code{\link[=output_tp]{output_tp()}} - \code{FALSE} (default) compares
-uptake in Daltons, \code{TRUE} compares percent deuteration.}
+uptake in Daltons, \code{TRUE} percent deuteration, \code{"FD"} percent of the
+fully deuterated control, \code{"per_residue"} uptake per exchangeable amide
+(removes peptide length from the critical-interval condition).}
+
+\item{p_adjust_method}{deprecated; earlier versions adjusted with
+\code{p_adjust_method = "BH"} by default. Supplying it sets \code{p_adjust}, with
+a warning.}
 }
 \value{
 data.frame with one row per peptide-by-state-pair (by region, if
 \code{regions} is supplied): \code{peptide_id}, \code{Start}, \code{End}, \code{Sequence},
 \code{state1}, \code{state2}, \code{delta} (\code{state2 - state1}), \code{p_value} (raw
 per-pair Welch p-value), \code{ci} (pooled CI for that pair), \code{p_adj}
-(BH-adjusted per-pair p-value), \code{p_omnibus}/\code{p_omnibus_adj} (\code{NA} for
-peptides absent from at least one requested state), and \code{is_sig}.
+(per-pair p-value after \code{p_adjust}; equal to \code{p_value} when \code{"none"}),
+\code{p_omnibus}/\code{p_omnibus_adj} (\code{NA} for peptides absent from at least one
+requested state), and \code{is_sig}.
 }
 \description{
 Every other significance function in this package (\code{plot_fissure_vent()},
 \code{diff_peptides_prep()}, \code{robot_indexes()}) compares exactly two states at
-a time - three or more states means looping pairwise yourself, with no
-correction for now running many more simultaneous tests. This function
-does two things instead: (1) an omnibus Kruskal-Wallis test per peptide
-across \emph{all} requested states (does this peptide differ across any of
-them at all) - reported, not used to gate significance (see Details) -
-and (2) the package's usual Hageman & Weis hybrid test (pooled
-\code{CI_2pts()} + per-pair Welch p-value) for every pair of states (or every
-\code{reference} vs. the rest, if \code{reference} is given), with p-values
-adjusted across every peptide-by-pair test at this timepoint together.
+a time. This function does two things for three or more states: (1) an
+omnibus test per peptide across \emph{all} requested states (does this
+peptide differ across any of them at all) - by default a Welch one-way
+ANOVA (\code{\link[stats:oneway.test]{stats::oneway.test()}}, unequal variances), reported but not used
+to gate significance (see Details) - and (2) the package's usual
+Hageman & Weis hybrid test (pooled \code{CI_2pts()} + per-pair Welch p-value)
+for every pair of states (or every \code{reference} vs. the rest, if
+\code{reference} is given). A pair is significant when its Welch p-value
+(raw by default, or adjusted with \code{p_adjust} across every peptide-by-pair
+test at this timepoint) is below \code{pvalue} AND its difference exceeds the
+pooled CI - the same rule as every other function in the package.
 }
 \section{Which replicate SD feeds the pooled CI}{
 
@@ -112,32 +127,29 @@ identified in 90\% of runs per state survives in only 0.9^N of cases).
 This function instead calls \code{output_tp()} \strong{separately per pair}, so a
 peptide only needs to be present in the \emph{two} states of that specific
 pair to be tested there - "available-case" matching. The one place
-complete-case is unavoidable is the omnibus test itself: Kruskal-Wallis
+complete-case is unavoidable is the omnibus test itself: it
 cannot test a peptide against a group it has no data for, so the omnibus
 p-value is computed from the peptide set present in \emph{all} requested
 states (via one additional \code{output_tp()} call with every state), and
 peptides outside that set simply get \code{NA} in \code{p_omnibus}/\code{p_omnibus_adj}.
 }
 
-\section{Why the omnibus test is advisory, not a gate}{
+\section{The omnibus test}{
 
-With the small replicate counts typical here (often \code{replicates = 3}),
-Kruskal-Wallis's exact null distribution is extremely coarse (with 3
-states of 3 replicates each, the smallest attainable p-value is
-6/1680 ~ 0.0036) and its chi-squared approximation is unreliable at this
-size. Using it as a hard gate stacks a second, statistically shaky
-filter on top of the BH-adjusted pairwise p-value with no clear combined
-error-rate guarantee. \code{is_sig} therefore depends only on the per-pair
-adjusted p-value and the pooled CI - the direct N-state generalization of
-the shipped two-state criterion - and \code{p_omnibus}/\code{p_omnibus_adj} are
-reported alongside for context, not enforced.
+The default omnibus test is a Welch one-way ANOVA, which keeps useful
+power at the small replicate counts typical of HDX (3 per state). The
+rank-based Kruskal-Wallis test (\code{omnibus = "kruskal"}) is available but
+is very coarse at this size: with 3 states of 3 replicates its smallest
+attainable p-value is about 0.0036. Either way the omnibus p-value is
+reported for context (\code{p_omnibus}, and \code{p_omnibus_adj} adjusted across
+peptides with \code{p_adjust}); \code{is_sig} depends only on the per-pair rule.
 }
 
 \examples{
 \donttest{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 # the shipped example only has two states; compare_states_tp() needs 3+.
-# See vignette("anova") for a worked example that
+# See vignette("multistate") for a worked example that
 # constructs a synthetic third state to demonstrate this function.
 }
 }

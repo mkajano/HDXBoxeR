@@ -5,9 +5,12 @@
 #' @param df_c dataframe of control
 #' @param df_v dataframe for variant
 #' @param replicates number of replicates. Default set to 3.
+#' @param p_adjust multiple-testing correction passed to [stats::p.adjust()]:
+#'   `"none"` (default) or e.g. `"BH"`, applied across all peptides and time
+#'   points of the comparison.
 #' @return pvalue comparisons between two sets.
 #' @export
-pv_timecourse<-function(df_c,df_v, replicates=3) {
+pv_timecourse<-function(df_c,df_v, replicates=3, p_adjust="none") {
   keys <- c('Start','End', 'Sequence', 'Search.RT', 'Charge')
   blocks_c <- .hdx_blocks(df_c, replicates)
   blocks_v <- .hdx_blocks(df_v, replicates)
@@ -23,5 +26,5 @@ pv_timecourse<-function(df_c,df_v, replicates=3) {
   }))
   colnames(pv2) <- paste0("pv_", names(blocks_c))
   pv2<-data.frame(combined_df[,1:6], pv2)
-  return(pv2)
+  return(.hdx_adjust_pv(pv2, p_adjust, skip_first = FALSE))
 }

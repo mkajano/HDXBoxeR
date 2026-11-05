@@ -10,7 +10,8 @@ pymol_script_significant_residue(
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
   pv_cutoff = 0.01,
-  replicates = 3
+  replicates = 3,
+  p_adjust = "none"
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ pymol_script_significant_residue(
 \item{pv_cutoff}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 }
 \value{
 pymol script with colors assigned per residues by maximum uptake per residue

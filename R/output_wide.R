@@ -17,12 +17,22 @@
                       fd = NULL) {
   layout <- match.arg(layout)
   fd_mode <- identical(percent, "FD")
+  per_res <- identical(percent, "per_residue")
+  if (!(isTRUE(percent) || identical(percent, FALSE) || fd_mode || per_res)) {
+    stop("percent must be FALSE, TRUE, \"FD\" or \"per_residue\"", call. = FALSE)
+  }
   value_col <- if (isTRUE(percent)) "Deut.." else "X..Deut"
-  value_tag <- if (fd_mode) "Deut.." else value_col
+  value_tag <- if (fd_mode || per_res) "Deut.." else value_col
 
   a <- a[a$Protein.State %in% states & a$Deut.Time %in% times, , drop = FALSE]
   a$.value <- suppressWarnings(as.numeric(a[[value_col]]))
   a <- a[!is.na(a$.value), , drop = FALSE]
+  if (per_res) {
+    ## uptake per exchangeable amide (Da / nb_exch_deut): removes peptide length
+    n_exch <- nb_exch_deut(a)
+    a$.value <- ifelse(n_exch > 0, a$.value / n_exch, NA_real_)
+    a <- a[!is.na(a$.value), , drop = FALSE]
+  }
   if (fd_mode) a$.fd <- .hdx_fd_lookup(a, fd, seq_match)
 
   ## replicate number within state x time, in file order of Experiment
@@ -136,7 +146,7 @@
   attr(out, "replicates") <- reps
   attr(out, "states") <- states
   attr(out, "times") <- times
-  attr(out, "percent") <- if (fd_mode) "FD" else isTRUE(percent)
+  attr(out, "percent") <- if (fd_mode) "FD" else if (per_res) "per_residue" else isTRUE(percent)
   out
 }
 

@@ -31,6 +31,17 @@ test_that("percent = 'FD' leaves peptides without a usable FD value empty instea
   expect_true(all(is.na(a[a$Start == 20, 7:12])))
 })
 
+test_that("percent = 'per_residue' is uptake per exchangeable amide; p-values do not change", {
+  f <- make_hdx_csv()
+  a <- tp(f, percent = "per_residue")
+  expect_equal(attr(a, "percent"), "per_residue")
+  nb <- nb_exch_deut(default_peptides)
+  row <- a$Deut.Time == "10.00s" & a$Start == 20
+  expect_equal(a[row, "B_Deut.._3"], expected_uptake(2, 1, 4, 3) / nb[4])
+  expect_equal(pv_timepoint(a)[, 8], pv_timepoint(tp(f))[, 8])
+  expect_error(tp(f, percent = "length"), "percent must be")
+})
+
 test_that("percent = TRUE / FALSE are unchanged by the FD option", {
   f <- make_hdx_csv()
   expect_equal(attr(tp(f, percent = TRUE), "percent"), TRUE)

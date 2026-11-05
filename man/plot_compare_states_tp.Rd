@@ -103,7 +103,7 @@ device compositing.
 \donttest{
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 # the shipped example only has two states; compare_states_tp() needs 3+.
-# See vignette("anova") for a worked example with a synthetic third state.
+# See vignette("multistate") for a worked example with a synthetic third state.
 }
 }
 \seealso{

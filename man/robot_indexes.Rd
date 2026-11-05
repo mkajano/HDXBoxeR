@@ -4,7 +4,16 @@
 \alias{robot_indexes}
 \title{Returns indexes for peptides with significant difference between two sets}
 \usage{
-robot_indexes(thP, th, replicates = 3, pvalue = 0.01, states, alpha = 0.01)
+robot_indexes(
+  thP,
+  th,
+  replicates = 3,
+  pvalue = 0.01,
+  states,
+  alpha = 0.01,
+  p_adjust = "none",
+  min_timepoints = 1
+)
 }
 \arguments{
 \item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
@@ -18,6 +27,10 @@ robot_indexes(thP, th, replicates = 3, pvalue = 0.01, states, alpha = 0.01)
 \item{states}{Protein states from the set. As default all states are chosen.}
 
 \item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{min_timepoints}{a peptide is selected when it is significant at at least this many time points. Default \code{1} (any time point, as before).}
 }
 \value{
 Returns indexes of significant peptides

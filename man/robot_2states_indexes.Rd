@@ -13,7 +13,8 @@ robot_2states_indexes(
   pvalue = 0.01,
   alpha = 0.01,
   ylim,
-  xlim
+  xlim,
+  p_adjust = "none"
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ robot_2states_indexes(
 \item{ylim}{y-axis range}
 
 \item{xlim}{x-axis range. Set as default from max and minimum residues for the protein}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 }
 \value{
 Robot maps for timecourses for 2 protein states and selected indexes.

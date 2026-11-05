@@ -75,6 +75,7 @@ vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
 #' @param pv_cutoff p-value cutoff here set up to 0.01
 #' @param alpha cutoff for Critical interval. Default=0.01
 #' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return volcano plots
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
@@ -82,7 +83,7 @@ vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
 #' plots_vol_tp(df=a, replicates=3, cola=c(1:4), pv_cutoff=0.01, alpha=0.01 )
 #' plots_vol_tp(df=a, pv_cutoff=0.05)
 #' @export
-plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, cola){
+plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, cola, p_adjust="none"){
   if(missing(cola)) cola=c(brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
 
   oldpar<-par(no.readonly = TRUE)
@@ -93,7 +94,7 @@ plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, cola){
 
   av1<-ave_timepoint(df, replicates)
   da1<-dif_ave(av1)
-  pv1<-pv_timepoint(df, replicates)
+  pv1<-pv_timepoint(df, replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(df,  replicates)
 
   for ( i in(unique(df$Deut.Time))){

@@ -5,13 +5,14 @@
 #' @param alpha critical interval, here is multiple sets are using maximum CI is used.
 #' @param replicates number of replicates
 #' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return list of the dataframes
 #' @export
-diff_peptides_prep<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01){
+diff_peptides_prep<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, p_adjust="none"){
 
   av1<-ave_timepoint(df, replicates)
   df1<-dif_ave(av1)
-  pv<-pv_timepoint(df, replicates)
+  pv<-pv_timepoint(df, replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(df,  replicates)
 
   nb1=0
