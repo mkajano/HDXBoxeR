@@ -277,5 +277,8 @@ compare_states_tp <- function(filepath, times, states = NULL,
   out$is_sig <- !is.na(out$p_adj) & (abs(out$delta) > out$ci) & (out$p_adj < pvalue)
   if (is.null(regions)) out$region <- NULL
   rownames(out) <- NULL
-  out
+  .hdx_stamp(out, list(times = times, states = states, by = by,
+                       reference = if (is.null(reference)) "all pairs" else reference,
+                       alpha = alpha, pvalue = pvalue, p_adjust = p_adjust, omnibus = omnibus,
+                       percent = format(percent)))
 }

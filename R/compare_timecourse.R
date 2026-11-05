@@ -109,5 +109,6 @@ compare_timecourse <- function(filepath, state1, state2, times, alpha = 0.01, pv
   out <- out[order(out$Start, out$End, out$Charge), c(first, setdiff(colnames(out), first))]
   rownames(out) <- NULL
   attr(out, "times") <- tlev
-  out
+  .hdx_stamp(out, list(state1 = state1, state2 = state2, times = tlev, alpha = alpha, pvalue = pvalue,
+                       p_adjust = p_adjust, min_timepoints = min_timepoints, percent = format(percent)))
 }

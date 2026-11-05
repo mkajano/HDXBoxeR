@@ -190,6 +190,9 @@
 #' @param p_adjust_method deprecated; earlier versions used
 #'   `p_adjust_method = "BH"` by default. Supplying it sets `p_adjust`, with
 #'   a warning.
+#' @param seed optional random seed for `method = "resample"`, making the
+#'   permutation p-values and bootstrap interval reproducible. The caller's
+#'   own random-number stream is left unchanged. Default `NULL`.
 #' @param n_perm number of label permutations for `method = "resample"`.
 #'   Default `1000`.
 #' @param n_boot number of bootstrap resamples for `method = "resample"`'s
@@ -228,7 +231,7 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
                                       method = c("peptide", "classic", "resample"),
                                       reference = NULL,
                                       replicates = 3, pvalue = 0.01, alpha = 0.01,
-                                      p_adjust = "none", n_perm = 1000, n_boot = 1000,
+                                      p_adjust = "none", n_perm = 1000, n_boot = 1000, seed = NULL,
                                       p_adjust_method) {
   value <- match.arg(value)
   method <- match.arg(method)
@@ -237,6 +240,13 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
     p_adjust <- p_adjust_method
   }
   p_adjust <- match.arg(p_adjust, stats::p.adjust.methods)
+  if (!is.null(seed)) {
+    ## reproducible resampling without changing the caller's random stream
+    old_seed <- if (exists(".Random.seed", envir = globalenv())) get(".Random.seed", envir = globalenv()) else NULL
+    on.exit(if (is.null(old_seed)) rm(".Random.seed", envir = globalenv()) else
+      assign(".Random.seed", old_seed, envir = globalenv()), add = TRUE)
+    set.seed(seed)
+  }
   if (missing(regions) || is.null(regions) || length(regions) == 0) {
     stop("regions is required - whole-protein pooling mixes very different exchange behavior ",
          "(protected core vs. exposed loops) and is not a reliable summary. Supply at least one ",
@@ -413,6 +423,9 @@ compare_states_unmatched <- function(filepath, times, regions, states = NULL,
   data_df <- do.call(rbind, pooled_data)
   rownames(data_df) <- NULL
 
-  list(summary = summary_df, coverage = coverage_df, data = data_df, peptides = peptide_sig_df,
-       value = value)
+  .hdx_stamp(list(summary = summary_df, coverage = coverage_df, data = data_df, peptides = peptide_sig_df,
+                  value = value),
+             list(times = times, regions = regions, states = states, value = value, method = method,
+                  pvalue = pvalue, alpha = alpha, p_adjust = p_adjust, n_perm = n_perm, n_boot = n_boot,
+                  seed = if (is.null(seed)) "none" else seed))
 }

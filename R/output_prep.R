@@ -10,7 +10,10 @@
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
 #' @param percent return either uptake or percent deuteration, default=FALSE, return uptake
-#' @return Returns&saves data.frame in format that is accepted for the publications.
+#' @return Writes the table to `output_name` and returns it invisibly.
+#'   `Mean.Peptide_Mass_[Da]` is the mean measured neutral peptide mass,
+#'   Charge x (centroid m/z - proton mass); earlier versions reported the
+#'   centroid m/z under this name.
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' @importFrom graphics abline axis box boxplot legend mtext par plot points polygon rect text arrows
 #' @importFrom stats df na.omit qt sd t.test
@@ -81,10 +84,17 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
   ## conventional 100% in percent mode. SD is not available at this
   ## granularity and stays 0 in all cases (kept out of `out` for the
   ## Peptide_Mass slot anyway).
+  ## Exp.Cent is a centroid m/z: the peptide mass column reports the neutral
+  ## mass, Charge * (m/z - proton mass), in Da
+  to_mass <- function(mz, z) as.numeric(z) * (as.numeric(mz) - .proton_mass)
+  FD[,9] <- to_mass(FD[,9], FD$Charge)
+  undeut[,9] <- to_mass(undeut[,9], undeut$Charge)
   FD2<-data.frame(FD[,c(1,2,4:6,8,7,9)], rep(0,times=dim(FD)[1]),
                   if (percent==FALSE) as.numeric(FD[,10]) else rep(100,times=dim(FD)[1]),
                   rep(0,times=dim(FD)[1]))
   undeut2<-data.frame(undeut[,c(1,2,4:6,8,7,9)], rep(0,times=dim(undeut)[1]),  rep(0,times=dim(undeut)[1]), rep(0,times=dim(undeut)[1]))
+  cent_cols <- grep("Exp.Cent", colnames(b))
+  b[, cent_cols] <- lapply(b[, cent_cols], function(v) to_mass(v, b$Charge))
 
   if (percent==FALSE){
     col_deut<-c(grep("X..Deut", colnames(b)))
@@ -117,7 +127,7 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
 
     nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge",
                 "Mean.Peptide_Mass_[Da]", "st.dev_Peptide_Mass",
-                "Mean.Percent_Deut_[Da]", "st.dev_Percent_Deut")
+                "Mean.Percent_Deut_[%]", "st.dev_Percent_Deut")
 
     colnames(FD2)<-nm_final
     colnames(undeut2)<-nm_final
@@ -141,12 +151,13 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
   ord[ord== "FD"]<- c("10000000000000.0s")
   ord=as.numeric(str_sub(ord, end=-2))
 
-  bp<-data.frame(out, ord)
+  bp<-data.frame(out, ord, check.names = FALSE)
   bp<-arrange(bp, Start, End, Protein.State, Charge, ord)
   bp<-bp[,-dim(bp)[2]]
+  rownames(bp) <- NULL
   ###write output
   write.csv(bp, output_name, row.names = FALSE)
-  return()}
+  invisible(bp)}
 
 
 

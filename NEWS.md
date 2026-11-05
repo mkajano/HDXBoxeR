@@ -23,6 +23,35 @@
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
   structure mapping, data quality.
 
+## Reporting
+
+* New `render_report()`: one-command HTML report with the analysis
+  parameters, the summary table, data-quality checks, significant-peptide
+  counts and fissure-vent plots per time point, and optionally region
+  ANOVAs and whole-time-course results; the tidy results table is written
+  next to it.
+* New `hdx_summary_table()`: the summary table recommended by Masson et al.
+  (2019) - computed items (time course, controls, replicates, peptides,
+  coverage, length, redundancy, back-exchange, repeatability, significance
+  threshold) plus your own experimental details via `metadata`; csv or
+  markdown.
+* New `hdx_results_table()`: tidy per-peptide, per-time, per-pair results
+  (means, SDs, n, difference, p-value, adjusted p-value, CI, call), written
+  as csv with a `_parameters.txt` file holding the parameters and
+  `sessionInfo()`.
+* Results of `compare_states_tp()`, `compare_states_unmatched()`,
+  `compare_regions()`, `compare_timecourse()`, `residue_regions()`,
+  `plot_fissure_vent()` and the new tables carry their parameters, the
+  package version and the date as attribute `"hdxboxer"`.
+* `compare_states_unmatched()` gains `seed` for reproducible resampling.
+* `output_prep()`: `Mean.Peptide_Mass_[Da]` is now the measured neutral
+  peptide mass (Charge x (centroid m/z - proton mass)); it previously held
+  the centroid m/z. The percent column is labelled `[%]` instead of `[Da]`,
+  column names are no longer mangled (`_[Da]` instead of `_.Da.`), and the
+  table is returned invisibly.
+* `general_info()`/`all_summary()`: average peptide length counts residues
+  (End - Start + 1); it was one residue too short.
+
 ## Statistics: one significance rule, regions and time courses
 
 * One significance rule everywhere: a peptide differs when its Welch

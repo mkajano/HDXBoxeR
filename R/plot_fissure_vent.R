@@ -242,5 +242,6 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   }
   out <- do.call(rbind, drawn)
   rownames(out) <- NULL
-  invisible(out)
+  invisible(.hdx_stamp(out, list(state1 = state1, state2 = state2, times = times, alpha = alpha,
+                                 pvalue = pvalue, p_adjust = p_adjust, sd_source = sd_source)))
 }

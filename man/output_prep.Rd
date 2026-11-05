@@ -20,7 +20,10 @@ output_prep(filepath, output_name, states, replicates, times, percent = FALSE)
 \item{percent}{return either uptake or percent deuteration, default=FALSE, return uptake}
 }
 \value{
-Returns&saves data.frame in format that is accepted for the publications.
+Writes the table to \code{output_name} and returns it invisibly.
+\code{Mean.Peptide_Mass_[Da]} is the mean measured neutral peptide mass,
+Charge x (centroid m/z - proton mass); earlier versions reported the
+centroid m/z under this name.
 }
 \description{
 Format prepared based of example from:

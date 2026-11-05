@@ -18,6 +18,7 @@ compare_states_unmatched(
   p_adjust = "none",
   n_perm = 1000,
   n_boot = 1000,
+  seed = NULL,
   p_adjust_method
 )
 }
@@ -65,6 +66,10 @@ Default \code{1000}.}
 
 \item{n_boot}{number of bootstrap resamples for \code{method = "resample"}'s
 confidence interval. Default \code{1000}.}
+
+\item{seed}{optional random seed for \code{method = "resample"}, making the
+permutation p-values and bootstrap interval reproducible. The caller's
+own random-number stream is left unchanged. Default \code{NULL}.}
 
 \item{p_adjust_method}{deprecated; earlier versions used
 \code{p_adjust_method = "BH"} by default. Supplying it sets \code{p_adjust}, with

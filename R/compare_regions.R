@@ -190,7 +190,10 @@ compare_regions <- function(filepath, times, regions, states = NULL, reference =
   if (!is.null(pairs_df)) pairs_df$p_adj <- stats::p.adjust(pairs_df$p_value, method = p_adjust)
   rownames(summary_df) <- NULL
   if (!is.null(pairs_df)) rownames(pairs_df) <- NULL
-  list(summary = summary_df, pairs = pairs_df)
+  .hdx_stamp(list(summary = summary_df, pairs = pairs_df),
+             list(times = unique(a$Deut.Time), regions = regions, states = states, by = by,
+                  percent = format(percent), time_model = time_model, p_adjust = p_adjust,
+                  model = "uptake ~ peptide + state on per-peptide means"))
 }
 
 ## p-value of the nested-model F test small vs big; NA when not testable

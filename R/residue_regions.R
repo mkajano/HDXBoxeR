@@ -156,7 +156,9 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
   result <- do.call(rbind, out)
   result <- result[order(result$direction, result$region_start), ]
   rownames(result) <- NULL
-  result
+  .hdx_stamp(result, list(state1 = state1, state2 = state2, times = times, pvalue = pvalue,
+                          p_adjust = p_adjust, alpha = alpha, min_peptides = min_peptides,
+                          gap_tolerance = gap_tolerance))
 }
 
 #' Roll up derived regions against named residue subsets

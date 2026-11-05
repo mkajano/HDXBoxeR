@@ -74,7 +74,7 @@ bp2<-c()
     cvr<-coverage_residue(bp2,start_col = 2, end_col = 3)[min(bp2$Start):max(bp2$End)]
     cvrLong<-coverage_residue(bp2,start_col = 2, end_col = 3)
     ppt_cov<-round((length(cvr)-length(which(cvr==0)))/length(cvr)*100, digits=2)
-    av<-round(mean(bp2$End-bp2$Start),digits=2)
+    av<-round(mean(bp2$End-bp2$Start+1),digits=2)  ## residues in Start..End
 
     redund<-c()
     for (nb1 in 1:dim(bp2)[1]){

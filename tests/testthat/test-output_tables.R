@@ -101,7 +101,10 @@ test_that("output_prep() writes the Masson-style table with mean/SD and controls
   out_file <- tempfile(fileext = ".csv")
   suppressMessages(output_prep(f, output_name = out_file))
   o <- read.csv(out_file, check.names = FALSE)
-  up <- "Mean.Deut.Uptake_.Da."
+  up <- "Mean.Deut.Uptake_[Da]"
+  ## mass column is the neutral mass, z * (m/z - proton), not the m/z
+  r0 <- o$Protein.State == "A" & o$Deut.Time == "0s" & o$Start == 1
+  expect_equal(o[r0, "Mean.Peptide_Mass_[Da]"], 2 * (450 - 1.00727646688), tolerance = 1e-6)
   expect_true(all(c("Protein.State", "Deut.Time", "Start", "End", "Sequence", "Charge",
                     up, "st.dev_Deut_Uptake") %in% colnames(o)))
   r <- o$Protein.State == "A" & o$Deut.Time == "10.00s" & o$Start == 1
