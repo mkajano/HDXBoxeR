@@ -64,18 +64,16 @@ The vignette is divided into several sections that introduce different aspects o
 
 ### Beyond this vignette
 
-This vignette covers the core two-state workflow. Newer tools have their own vignettes:
+This vignette covers the two-state workflow. Other topics have their own vignettes:
 
-| Task | Functions | Vignette |
-|---|---|---|
-| Read DynamX or other software; uneven replicates; normalize to the fully deuterated control or per residue; peptide quality checks | `read_hdx()`, `as_hdx_long()`, `output_tp(percent = "FD" / "per_residue")`, `peptide_qc()` | `vignette("input_formats")` |
-| Coverage, redundancy, back-exchange | `plot_peptide_coverage_map()`, `general_info()` | `vignette("data_quality")` |
-| Two states, peptide by peptide, with uncertainty ellipses | `plot_fissure_vent()` | `vignette("fissure_vent")` |
-| Three or more states; whole regions (region ANOVA); whole time courses; contiguous affected regions | `compare_states_tp()`, `compare_regions()`, `compare_timecourse()`, `residue_regions()` | `vignette("multistate")` |
-| Interactive linked plots; results on a structure | `interactive_fissure_explorer()`, `plot_hdx_structure()` | `vignette("interactive_explorer")`, `vignette("hdx_structure")` |
-| Publication tables and a one-command report | `hdx_summary_table()`, `hdx_results_table()`, `render_report()` | sections 7-8 below |
-
-Every significance call in the package uses the same rule - Welch p-value below `pvalue` AND difference above the pooled critical interval - and every function takes `p_adjust = "BH"` to control the false discovery rate.
+| Topic | Vignette |
+|---|---|
+| DynamX and other software, replicates, FD normalization | `vignette("input_formats")` |
+| Coverage, redundancy, back-exchange | `vignette("data_quality")` |
+| Fissure vent plots | `vignette("fissure_vent")` |
+| Three or more states, regions, time courses | `vignette("multistate")` |
+| Interactive plots | `vignette("interactive_explorer")` |
+| Structures | `vignette("hdx_structure")` |
 
 ## 1. Input preparation
 
@@ -97,7 +95,7 @@ Tools \> Export \> All results table.
 
 HDXBoxeR significantly facilitates the comparison of multiple Protein States in the time series and the number of replicates.
 We recommend using at least 3 replicates for a robust statistical analysis.
-All the Protein States imported are required to have the same number of replicates.
+Protein States can have different numbers of replicates (for example 3 and 4).
 Another recommendation is to use only peptides the user is confident in.
 There is no point in analyzing bad data.
 
@@ -160,8 +158,8 @@ Input can be formatted to:
 -   Analyze time points *or* time courses analysis (`output_tp` vs `output_tc` functions).
 -   Analyze Deuterons Uptake *or* Percent Deuteration (flag `percent=F/T`).
 -   Use all protein states/deuteration times *or* use selected (options: `states` and `times`, respectively).
--   Use a maximum common number of replicates used *or* specify how many replicates should be used (`replicates` option in the function).
--   Match Peptide sequence between protein states *or* not. Default is set to match peptide sequences to prevent mismatches; use functions with flag `match_seq`.
+-   Use all replicates *or* specify the maximum number of replicates (`replicates` option in the function).
+-   Match peptides by sequence between protein states *or* by position only (flag `seq_match`). Default is to match sequences, to prevent mismatches. Use `seq_match=TRUE` for point mutants.
 
 Examples:
 
@@ -193,138 +191,26 @@ input_subset_states<-output_tp(filepath=file_nm, replicates=3, states=names_stat
 
 ```
 
-### Residue-level reconstruction
+### Residue-level values
 
-Peptide-level data is what HDX-MS measures directly, but sometimes single-residue
-resolution is wanted instead - for example, to compare specific structural
-regions rather than whatever segments happen to have been proteolyzed.
-HDXBoxeR provides two functions for this, and they make different trade-offs.
+HDX-MS measures peptides.
+Two functions estimate values per residue instead:
 
-`residue_level_average()` maps each residue to a weighted mean of every
-peptide that covers it, with each peptide weighted by `1/nb_exch_deut` (so
-shorter, more localized peptides count more) - the same weighting scheme used
-by PyHDX's own peptide-to-residue mapping step (<https://pyhdx.readthedocs.io/>).
-It is fast, but it does not separate the contribution of overlapping
-peptides algebraically, so a residue near the edge of a long peptide still
-carries some signal from its neighbors.
-
-`residue_deconvolution()` instead solves a constrained least-squares problem:
-each peptide's uptake is modelled as the sum of its individual exchangeable
-residues' uptake, and the system is solved (per Protein State, replicate, and
-timepoint) subject to each residue's fractional uptake lying in `[0, 1]`.
-This uses the *differences* between overlapping peptides of different
-lengths, not just their average, so it resolves overlapping contributions
-considerably better in practice - particularly at boundaries between
-structurally distinct regions, where a plain average blends signal across
-the boundary.
+-   `residue_level_average()`: each residue gets the average of all peptides covering it. Short peptides count more.
+-   `residue_deconvolution()`: uses the differences between overlapping peptides to separate the residues. It resolves boundaries between regions better than the average.
 
 ```{r}
-## requires percent = FALSE (uptake in Daltons - additive across residues)
+## needs uptake in Da (percent = FALSE)
 input_uptake_timepoint <- output_tp(filepath = file_nm, percent = FALSE)
 residue_deconv <- residue_deconvolution(input_uptake_timepoint, protein_length = 225)
 
-## requires percent = TRUE (already normalized per peptide length)
+## needs percent deuteration (percent = TRUE)
 residue_avg <- residue_level_average(input_deut_timepoint, protein_length = 225)
 ```
 
-Note that `residue_deconvolution()` is a distinct method from PyHDX's ΔG
-fitting, not a re-implementation of it - see `?residue_deconvolution` for how
-the two differ (PyHDX fits a kinetic model jointly across all residues *and*
-timepoints, with an explicit smoothness regularization between neighboring
-residues; `residue_deconvolution()` solves each timepoint independently, and
-`lambda_smooth` adds only the neighbor-smoothness idea, not the joint kinetic
-fit).
-
-### Choosing `lambda_smooth`
-
-`residue_deconvolution()`'s `lambda_smooth` argument controls how strongly
-adjacent residues are pulled toward the same value. `0` reproduces the
-unregularized fit; the package default (`0.1`) is a modest starting point,
-**not a universally correct value** - PyHDX's documentation makes the same
-point about its own equivalent parameter: the right strength depends on
-protein size and peptide coverage, and should be checked per dataset.
-
-The most general, dataset-agnostic way to choose it is cross-validation:
-hold out a subset of peptides, fit on the rest, and check how well the fit
-*predicts* the held-out peptides' observed uptake, across a grid of
-`lambda_smooth` values.
-
-```{r}
-## which residues a peptide covers - same convention as nb_exch_deut()
-## (first two residues of the peptide and non-first Prolines excluded)
-peptide_exch_residues <- function(start, seq_string) {
-  chars <- strsplit(seq_string, "")[[1]]
-  if (length(chars) < 3) return(integer(0))
-  local_idx <- 3:length(chars)
-  resid_idx <- start + local_idx - 1
-  resid_idx[chars[local_idx] != "P"]
-}
-
-value_cols <- grep("_X\\.\\.Deut_[0-9]+$", colnames(input_uptake_timepoint), value = TRUE)
-peptide_id <- paste(input_uptake_timepoint$Start, input_uptake_timepoint$End,
-                     input_uptake_timepoint$Sequence, sep = "_")
-unique_peptides <- unique(peptide_id)
-
-set.seed(42)
-k <- 3
-folds <- sample(rep(1:k, length.out = length(unique_peptides)))
-names(folds) <- unique_peptides
-
-lambda_grid <- c(0, 0.1, 0.5, 1)
-cv_error <- setNames(numeric(length(lambda_grid)), lambda_grid)
-
-for (lam in lambda_grid) {
-  fold_errors <- c()
-  for (f in 1:k) {
-    held_out <- names(folds)[folds == f]
-    train_df <- input_uptake_timepoint[!(peptide_id %in% held_out), ]
-    test_df  <- input_uptake_timepoint[peptide_id %in% held_out, ]
-
-    fit <- residue_deconvolution(train_df, protein_length = 225, lambda_smooth = lam)
-
-    for (i in seq_len(nrow(test_df))) {
-      keep <- peptide_exch_residues(test_df$Start[i], test_df$Sequence[i])
-      keep <- keep[keep >= 1 & keep <= 225]
-      fit_sub <- fit[fit$Deut.Time == test_df$Deut.Time[i] & fit$residue %in% keep, ]
-      for (vc in value_cols) {
-        predicted <- sum(fit_sub[[vc]], na.rm = TRUE)
-        actual <- test_df[[vc]][i]
-        if (!is.na(actual) && !all(is.na(fit_sub[[vc]]))) {
-          fold_errors <- c(fold_errors, (predicted - actual)^2)
-        }
-      }
-    }
-  }
-  cv_error[as.character(lam)] <- mean(fold_errors, na.rm = TRUE)
-}
-
-print(round(cv_error, 3))
-```
-
-On this example dataset the held-out prediction error barely depends on
-`lambda_smooth`: across five different random fold splits, the mean error
-for every value from 0 to 1 is within about 1% of the others, while the
-error itself varies about twofold from one split to the next, and which
-value comes out "best" changes with the split. For this protein and
-coverage depth the choice makes no measurable difference to how well the
-fit predicts new peptides, so the default is kept; smoothing mainly makes
-the per-residue profile smoother.
-
-This is not the last word on the question, though, and it is worth knowing
-the two ways CV and a domain-informed check can disagree. Cross-validation
-answers "does this value predict new peptides well," which is a good
-general-purpose default question. But if you have independent structural
-reasons to expect two particular residues or regions to be distinguishable
-(e.g. they sit in different secondary structure elements) and the
-unregularized fit reports them as suspiciously close to identical, that is a
-sign of an identifiability problem that held-out peptide prediction error
-alone will not necessarily catch, since a degenerate (over-smoothed or
-under-resolved) solution can still predict peptide-level uptake well without
-correctly attributing it to the right residues. In that situation, checking
-whether a modest `lambda_smooth` resolves the suspicious near-identical
-values - even at a small cost in cross-validated prediction error - is a
-reasonable, complementary diagnostic to run alongside cross-validation, not
-instead of it.
+`lambda_smooth` in `residue_deconvolution()` makes neighboring residues more similar.
+The default is 0.1.
+On the example data, values between 0 and 1 predicted left-out peptides equally well.
 
 **Now that the data is loaded let’s start the fun!**
 
@@ -334,7 +220,7 @@ Great!
 Now that the hardest part is done, let’s delve into the actual analysis.
 
 **HDXBoxeR provides a statistical framework to identify peptides that are significantly different between given protein states.** To conduct statistics, we recommend providing at least 3 replicates for each protein state (duplicate data also work).
-**The number of replicates and Deut Time will be trimmed to be the same for all Protein States in the analysis.**
+**Only Deut Times present in all Protein States are used. All replicates are used, and states may have different numbers of replicates.**
 
 ### Some theoretical details about statistical analysis
 

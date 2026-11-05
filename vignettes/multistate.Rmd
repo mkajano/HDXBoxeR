@@ -24,222 +24,84 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette covers the package's "beyond two states" and "beyond one peptide" significance tools: comparing three or more states, testing whole regions, and combining time points.
-For quality-control plots (peptide coverage, redundancy) see `vignette("data_quality")` instead - that's about whether the input data supports any of these comparisons in the first place, not about the comparisons themselves.
+This vignette shows how to compare more than two states, whole regions, and whole time courses.
+For data checks, see `vignette("data_quality")`.
 
-## One significance rule everywhere
+## The significance rule
 
-Every peptide-level call in the package uses the same rule, the hybrid test of Hageman & Weis: a peptide differs between two states when its Welch t-test p-value is below `pvalue` **and** its difference exceeds the pooled critical interval (CI).
-p-values are raw by default; every function takes `p_adjust = "BH"` (or another `p.adjust()` method) to control the false discovery rate instead.
+All functions use the same rule (Hageman & Weis, Anal. Chem. 2019):
+a peptide differs between two states when its Welch t-test p-value is below `pvalue` **and** the difference is larger than the critical interval (CI).
 
-Peptide length matters for the CI half of the rule: a long peptide collects more deuterium in Da than a short one for the same per-residue change.
-To remove that, run any analysis on uptake per exchangeable amide with `percent = "per_residue"` (Da divided by `nb_exch_deut()`); the p-values do not change, only the difference and the CI move onto the per-amide scale.
+-   `p_adjust = "BH"` corrects the p-values for multiple testing.
+-   `percent = "per_residue"` divides uptake by the number of exchangeable residues, so peptide length does not affect the result.
 
-## Which tool answers which question
+## Which function for which question
 
-| Function | Question | Requires | Test |
-|---|---|---|---|
-| `compare_states_tp()` | Does *this specific peptide* differ between states? | The same peptide in each pair compared | Per pair: CI + Welch p; omnibus Welch ANOVA across all states (reported) |
-| `compare_regions()` | Does *this region* differ between states, peptide by peptide? | The same peptides in every state | Two-way ANOVA (peptide + state) per region; optional state x time |
-| `compare_states_unmatched()` | Does *this region's* typical exchange level differ when peptide maps differ? | Nothing - peptides never need to match | Matched per-peptide diagnostic, plus an approximate pooled Wilcoxon/Kruskal-Wallis test |
-| `compare_timecourse()` | Does *this peptide* differ over the whole time course? | Two states, all time points | Summed difference over time with a global CI; count of significant time points |
-| `residue_regions()` | Which *contiguous residues* are consistently destabilized/protected? | Matched peptides, two states | Peptide rule + corroboration by >= 2 peptides |
+| Function | Question |
+|---|---|
+| `compare_states_tp()` | Does this peptide differ between states? (3+ states) |
+| `compare_regions()` | Does this region differ between states? |
+| `compare_states_unmatched()` | Does this region differ, when the states have different peptides? |
+| `compare_timecourse()` | Does this peptide differ over the whole time course? |
+| `residue_regions()` | Which stretches of residues changed? |
 
-For a plain two-state comparison at one time point, `plot_fissure_vent()`/`diff_peptides_prep()` remain the primary tools.
+For two states at one time point, `plot_fissure_vent()` and `diff_peptides_prep()` are the main tools.
 
-> **"I just want to compare a domain between states."** If the peptides were identified in every state, that's `compare_regions()` with `regions = list(my_domain = c(start, end))`: it uses every replicate of every peptide in the domain, with each peptide as its own control. If peptide maps differ between states (chimeras, point mutants), use `compare_states_unmatched()` and read its per-peptide diagnostic first.
-
-
-## `compare_states_tp()`: matched peptides, three or more states
+## `compare_states_tp()`: peptides, three or more states
 
 ```{r}
 library(HDXBoxeR)
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-```
-
-The three-state examples use `three_states.csv`: a wild-type protein and two point mutants (D109H, R120G), with 3-4 replicates per state and time (Woods et al. 2025, PNAS; see `?three_states`).
-Peptides covering residue 109 or 120 have different sequences in the mutants, so they are only compared when peptides are matched by position (`by = "position"`).
-
-```{r}
 file_3state <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
 ```
 
-`compare_states_tp()` takes a **filepath**, not an already-loaded `output_tp()` table, and calls `output_tp()` internally - once per pair of states, plus once for all states together for the omnibus test.
-That's deliberate: `output_tp()`'s merge across states is an inner join, so building one wide table for all N states up front would silently require a peptide to be present in *every* state to be compared at all, shrinking the usable peptide set combinatorially as N grows.
-Calling it per pair instead means a peptide only needs to be present in the *two* states of that specific pair - "available-case" rather than "complete-case" matching.
+`three_states.csv` has a wild-type protein and two point mutants (D109H, R120G), with 3-4 replicates (Woods et al. 2025, PNAS).
 
 ```{r}
 res <- compare_states_tp(file_3state, times = "1800.00s")
 head(res)
 ```
 
-Each row is one peptide, for one pair of states.
-`p_omnibus` is a Welch one-way ANOVA across all three states at once (does this peptide differ among the states at all); it is reported for context and does not gate `is_sig`.
-`omnibus = "kruskal"` gives the rank-based Kruskal-Wallis test instead, but with 3 replicates per state its smallest possible p-value is about 0.0036, so it has little power.
-`is_sig` uses the package-wide rule for each pair - the direct three-state generalization of the criterion `plot_fissure_vent()` uses for two; add `p_adjust = "BH"` to adjust across every peptide-by-pair test.
+Each row is one peptide and one pair of states.
+`p_omnibus` is a Welch ANOVA across all states.
+It is given for information; `is_sig` uses the rule above for each pair.
 
-### Comparing only against a reference state
-
-Most multi-state HDX designs are one reference (apo/wild-type) against several perturbations, not every state against every other.
-`reference` restricts to exactly that - N-1 tests instead of N(N-1)/2:
+Compare every state to one reference only:
 
 ```{r}
 res_ref <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5")
 unique(res_ref[, c("state1", "state2")])
 ```
 
-Matching by position adds the peptides that span the mutated residues:
+Peptides that cover a mutation have a different sequence in the mutant.
+`by = "position"` matches peptides by position, so these peptides are compared too:
 
 ```{r}
 res_pos <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5", by = "position")
 c(by_sequence = nrow(res_ref), by_position = nrow(res_pos))
 ```
 
-### Restricting to specific regions
-
-`regions` takes a named list of `c(start, end)` residue ranges and runs the comparison separately within each, tagging the result with a `region` column - useful for comparing named domains rather than the whole protein at once:
+Split by regions:
 
 ```{r}
 res_regions <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5",
-                                  regions = list(nterm = c(1, 90), cterm = c(91, 175)))
+                                 regions = list(nterm = c(1, 90), cterm = c(91, 175)))
 table(res_regions$region)
 ```
-
-### Plotting it: every peptide, by region and by pair
-
-`plot_compare_states_tp()` draws exactly this table - one panel per region, one x-position per state pair, every matched peptide's `delta` as a point (or a box/violin summary via `plot_type`).
-Significant peptides are colored, not filtered out, so a domain's full behavior for a given comparison is visible in one look - across as many states as were compared, not just two:
 
 ```{r, fig.height = 6}
 plot_compare_states_tp(res_regions, plot_type = "jitter")
 ```
 
-Read this alongside the "significant peptides" count in each panel's subtitle: a region can show a consistent downward trend across most peptides in a pair while still having only a few individually clear the strict Hageman & Weis gate (colored red here) - the grey points still matter, and `plot_type = "box"` or `"violin"` overlays a summary shape on top of them if that consistency is what you want to see at a glance.
+Every peptide is shown; significant ones are colored.
+`plot_type = "box"` or `"violin"` adds a summary shape.
 
-## `compare_states_unmatched()`: no peptide matching, pooled by region
+## `compare_regions()`: a whole region
 
-`compare_states_unmatched()` takes the opposite approach: it never requires peptide identity to match between states at all.
-Every peptide within a chosen residue range is pooled into one distribution per state (by default, one value per peptide, replicates averaged first), and the states' distributions are compared as independent groups.
-
-This sidesteps the "peptide must be found in every state" attrition problem entirely, at the cost of a real confound worth stating plainly: if two states' peptide *maps* differ (different lengths, different boundaries - exactly what happens with chimeras or point mutants), a pooled distribution can shift because of which peptides happened to be identified, not because the underlying exchange changed.
-That's why this function's output uses different vocabulary from `compare_states_tp()` (`shift_hl`/`p_value`, not `delta`/`is_sig`) and always returns a `coverage` diagnostic - check `frac_shared_all_states` before trusting a result; if it's low, treat the shift with real skepticism.
-
-`regions` is **required** here, not optional - pooling the whole protein at once mixes protected-core and fully-exposed-loop behavior, and the pooled result ends up reflecting which peptides were identified more than the biology.
-
-```{r}
-res_unmatched <- compare_states_unmatched(file_nm, times = "1800.00s",
-                                           regions = list(nterm = c(1, 100), cterm = c(101, 225)))
-res_unmatched$summary
-res_unmatched$coverage
-```
-
-### Raw uptake by default - no per-peptide size correction
-
-`value` controls what column feeds the comparison, and defaults to `"raw"` - the file's own `# Deut` column (deuterium uptake in Da), used exactly as it appears in the input, with **no per-peptide normalization of any kind**. `shift_hl` above is reported in that same unit (Da).
-
-Two alternatives exist, both opt-in:
-
-```{r, eval = FALSE}
-compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)), value = "raw")        # default
-compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)), value = "percent")    # HDX Examiner's own "Deut %"
-compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)), value = "frac_deut")  # this package's own per-residue normalization
-```
-
-`value = "frac_deut"` divides `# Deut` by the peptide's number of exchangeable protons - useful specifically when a region's peptides vary a lot in length, since pooling raw Da values then partly reflects *how big each peptide is*, not just how much it exchanged (a longer peptide mechanically carries more deuterons even at the same intrinsic exchange rate). That's a real, legitimate reason to reach for it - it's simply not the default, so the numbers you get out of this function match the file you put in unless you ask otherwise.
-
-The per-peptide p-values behind the diagnostic below do not depend on `value` (dividing one peptide's two states by the same constant cannot change its t-test), but the critical-interval half of the per-peptide rule and the *pooled* numbers (`shift_hl`, `p_value`, `p_omnibus`) are computed on the chosen scale.
-
-`states` defaults to every state found in the file and isn't limited to two - passing the same 3-state file used above runs every pairwise comparison plus one omnibus test per region, in a single call. Because no peptide matching is needed, the mutant-specific peptides are included too:
-
-```{r, fig.height = 6}
-res3_unmatched <- compare_states_unmatched(file_3state, times = "1800.00s",
-                                            regions = list(nterm = c(1, 90), cterm = c(91, 175)))
-plot_compare_states_unmatched(res3_unmatched, plot_type = "jitter")
-```
-
-### Three inference methods
-
-```{r, eval = FALSE}
-compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)),
-                          method = "peptide")   # default: one value per peptide, Wilcoxon/Kruskal-Wallis
-compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)),
-                          method = "classic")   # every replicate row pooled - warns; kept to reproduce older analyses
-compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)),
-                          method = "resample")  # peptide-level, permutation p-values + bootstrap CI on the shift
-```
-
-- **`"peptide"`** (default): averages each peptide's replicates first - recommended for new analyses.
-- **`"classic"`**: pools every replicate row as its own observation, reproducing older ad hoc analyses. Triggers a warning - replicates within a peptide are correlated, not independent, which understates p-values. Kept for reproducing a prior result, not recommended otherwise.
-- **`"resample"`**: peptide-level like `"peptide"`, but p-values come from label permutation and the shift gets a bootstrap CI - the most defensible option with small peptide counts per state, where the asymptotic tests are least reliable.
-
-### Reading the plots
-
-Two checks that have nothing to do with significance yet - whether the comparison should be trusted at all: peptide counts per region/state (a big imbalance is itself suspicious), and `frac_shared_all_states` (fraction of peptide identities present in every state).
-Both regions clear the dashed 0.5 reference line comfortably below, so peptide-map composition is not the likely explanation for anything seen next.
-
-```{r, fig.height = 6}
-plot_coverage_diagnostics(res_unmatched)
-```
-
-The comparison itself, in the style you prefer - `plot_type = "jitter"` (every peptide, no summary shape), `"box"`, or `"violin"`:
-
-```{r, fig.height = 5}
-plot_compare_states_unmatched(res_unmatched, plot_type = "jitter", state_labels = c(Unbound = "Unbound", bound = "Bound"))
-```
-
-```{r, fig.height = 5}
-plot_compare_states_unmatched(res_unmatched, plot_type = "violin", state_labels = c(Unbound = "Unbound", bound = "Bound"))
-```
-
-Neither region's pooled result clears significance here (`p_value` about 0.29 for nterm and 0.58 for cterm) - which is exactly the reading that motivates the next diagnostic.
-
-### Pooled non-significance does not mean no peptide differs
-
-The pooled test above answers "does this region's *typical* value shift" - it says nothing about whether *some* peptides in the region shift while most don't.
-A real, spatially localized effect confined to a handful of peptides inside an otherwise flat region gets averaged against every unaffected peptide riding along in the same pool, and can come back completely non-significant even though individual peptides in it clearly differ.
-`summary` reports exactly this, in its first columns, as `frac_peptides_significant` - the fraction of the region's peptides found in both states that are individually significant by the package-wide rule (matched Welch p < `pvalue` and difference > the pooled CI; `p_adjust = "BH"` adjusts across every peptide-by-pair test in the call). The per-peptide results themselves are in `res_unmatched$peptides`:
-
-```{r}
-res_unmatched$summary[, c("region", "state1", "state2", "p_value", "p_adj",
-                           "n_peptides_tested", "n_peptides_significant", "frac_peptides_significant")]
-```
-
-Both regions here are a real example of exactly this trap: the pooled p-values (0.29 and 0.58) are nowhere near significant, but `frac_peptides_significant` is 0.56 (5/9, nterm) and 0.37 (7/19, cterm) - **over half the individually-tested peptides in "non-significant" nterm are themselves significant.**
-**Do not read a flat pooled result as "nothing is happening in this region."** Check `frac_peptides_significant` first; if it's non-trivial, the region contains real localized signal that pooling hid. When the peptides are matched between states, `compare_regions()` (below) is the better region-level test.
-
-## `residue_regions()`: from significant peptides to significant regions
-
-`residue_regions()` turns significant *peptides* into contiguous *regions* - "which stretch of residues is consistently affected":
-
-1. **Significant peptide**: the package-wide rule (Welch p < `pvalue` and difference > pooled CI; `p_adjust = "BH"` optional).
-2. **Effect size** for ranking is the difference per exchangeable amide (`delta / nb_exch_deut()`), not raw Da.
-3. **Significant region**: a residue only counts if covered by at least `min_peptides` (default `2`) *distinct*, same-direction significant peptides - one peptide alone (including the same peptide seen at two charge states) cannot make a region - and destabilized/protected residues are clustered separately so a real protected region is never averaged away by a nearby destabilized one.
-
-```{r}
-a_da <- output_tp(file_nm, percent = FALSE)  # residue_regions() needs Da (additive across residues), not percent
-rr <- residue_regions(a_da, state1 = "Unbound", state2 = "bound", times = "1800.00s")
-rr
-```
-
-`pooled_CI_Da` is the critical interval used for the peptide calls.
-Earlier versions called peptides by BH-adjusted p alone (`fdr_cutoff`); that argument still works, with a deprecation warning, and reproduces the old rule.
-
-### Rolling regions up against named subsets
-
-`residue_regions()` always scans every residue covered by any tested peptide - the unrestricted, data-driven "total" picture, deliberately not pre-restricted to any domain you might already suspect matters.
-`residue_regions_subset_summary()` checks that unrestricted result against named subsets *after the fact*, without re-running anything:
-
-```{r}
-residue_regions_subset_summary(rr, regions = list(nterm = c(1, 100), cterm = c(101, 225)))
-```
-
-`frac_significant` is the fraction of each named subset actually covered by a derived region - a cross-check for a structural hypothesis (e.g. "is my proposed domain boundary where the data-driven signal actually is") against the unconstrained result, not a replacement for it.
-
-## `compare_regions()`: a region ANOVA for matched peptides
-
-When the peptides were identified in every state, a region can be tested with each peptide as its own control: a two-way ANOVA `uptake ~ peptide + state` on the per-peptide means.
-Differences between peptides (length, location) are removed before the states are compared, and the peptides are the replication unit, so the test asks whether the states differ *consistently across the region's peptides*.
-With two states this is exactly a paired t-test of the per-peptide differences.
+`compare_regions()` tests whether the states differ in a region.
+Each peptide is its own control: the model is `uptake ~ peptide + state` on the peptide averages.
+For two states this is a paired t-test of the peptide differences.
+The peptides must be found in every state.
 
 ```{r}
 reg <- compare_regions(file_nm, times = "1800.00s",
@@ -248,19 +110,74 @@ reg$summary
 reg$pairs
 ```
 
-Compared with the pooled test above, cterm now clearly differs between the states (the per-peptide differences are consistent), while nterm is borderline: its peptides disagree strongly, which `p_state_x_peptide` (state x peptide interaction, tested against replicate noise) confirms.
-A significant interaction means the effect is localized or mixed in direction, so the average shift alone does not describe the region - look at its peptides with `compare_states_tp()` or `plot_fissure_vent()`.
+-   `p_state`: do the states differ in this region?
+-   `p_state_x_peptide`: does the difference change from peptide to peptide? If yes, the effect is local - look at the single peptides.
+-   `estimate`: the average difference per peptide (state2 - state1).
 
-All time points at once, with a test of whether the state effect changes over time:
+Here cterm differs clearly (p = 0.0006).
+nterm is borderline (p = 0.08): some of its peptides change and some do not.
+
+All time points in one model, with a test for state x time:
 
 ```{r}
 compare_regions(file_nm, regions = list(nterm = c(1, 100), cterm = c(101, 225)),
                 time_model = TRUE)$summary
 ```
 
-## `compare_timecourse()`: the whole time course of each peptide
+## `compare_states_unmatched()`: different peptides in the states
 
-`compare_timecourse()` judges each peptide on all its time points together: the summed difference over time with a global critical interval (as in Deuteros 2.0), and the number of time points at which the peptide passes the usual rule.
+Use this function when the states do not share the same peptides.
+All peptides in a region are pooled per state, and the states are compared.
+`regions` is required.
+
+```{r}
+res_unmatched <- compare_states_unmatched(file_nm, times = "1800.00s",
+                                          regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+res_unmatched$summary
+res_unmatched$coverage
+```
+
+Read the first columns first: `frac_peptides_significant` is the fraction of the shared peptides that differ by the rule above.
+The pooled test after it is only approximate.
+
+Here the pooled test is not significant (p = 0.29 and 0.58), but 5/9 nterm peptides and 7/19 cterm peptides differ.
+A non-significant pooled result does **not** mean nothing changed.
+
+`frac_shared_all_states` in `coverage` is the fraction of peptides found in every state.
+If it is low, a difference can come from different peptides rather than different exchange.
+
+```{r, fig.height = 6}
+plot_coverage_diagnostics(res_unmatched)
+```
+
+```{r, fig.height = 5}
+plot_compare_states_unmatched(res_unmatched, plot_type = "jitter",
+                              state_labels = c(Unbound = "Unbound", bound = "Bound"))
+```
+
+More than two states work the same way, and the mutant peptides are included:
+
+```{r, fig.height = 6}
+res3_unmatched <- compare_states_unmatched(file_3state, times = "1800.00s",
+                                           regions = list(nterm = c(1, 90), cterm = c(91, 175)))
+plot_compare_states_unmatched(res3_unmatched, plot_type = "jitter")
+```
+
+Options:
+
+```{r, eval = FALSE}
+## values: uptake in Da (default), percent, or uptake per exchangeable residue
+compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)), value = "frac_deut")
+## methods: "peptide" (default), "resample" (permutation p-values and bootstrap CI),
+## "classic" (every replicate pooled; only to reproduce old analyses)
+compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)),
+                         method = "resample", seed = 1)
+```
+
+## `compare_timecourse()`: the whole time course
+
+`compare_timecourse()` judges each peptide on all time points together.
+It gives the summed difference over time with its own CI, and the number of time points where the peptide is significant.
 
 ```{r}
 tc <- compare_timecourse(file_nm, "Unbound", "bound")
@@ -268,11 +185,22 @@ head(tc[order(tc$p_value), c("Start", "End", "summed_delta", "p_value", "ci_sum"
                              "sig_summed", "n_timepoints_sig")])
 ```
 
-The robot plots use the same idea: `robot_plot_All(..., min_timepoints = 2)` draws only peptides significant at two or more time points instead of at any single one.
+Robot plots can show only peptides significant at two or more time points: `robot_plot_All(..., min_timepoints = 2)`.
 
-## What these are not
+## `residue_regions()`: stretches of residues
 
-- **Not a replacement for the two-state functions.** For exactly two states at one time point, `plot_fissure_vent()`/`diff_peptides_prep()` remain the package's primary tool.
-- **`compare_states_unmatched()`'s pooled test is approximate.** It treats a region's peptides as independent samples; read its per-peptide diagnostic first, and use `compare_regions()` whenever peptides are matched.
-- **A pooled or omnibus non-significant result is not "nothing is different here."** Check `frac_peptides_significant`, `p_state_x_peptide`, or run `residue_regions()` before concluding a flat region has no real signal in it.
-- **None of these fit exchange kinetics or protection factors.**
+`residue_regions()` finds stretches of residues that changed in the same direction.
+A residue is included when at least `min_peptides` (default 2) significant peptides cover it.
+The effect is given per exchangeable residue.
+
+```{r}
+a_da <- output_tp(file_nm)
+rr <- residue_regions(a_da, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+rr
+```
+
+Check the regions against your own domains:
+
+```{r}
+residue_regions_subset_summary(rr, regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+```

@@ -24,9 +24,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-Before asking whether two states differ (`vignette("multistate")`, `vignette("fissure_vent")`), it's worth asking a more basic question: is the data itself good enough to support that comparison?
-Two states can only be meaningfully compared where both were actually measured with enough redundancy to trust the numbers, and a low-coverage gap or a lopsided peptide map between states is a real, common confound - `compare_states_unmatched()`'s own `coverage` diagnostic exists specifically because of it (see `vignette("multistate")`).
-This vignette covers the tools for checking that *before* running any significance test: summary tables (`general_info()`, `backHX_calculations()`) and a coverage map plot (`plot_peptide_coverage_map()`).
+Check the data before comparing states.
+States can only be compared where both were measured well.
 
 ```{r}
 library(HDXBoxeR)
@@ -35,58 +34,56 @@ file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 
 ## Summary tables
 
-`general_info()` reports, per state: how many peptides were identified, what percent of the sequence they cover, their mean length, and mean redundancy (how many peptides overlap the average residue):
+`general_info()` gives, per state, the number of peptides, sequence coverage, average peptide length, and redundancy (how many peptides cover an average residue):
 
 ```{r}
 general_info(file_nm)
 ```
 
-A coverage percentage well below 100% means part of the sequence has no data at all in that state - not necessarily a problem (some regions may be poorly digested or simply not ionize well), but worth knowing before interpreting the *absence* of a significant result there as "nothing happens" rather than "nothing was measured."
-Low mean redundancy means individual residues are typically covered by very few peptides, so an unusual value from one bad peptide isn't cross-checked by neighbors - exactly what `residue_regions()`'s `min_peptides` corroboration requirement (`vignette("multistate")`) is designed to guard against downstream.
+Low coverage means part of the sequence was not measured.
+No significant difference there means "not measured", not "no change".
+Low redundancy means a residue is covered by few peptides, so one bad peptide is not cross-checked.
 
-`backHX_calculations()` reports back-exchange - deuterium lost during sample handling/LC before the mass measurement, calculated from the undeuterated (`0s`) and fully-deuterated (`FD`) controls. The peptide masses come from the *measured* centroids: HDX Examiner's `Exp Cent` is an m/z value, so it is multiplied by the peptide's `Charge` to get a mass in Da, i.e. back-exchange = 1 - (Exp Cent[FD] - Exp Cent[0s]) x Charge / N / Dfact:
+`backHX_calculations()` gives the back-exchange per state.
+It uses the undeuterated (`0s`) and fully deuterated (`FD`) controls, and the measured centroids (m/z x charge):
 
 ```{r}
 backHX_calculations(file_nm)
 ```
 
-High or wildly different back-exchange between states can distort a direct comparison between them (see `?backHX_calculations` for the calculation itself) - this is a single global number per state, not something a plot adds much to, which is why it stays table-only here.
+Very different back-exchange between states can bias the comparison.
 
 ## Peptide coverage map
 
-The two tables above summarize coverage as single numbers; they can't show *where* a gap is or *which* residues are over- or under-represented.
-`plot_peptide_coverage_map()` draws that directly: a per-residue redundancy strip above a peptide map (one block per unique peptide), one panel-pair per state, sharing one residue axis so states are directly comparable:
+`plot_peptide_coverage_map()` shows where the peptides are: redundancy on top, the peptide map below, one panel per state.
 
 ```{r, fig.height = 7}
 plot_peptide_coverage_map(file_nm)
 ```
 
-Read this alongside `general_info()`'s numbers above: the ~94% coverage for each state shows up here as the mostly-continuous colored strip, with the few visible gaps (e.g. right around residue 0-40) being the missing ~6%.
-Redundancy (the height of the top strip) is not uniform - some stretches are covered by a dozen overlapping peptides, others by only one or two - and a region singled out as significant by `residue_regions()` sitting in a low-redundancy stretch here is worth a second look, since it has less independent corroboration behind it.
+Gaps are regions without data.
+A gap in one state but not the other is worth noting before comparing those regions.
 
-Comparing the two states side by side is also a direct visual check on the exact confound `compare_states_unmatched()`'s `coverage`/`frac_shared_all_states` diagnostic quantifies (`vignette("multistate")`): a gap present in one state's map but not the other's marks a region where an unmatched, pooled comparison could be picking up peptide-map differences rather than real biology.
-
-### Customizing the plot
-
-Every visual choice above is a parameter, not a fixed style - useful both for matching a house style and for making a specific feature (a gap, a redundancy dip) easier to spot:
+The look of the plot can be changed:
 
 ```{r, fig.height = 4}
 plot_peptide_coverage_map(file_nm, states = "Unbound", palette = "steelblue",
-                           bg = "white", show_grid = FALSE, block_height = 0.9)
+                          bg = "white", show_grid = FALSE, block_height = 0.9)
 ```
 
-```{r, fig.height = 4}
-plot_peptide_coverage_map(file_nm, states = "bound", palette = "Dark2",
-                           row_gap = 3, block_border = "grey20")
+-   `palette`: one color, or an RColorBrewer palette name.
+-   `bg`, `grid_col`, `show_grid`: background and grid lines.
+-   `row_gap`: space between peptides in one row.
+-   `block_height`, `block_border`: peptide block size and outline.
+
+## Peptide checks
+
+`peptide_qc()` flags peptides with missing controls, uptake of 0 at every time point, negative uptake, or odd FD values.
+It does not remove anything.
+
+```{r}
+qc <- peptide_qc(file_nm)
+qc[qc$issues != "", c("Protein.State", "Start", "End", "Sequence", "issues")]
 ```
 
-- `palette`: a single color, or an `RColorBrewer` qualitative palette name (one color per state).
-- `bg`/`grid_col`/`show_grid`: panel shading and gridlines - set `show_grid = FALSE` for a plain white background.
-- `row_gap`: minimum residue spacing enforced between two peptides sharing a map row (visual only).
-- `block_height`/`block_border`: peptide block thickness and outline.
-- `cex_main`/`font_family`: title text size and font.
-
-## What this is not
-
-- **Not a significance test.** Nothing here compares states statistically - that's `vignette("multistate")` and `vignette("fissure_vent")`.
-- **Coverage is about identification, not deuteration.** A well-covered region can still show no real exchange difference between states, and a gap doesn't imply one exists there either - it only means there's no data to check.
+In this example, peptide 182-193 has no undeuterated control, so HDXExaminer reports its uptake as 0.
