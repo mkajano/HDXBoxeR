@@ -27,3 +27,43 @@
 .state_column_prefix <- function(state) {
   make.names(gsub(" ", "", state, fixed = TRUE))
 }
+
+## the one average/SD column of a state, e.g. "av_<state>_X..Deut",
+## "sd_<state>_X..Deut", "sd_ci_<state>_Deut..": exact match on the state
+## part after removing the known prefix and value suffix
+.hdx_summary_col <- function(state, cols, prefixes = c("sd_ci_", "sd_", "av_", "pv_")) {
+  prefix <- .state_column_prefix(state)
+  root <- cols
+  for (p in prefixes) root <- sub(paste0("^", p), "", root)
+  is_value <- grepl("_(X\\.\\.Deut|Deut\\.\\.)$", cols)
+  root <- sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", root)
+  hits <- cols[is_value & root == prefix]
+  ## no exact match: accept an unambiguous abbreviation ("Fresh" -> "Fresh_pH7")
+  if (length(hits) == 0) hits <- cols[is_value & startsWith(root, prefix)]
+  if (length(hits) != 1) {
+    stop(sprintf("State '%s' must match exactly one column among: %s",
+                 state, paste(cols[is_value], collapse = ", ")), call. = FALSE)
+  }
+  hits
+}
+
+## raw replicate columns of one state in an output_tp() table: exact match
+## on "<state>_X..Deut_<k>" / "<state>_Deut.._<k>" (not a prefix match, so
+## "WT" does not also pick up "WT_mut"). Any number of replicates is
+## accepted; states may differ.
+.hdx_state_cols <- function(state, cols) {
+  prefix <- .state_column_prefix(state)
+  root <- sub("_(X\\.\\.Deut|Deut\\.\\.)_[0-9]+$", "", cols)
+  is_value <- grepl("_(X\\.\\.Deut|Deut\\.\\.)_[0-9]+$", cols)
+  hits <- cols[is_value & root == prefix]
+  if (length(hits) == 0) {
+    ## no exact match: accept an unambiguous abbreviation
+    cand <- unique(root[is_value & startsWith(root, prefix)])
+    if (length(cand) == 1) hits <- cols[is_value & root == cand]
+  }
+  if (length(hits) == 0) {
+    stop(sprintf("No replicate columns for state '%s' among: %s",
+                 state, paste(cols[is_value], collapse = ", ")), call. = FALSE)
+  }
+  hits
+}

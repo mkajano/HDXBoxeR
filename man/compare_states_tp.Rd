@@ -11,7 +11,7 @@ compare_states_tp(
   by = c("sequence", "position"),
   reference = NULL,
   regions = NULL,
-  replicates = 3,
+  replicates = NULL,
   alpha = 0.01,
   pvalue = 0.01,
   p_adjust_method = "BH",
@@ -54,7 +54,9 @@ are compared, run separately per region, and the result gets a
 \code{region} column. Default \code{NULL} compares every peptide with no
 filtering (no \code{region} column in the output).}
 
-\item{replicates}{number of replicates per state. Default \code{3}.}
+\item{replicates}{optional maximum number of replicates per state (passed
+to \code{\link[=output_tp]{output_tp()}}). Default \code{NULL} uses every replicate; states may
+differ.}
 
 \item{alpha}{alpha for the pooled critical interval (\code{CI_2pts()}),
 applied per pair. Default \code{0.01}.}

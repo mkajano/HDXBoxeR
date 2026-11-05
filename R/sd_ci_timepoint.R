@@ -13,23 +13,21 @@
 #' @return data frame with standard deviation calculated from the CI
 #' @export
 sd_ci_timepoint<-function(df, replicates=3, alpha=0.01) {
-  ### calculate standard deviation of sample 1 for all data points
-  nb_sets=(dim(df)[2]-6)/replicates
-  nm_root<-colnames(df[,c(6+((1:nb_sets)-1)*replicates+1)])
-  nm_root<-str_sub(nm_root, end = -3)
-  sd_nm<-paste("sd_ci_", nm_root, sep="")
-
-  sd1<-c(); for ( j in 1:nb_sets) {
-    for (i in 1:dim(df)[1]) {x1<-df[i,7:(7+replicates-1)];
-    x2<-df[i,(6+(j-1)*replicates+1):(6+(j-1)*replicates+replicates)]
-
-    tvalue=abs(qt(alpha/2, replicates*2-2))
-    tt<-t.test(x1, x2, conf.level = c(1-alpha))
-    sd.ci<-(tt$conf.int[2]-tt$conf.int[1])/(2*tvalue)*sqrt(replicates)
-    sd1<-c(sd1, sd.ci)}
+  blocks <- .hdx_blocks(df, replicates)
+  m1 <- .hdx_block_matrix(df, blocks[[1]])
+  sd_one <- function(cols) {
+    m2 <- .hdx_block_matrix(df, cols)
+    vapply(seq_len(nrow(df)), function(i) {
+      x1 <- m1[i, ][!is.na(m1[i, ])]; x2 <- m2[i, ][!is.na(m2[i, ])]
+      if (length(x1) < 2 || length(x2) < 2) return(NA_real_)
+      n <- min(length(x1), length(x2))
+      tvalue <- abs(qt(alpha/2, length(x1) + length(x2) - 2))
+      tt <- tryCatch(t.test(x1, x2, conf.level = 1 - alpha), error = function(e) NULL)
+      if (is.null(tt) || anyNA(tt$conf.int)) return(NA_real_)
+      (tt$conf.int[2] - tt$conf.int[1]) / (2 * tvalue) * sqrt(n)
+    }, numeric(1))
   }
-
-  sd2<-data.frame(matrix(sd1, ncol=nb_sets , byrow = FALSE))
-  colnames(sd2)<-sd_nm
-  sd2<-data.frame(df[,1:6], sd2)
+  sd2 <- data.frame(lapply(blocks, sd_one))
+  colnames(sd2) <- paste0("sd_ci_", names(blocks))
+  sd2 <- data.frame(df[, 1:6], sd2)
   return(sd2)}

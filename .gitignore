@@ -43,3 +43,7 @@ vignettes/lib/
 .DS_Store
 /doc/
 /Meta/
+
+# testthat failure snapshots
+tests/testthat/_problems/
+tests/testthat/testthat-problems.rds

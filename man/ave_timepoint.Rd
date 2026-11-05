@@ -7,20 +7,20 @@
 ave_timepoint(df, replicates = 3)
 }
 \arguments{
-\item{df}{output from functions output_tp or output_tp_proc.}
+\item{df}{output from functions output_tp or output_tc.}
 
-\item{replicates}{number of replicates used. Default is set to replicates=3}
+\item{replicates}{only used for tables whose value columns are not named
+\verb{<state>_..._<replicate>}: the number of replicates per block. Default 3.}
 }
 \value{
 Data.frame with average values
 }
 \description{
-Calculates average of uptake or procent data. Returns data frame with average values.
-Default for the number of replicates is 3.
+Calculates the average of the replicates of every state (or time, for
+\code{\link[=output_tc]{output_tc()}} tables) for each peptide, ignoring missing replicates.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-ave<-ave_timepoint(df=a) ##if number of replicates is equal 3
-ave<-ave_timepoint(df=a, replicates=4) ##if number of replicates is equal 4
+ave<-ave_timepoint(df=a)
 }

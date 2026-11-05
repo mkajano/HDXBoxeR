@@ -23,6 +23,33 @@
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
   structure mapping, data quality.
 
+## Uneven and missing replicates
+
+* `output_tp()` and `output_tc()` now use every replicate of every state by
+  default, so states may have different numbers of replicates (e.g. 3 and
+  4). Previously all states were cut to the smallest count and the extra
+  replicates were silently dropped; `replicates = n` still caps the number.
+* A peptide with a missing measurement is kept with `NA` instead of being
+  dropped, as long as it has at least `min_replicates` (new argument,
+  default 2) values in every state. Dropped peptides are reported.
+* `sd_timepoint()`, `ave_timepoint()`, `pv_timepoint()`, `sd_ci_timepoint()`
+  and `pv_timecourse()` find each state's replicate columns by name and
+  ignore missing values; `pv_timepoint()` returns `NA` instead of failing
+  when a peptide has fewer than two values or identical replicates.
+* `CI_2pts()` (and so `CI_tp()`, `CI_tc()` and every plot using them) pools
+  each state's SDs weighted by their degrees of freedom and uses each
+  state's own number of replicates. With equal, complete replicates the
+  result is unchanged.
+* The results of `output_tp()`/`output_tc()` record their replicates,
+  states, times and units as attributes.
+* State names are matched exactly before abbreviations are tried, so a
+  state "WT" is no longer confused with "WT_mut".
+* `output_tc(seq_match = )` now means the same as in `output_tp()`
+  (`FALSE`: identical sequence required; `TRUE`: match by position). The
+  two functions previously used opposite meanings. With `seq_match = TRUE`,
+  `output_tp()` keeps its usual column order (Sequence fourth).
+* `compare_states_tp()` uses every replicate by default (`replicates = NULL`).
+
 ## Changes to results
 
 * `backHX_calculations()` now computes back-exchange from the measured

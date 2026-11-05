@@ -11,13 +11,9 @@
 #' @export
 CI_tc<-function(sd_c, sd_v, replicates=3, alpha=0.01 ){
   CI_all<-c()
-  tvalue=abs(qt(alpha, replicates*2-2))
-
   for ( i in 7:dim(sd_c)[2]){
-    sp1<-sqrt(sum(sd_c[,i]^2*(replicates-1))/((replicates-1)*length(sd_c[,i])))
-    sp2<-sqrt(sum(sd_v[,i]^2*(replicates-1))/((replicates-1)*length(sd_v[,i])[1]))
-    spa<-sqrt((sp1^2+sp2^2)/replicates)
-    CI<-spa*tvalue
-    CI_all<-c(CI_all, CI)}
+    CI_all<-c(CI_all, CI_2pts(sd_c[,i], sd_v[,i], replicates, alpha,
+                              n1 = .hdx_n_for(sd_c, colnames(sd_c)[i]),
+                              n2 = .hdx_n_for(sd_v, colnames(sd_v)[i])))}
   return(CI_all)
 }

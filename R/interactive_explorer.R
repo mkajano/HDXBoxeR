@@ -39,15 +39,7 @@
   if (missing(state2) || is.null(state2)) state2 <- nm1[2]
 
   resolve_col <- function(state, cols, known_prefixes = character(0)) {
-    state <- .state_column_prefix(state)
-    root <- cols
-    for (p in known_prefixes) root <- sub(paste0("^", p), "", root)
-    hits <- cols[startsWith(root, state)]
-    if (length(hits) != 1) {
-      stop(sprintf("State '%s' must match exactly one column among: %s",
-                    state, paste(cols, collapse = ", ")))
-    }
-    hits
+    .hdx_summary_col(state, cols, known_prefixes)
   }
   av_state1 <- resolve_col(state1, colnames(av1), "av_")
   av_state2 <- resolve_col(state2, colnames(av1), "av_")
@@ -58,16 +50,11 @@
   sd_prefixes <- c("sd_ci_", "sd_")
   sd_state1 <- resolve_col(state1, colnames(sd1), sd_prefixes)
   sd_state2 <- resolve_col(state2, colnames(sd1), sd_prefixes)
-  ci <- CI_2pts(stats::na.omit(sd1[[sd_state1]]), stats::na.omit(sd1[[sd_state2]]), replicates, alpha)
+  ci <- CI_2pts(sd1[[sd_state1]], sd1[[sd_state2]], replicates, alpha,
+                n1 = .hdx_n_for(sd1, sd_state1), n2 = .hdx_n_for(sd1, sd_state2))
 
   resolve_raw_cols <- function(state, cols, replicates) {
-    state <- .state_column_prefix(state)
-    hits <- cols[startsWith(cols, state)]
-    if (length(hits) != replicates) {
-      stop(sprintf("Expected %d raw replicate columns matching state '%s', found %d: %s",
-                    replicates, state, length(hits), paste(hits, collapse = ", ")))
-    }
-    hits
+    .hdx_state_cols(state, cols)
   }
   raw_cols1 <- resolve_raw_cols(state1, colnames(sub_df), replicates)
   raw_cols2 <- resolve_raw_cols(state2, colnames(sub_df), replicates)

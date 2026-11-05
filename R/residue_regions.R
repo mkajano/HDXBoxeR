@@ -65,13 +65,7 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
   }
 
   resolve_raw_cols <- function(state, cols, replicates) {
-    state <- .state_column_prefix(state)
-    hits <- cols[startsWith(cols, state)]
-    if (length(hits) != replicates) {
-      stop(sprintf("Expected %d raw replicate columns matching state '%s', found %d: %s",
-                    replicates, state, length(hits), paste(hits, collapse = ", ")))
-    }
-    hits
+    .hdx_state_cols(state, cols)
   }
   raw_cols1 <- resolve_raw_cols(state1, colnames(sub_df), replicates)
   raw_cols2 <- resolve_raw_cols(state2, colnames(sub_df), replicates)
@@ -125,15 +119,10 @@ residue_regions <- function(df, state1, state2, times, replicates = 3,
 
   sd1 <- sd_timepoint(sub_df, replicates)
   sd_prefixes <- c("sd_ci_", "sd_")
-  resolve_col <- function(state, cols, known_prefixes) {
-    state <- .state_column_prefix(state)
-    root <- cols
-    for (p in known_prefixes) root <- sub(paste0("^", p), "", root)
-    cols[startsWith(root, state)][1]
-  }
-  sd_state1 <- resolve_col(state1, colnames(sd1), sd_prefixes)
-  sd_state2 <- resolve_col(state2, colnames(sd1), sd_prefixes)
-  pooled_CI <- CI_2pts(stats::na.omit(sd1[[sd_state1]]), stats::na.omit(sd1[[sd_state2]]), replicates, alpha)
+  sd_state1 <- .hdx_summary_col(state1, colnames(sd1), sd_prefixes)
+  sd_state2 <- .hdx_summary_col(state2, colnames(sd1), sd_prefixes)
+  pooled_CI <- CI_2pts(sd1[[sd_state1]], sd1[[sd_state2]], replicates, alpha,
+                       n1 = .hdx_n_for(sd1, sd_state1), n2 = .hdx_n_for(sd1, sd_state2))
 
   out <- list()
   for (direction in c("destabilized", "protected")) {

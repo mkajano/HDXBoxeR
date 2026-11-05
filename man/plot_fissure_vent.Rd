@@ -30,10 +30,10 @@ plot_fissure_vent(
 
 \item{times}{Deut times}
 
-\item{state1}{First protein state. Matched by substring against the
-averaged/SD column names (e.g. "Fresh" matches "av_Fresh_pH7"), so it
-does not need to be the exact column name - just specific enough to
-match exactly one column. Defaults to the first state found in \code{df}.}
+\item{state1}{First protein state. An exact state name is matched first
+(so "WT" never picks up "WT_mut"); otherwise an unambiguous
+abbreviation is accepted (e.g. "Fresh" for "Fresh_pH7"). Defaults to
+the first state found in \code{df}.}
 
 \item{state2}{Second protein state, same matching rule. Defaults to the
 second state found in \code{df}.}

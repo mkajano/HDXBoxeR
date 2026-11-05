@@ -75,7 +75,9 @@
 #'   are compared, run separately per region, and the result gets a
 #'   `region` column. Default `NULL` compares every peptide with no
 #'   filtering (no `region` column in the output).
-#' @param replicates number of replicates per state. Default `3`.
+#' @param replicates optional maximum number of replicates per state (passed
+#'   to [output_tp()]). Default `NULL` uses every replicate; states may
+#'   differ.
 #' @param alpha alpha for the pooled critical interval (`CI_2pts()`),
 #'   applied per pair. Default `0.01`.
 #' @param pvalue significance cutoff applied to the (BH-adjusted) per-pair
@@ -105,7 +107,7 @@
 compare_states_tp <- function(filepath, times, states = NULL,
                                by = c("sequence", "position"),
                                reference = NULL, regions = NULL,
-                               replicates = 3, alpha = 0.01, pvalue = 0.01,
+                               replicates = NULL, alpha = 0.01, pvalue = 0.01,
                                p_adjust_method = "BH", percent = FALSE) {
   by <- match.arg(by)
   ## output_tp(seq_match = FALSE) merges on Sequence+Start+End+Charge (exact
@@ -161,8 +163,9 @@ compare_states_tp <- function(filepath, times, states = NULL,
     state_of_col_omni <- sub("_(X\\.\\.Deut|Deut\\.\\.)_[0-9]+$", "", value_cols_omni)
     cols_for_omni <- function(s) value_cols_omni[state_of_col_omni == .state_column_prefix(s)]
     p_omnibus_raw <- vapply(seq_len(nrow(omni_df)), function(r) {
-      vals <- unlist(lapply(states, function(s) as.numeric(omni_df[r, cols_for_omni(s)])))
-      grp  <- rep(states, each = replicates)
+      cols <- lapply(states, cols_for_omni)
+      vals <- unlist(lapply(cols, function(cc) as.numeric(omni_df[r, cc])))
+      grp  <- rep(states, times = lengths(cols))
       ok <- !is.na(vals)
       if (length(unique(grp[ok])) < length(states) || length(unique(vals[ok])) < 2) return(NA_real_)
       tryCatch(stats::kruskal.test(vals[ok], factor(grp[ok]))$p.value, error = function(e) NA_real_)
@@ -192,9 +195,9 @@ compare_states_tp <- function(filepath, times, states = NULL,
                     s1, s2, paste(value_cols, collapse = ", ")))
     }
 
-    sd1 <- apply(as.matrix(pair_df[, raw1]), 1, stats::sd, na.rm = TRUE)
-    sd2 <- apply(as.matrix(pair_df[, raw2]), 1, stats::sd, na.rm = TRUE)
-    ci  <- CI_2pts(stats::na.omit(sd1), stats::na.omit(sd2), replicates, alpha)
+    m1 <- .hdx_block_matrix(pair_df, raw1); m2 <- .hdx_block_matrix(pair_df, raw2)
+    ci  <- CI_2pts(.hdx_row_sd(m1), .hdx_row_sd(m2), alpha = alpha,
+                   n1 = .hdx_row_n(m1), n2 = .hdx_row_n(m2))
 
     test <- lapply(seq_len(nrow(pair_df)), function(r) {
       x1 <- as.numeric(pair_df[r, raw1]); x2 <- as.numeric(pair_df[r, raw2])

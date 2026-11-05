@@ -50,10 +50,10 @@
 #'   Welch t-test p-value (state1 vs state2, via pv_timepoint) is below
 #'   this cutoff.
 #' @param replicates number of replicates in sample. Default set to 3.
-#' @param state1 First protein state. Matched by substring against the
-#'   averaged/SD column names (e.g. "Fresh" matches "av_Fresh_pH7"), so it
-#'   does not need to be the exact column name - just specific enough to
-#'   match exactly one column. Defaults to the first state found in `df`.
+#' @param state1 First protein state. An exact state name is matched first
+#'   (so "WT" never picks up "WT_mut"); otherwise an unambiguous
+#'   abbreviation is accepted (e.g. "Fresh" for "Fresh_pH7"). Defaults to
+#'   the first state found in `df`.
 #' @param state2 Second protein state, same matching rule. Defaults to the
 #'   second state found in `df`.
 #' @param sd_source flag. `"raw"` (default) uses the raw SD of each state's
@@ -116,18 +116,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   # and "bound" ("bound" is a substring of "Unbound") - caught by testing
   # this fix against that real example data, not assumed safe.
   resolve_col <- function(state, cols, known_prefixes = character(0)) {
-    state <- .state_column_prefix(state)
-    root <- cols
-    for (p in known_prefixes) root <- sub(paste0("^", p), "", root)
-    hits <- cols[startsWith(root, state)]
-    if (length(hits) == 0) {
-      stop(sprintf("No column matching state '%s' found among: %s", state, paste(cols, collapse = ", ")))
-    }
-    if (length(hits) > 1) {
-      stop(sprintf("State '%s' matches multiple columns (%s) - use a more specific name",
-                    state, paste(hits, collapse = ", ")))
-    }
-    hits
+    .hdx_summary_col(state, cols, known_prefixes)
   }
 
   if (sd_source == "CI") {
@@ -161,13 +150,7 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
   # returns NaN for both p.value and conf.int - so NaN is checked
   # explicitly rather than relying on tryCatch alone.
   resolve_raw_cols <- function(state, cols, replicates) {
-    state <- .state_column_prefix(state)
-    hits <- cols[startsWith(cols, state)]
-    if (length(hits) != replicates) {
-      stop(sprintf("Expected %d raw replicate columns matching state '%s', found %d: %s",
-                    replicates, state, length(hits), paste(hits, collapse = ", ")))
-    }
-    hits
+    .hdx_state_cols(state, cols)
   }
   raw_cols1 <- resolve_raw_cols(state1, colnames(df), replicates)
   raw_cols2 <- resolve_raw_cols(state2, colnames(df), replicates)
@@ -232,7 +215,8 @@ plot_fissure_vent <- function(df, replicates = 3, times, state1, state2, alpha =
       warning(sprintf("no peptides match times = '%s' - skipping", times[i]))
       next
     }
-    ci <- CI_2pts(stats::na.omit(sd1[ind1, sd_state1]), stats::na.omit(sd1[ind1, sd_state2]), replicates, alpha)
+    ci <- CI_2pts(sd1[ind1, sd_state1], sd1[ind1, sd_state2], replicates, alpha,
+                  n1 = .hdx_n_for(sd1, sd_state1, ind1), n2 = .hdx_n_for(sd1, sd_state2, ind1))
     message(sprintf("time %s: CI = %.3f", times[i], ci))
     points(c(-10, 110), c(-10, 110) + ci, type = "l", col = "grey70", lty = 2)
     points(c(-10, 110), c(-10, 110) - ci, type = "l", col = "grey70", lty = 2)

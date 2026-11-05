@@ -35,9 +35,23 @@ test_that("output_tp() honours replicates, states and times", {
   expect_equal(unique(a$Deut.Time), "100.00s")
 })
 
-test_that("output_tp() replicate auto-detection takes the smallest count", {
+test_that("output_tp() uses every replicate; states may differ; replicates= caps", {
   f <- make_hdx_csv(replicates = c(A = 3, B = 4))
-  expect_equal(ncol(tp(f)) - 6, 6)
+  a <- tp(f)
+  expect_equal(colnames(a)[7:13], c(paste0("A_X..Deut_", 1:3), paste0("B_X..Deut_", 1:4)))
+  expect_equal(attr(a, "replicates"), c(A = 3L, B = 4L))
+  row <- a$Deut.Time == "100.00s" & a$Start == 20
+  expect_equal(a[row, "B_X..Deut_4"], expected_uptake(2, 2, 4, 4))
+  capped <- tp(f, replicates = 3)
+  expect_equal(attr(capped, "replicates"), c(A = 3L, B = 3L))
+})
+
+test_that("output_tc() keeps every replicate per time point", {
+  f <- make_hdx_csv(replicates = c(A = 3, B = 4))
+  b <- suppressMessages(output_tc(f))
+  expect_equal(attr(b, "replicates"), c(`10.00s` = 4L, `100.00s` = 4L))
+  expect_true(all(is.na(b[b$Protein.State == "A", "t10.00s_X..Deut_4"])))
+  expect_false(anyNA(b[b$Protein.State == "B", "t10.00s_X..Deut_4"]))
 })
 
 test_that("output_tp() seq_match: FALSE requires identical sequence, TRUE matches by position", {
@@ -54,11 +68,22 @@ test_that("output_tp() seq_match: FALSE requires identical sequence, TRUE matche
   expect_equal(unique(by_pos$Sequence[by_pos$Start == 1]), "MKTAYIAKQR.MKTAYIAKQA")
 })
 
-test_that("output_tp() drops a peptide missing from any used replicate (current behaviour)", {
+test_that("output_tp() keeps a peptide with a missing replicate as NA; min_replicates sets the floor", {
   f <- make_hdx_csv(drop = data.frame(state = "B", time = "10.00s", replicate = 2, Start = 12))
   a <- tp(f)
-  expect_false(any(a$Deut.Time == "10.00s" & a$Start == 12))
-  expect_true(any(a$Deut.Time == "100.00s" & a$Start == 12))
+  row <- a$Deut.Time == "10.00s" & a$Start == 12
+  expect_equal(sum(row), 1)
+  expect_true(is.na(a[row, "B_X..Deut_2"]))
+  expect_equal(a[row, "B_X..Deut_3"], expected_uptake(2, 1, 3, 3))
+
+  strict <- tp(f, min_replicates = 3)
+  expect_false(any(strict$Deut.Time == "10.00s" & strict$Start == 12))
+  expect_true(any(strict$Deut.Time == "100.00s" & strict$Start == 12))
+
+  ## two of three missing -> below the default floor of 2 -> dropped
+  f2 <- make_hdx_csv(drop = data.frame(state = "B", time = "10.00s", replicate = 1:2, Start = 12))
+  expect_message(a2 <- output_tp(f2), "1 peptide row\\(s\\) dropped")
+  expect_false(any(a2$Deut.Time == "10.00s" & a2$Start == 12))
 })
 
 test_that("output_tc() lays out one row per peptide x state and one column per time x replicate", {

@@ -62,6 +62,38 @@ test_that("sd_ci_timepoint() recovers SD of the difference from the two-sided t 
   expect_equal(s[1, 8], diff(tt$conf.int) / (2 * abs(qt(0.005, 4))) * sqrt(3))
 })
 
+test_that("statistics with uneven and missing replicates use each state's own n", {
+  f <- make_hdx_csv(replicates = c(A = 3, B = 4),
+                    drop = data.frame(state = "A", time = "10.00s", replicate = 2, Start = 5))
+  a <- tp(f)
+  s <- sd_timepoint(a); av <- ave_timepoint(a); pv <- pv_timepoint(a)
+  row <- which(a$Deut.Time == "10.00s" & a$Start == 5)
+  xa <- c(expected_uptake(1, 1, 2, 1), expected_uptake(1, 1, 2, 3))
+  xb <- sapply(1:4, function(r) expected_uptake(2, 1, 2, r))
+  expect_equal(av$av_A_X..Deut[row], mean(xa))
+  expect_equal(s$sd_A_X..Deut[row], sd(xa))
+  expect_equal(s$sd_B_X..Deut[row], sd(xb))
+  expect_equal(pv$pv_B_X..Deut[row], t.test(xa, xb)$p.value)
+  expect_equal(attr(s, "n", exact = TRUE)$A_X..Deut[row], 2)
+
+  ## pooled CI: df-weighted pooled SD per state, SE with each state's mean n
+  nA <- attr(s, "n", exact = TRUE)$A_X..Deut; nB <- attr(s, "n", exact = TRUE)$B_X..Deut
+  spA <- sqrt(sum((nA - 1) * s$sd_A_X..Deut^2) / sum(nA - 1))
+  spB <- sqrt(sum((nB - 1) * s$sd_B_X..Deut^2) / sum(nB - 1))
+  expected <- sqrt(spA^2 / mean(nA) + spB^2 / mean(nB)) * abs(qt(0.01, mean(nA) + mean(nB) - 2))
+  expect_equal(CI_tp(s, alpha = 0.01), expected)
+})
+
+test_that("pv_timepoint() returns NA instead of failing for too few or constant values", {
+  a <- tp(make_hdx_csv())
+  a[1, 10:12] <- c(1, NA, NA)        # B has one value
+  a[2, 7:12] <- 1                    # all identical
+  pv <- pv_timepoint(a)
+  expect_true(is.na(pv[1, 8]))
+  expect_true(is.na(pv[2, 8]))
+  expect_false(anyNA(pv[3:nrow(pv), 8]))
+})
+
 test_that("nb_exch_deut(): length - 2 - non-N-terminal prolines", {
   d <- data.frame(Start = c(1, 1, 1, 1, 1), End = c(10, 10, 10, 2, 3),
                   Sequence = c("AAAAAAAAAA",   # no Pro: 10 - 2 = 8
