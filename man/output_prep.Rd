@@ -4,23 +4,33 @@
 \alias{output_prep}
 \title{Prepares output with HDX-MS data for publications}
 \usage{
-output_prep(filepath, output_name, states, replicates, times, percent = FALSE)
+output_prep(
+  filepath,
+  output_name,
+  states,
+  replicates = NULL,
+  times,
+  percent = FALSE
+)
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 
 \item{output_name}{Name of output file. It has to be csv file}
 
 \item{states}{function allows to choose what states should be used for analysis. Default all states are used.}
 
-\item{replicates}{number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.}
+\item{replicates}{optional maximum number of replicates per state and time. Default \code{NULL} uses every replicate; states may differ.}
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 
 \item{percent}{return either uptake or percent deuteration, default=FALSE, return uptake}
 }
 \value{
-Returns&saves data.frame in format that is accepted for the publications.
+Writes the table to \code{output_name} and returns it invisibly.
+\code{Mean.Peptide_Mass_[Da]} is the mean measured neutral peptide mass,
+Charge x (centroid m/z - proton mass); earlier versions reported the
+centroid m/z under this name.
 }
 \description{
 Format prepared based of example from:

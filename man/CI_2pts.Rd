@@ -4,14 +4,22 @@
 \alias{CI_2pts}
 \title{Global confidence interval treshold from experimental standard deviation for 2 samples.}
 \usage{
-CI_2pts(s1, s2, replicates = 3)
+CI_2pts(s1, s2, replicates = 3, alpha = 0.01, n1 = NULL, n2 = NULL)
 }
 \arguments{
 \item{s1}{standard deviation from one sample}
 
 \item{s2}{standard deviation from seconda sample}
 
-\item{replicates}{number of replicates. Default set to 3.}
+\item{replicates}{number of replicates. A single number, or two numbers
+(state 1, state 2) when the states have different replicate counts.
+Default set to 3.}
+
+\item{alpha}{probability to calculate t-value in Welch test. Default 0.01}
+
+\item{n1, n2}{optional per-peptide numbers of replicates behind \code{s1} and
+\code{s2} (e.g. from attribute \code{"n"} of \code{\link[=sd_timepoint]{sd_timepoint()}}). Default: every
+peptide has \code{replicates} values.}
 }
 \value{
 treshold for determining significance.
@@ -21,10 +29,21 @@ Calculation of global confidence interval using approach by:
 Reliable Identification of Significant Differences in Differential Hydrogen Exchange-Mass Spectrometry Measurements Using a Hybrid Significance Testing Approach
 Tyler S. Hageman and David D. Weis
 Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
-calculations for alpha 0.99
+The default alpha is 0.01.
+}
+\details{
+The t-value is two-tailed, \verb{|qt(alpha/2, df)|}, as in the published
+version of the package.
+
+Unequal or missing replicates: each state's pooled SD weights every
+peptide's SD by its degrees of freedom (n_i - 1), the standard error of
+the difference is \code{sqrt(sp1^2/n1 + sp2^2/n2)} with n1, n2 the average
+number of replicates per peptide in each state, and the t-value uses
+df = n1 + n2 - 2. With equal, complete replicates this is exactly the
+Hageman & Weis formula.
 }
 \examples{
 sd1<-data.frame(c(0.1, 0.12, 0.13, 0.09, 0.11, 0.10))
 sd2<-data.frame(c(0.18, 0.11, 0.13, 0.08, 0.11, 0.06))
-CI_2pts(s1=sd1, s2=sd2, replicates=3)
+CI_2pts(s1=sd1, s2=sd2, replicates=3, alpha=0.01)
 }

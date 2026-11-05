@@ -1,0 +1,206 @@
+---
+title: "Comparing Three or More States, and Whole Regions"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Comparing Three or More States, and Whole Regions}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 8,
+  fig.height = 5
+)
+```
+
+This vignette shows how to compare more than two states, whole regions, and whole time courses.
+For data checks, see `vignette("data_quality")`.
+
+## The significance rule
+
+All functions use the same rule (Hageman & Weis, Anal. Chem. 2019):
+a peptide differs between two states when its Welch t-test p-value is below `pvalue` **and** the difference is larger than the critical interval (CI).
+
+-   `p_adjust = "BH"` corrects the p-values for multiple testing.
+-   `percent = "per_residue"` divides uptake by the number of exchangeable residues, so peptide length does not affect the result.
+
+## Which function for which question
+
+| Function | Question |
+|---|---|
+| `compare_states_tp()` | Does this peptide differ between states? (3+ states) |
+| `compare_regions()` | Does this region differ between states? |
+| `compare_states_unmatched()` | Does this region differ, when the states have different peptides? |
+| `compare_timecourse()` | Does this peptide differ over the whole time course? |
+| `residue_regions()` | Which stretches of residues changed? |
+
+For two states at one time point, `plot_fissure_vent()` and `diff_peptides_prep()` are the main tools.
+
+## `compare_states_tp()`: peptides, three or more states
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+file_3state <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
+```
+
+`three_states.csv` has a wild-type protein and two point mutants (D109H, R120G), with 3-4 replicates (Woods et al. 2025, PNAS).
+
+```{r}
+res <- compare_states_tp(file_3state, times = "1800.00s")
+head(res)
+```
+
+Each row is one peptide and one pair of states.
+`p_omnibus` is a Welch ANOVA across all states.
+It is given for information; `is_sig` uses the rule above for each pair.
+
+Compare every state to one reference only:
+
+```{r}
+res_ref <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5")
+unique(res_ref[, c("state1", "state2")])
+```
+
+Peptides that cover a mutation have a different sequence in the mutant.
+`by = "position"` matches peptides by position, so these peptides are compared too:
+
+```{r}
+res_pos <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5", by = "position")
+c(by_sequence = nrow(res_ref), by_position = nrow(res_pos))
+```
+
+Split by regions:
+
+```{r}
+res_regions <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5",
+                                 regions = list(nterm = c(1, 90), cterm = c(91, 175)))
+table(res_regions$region)
+```
+
+```{r, fig.height = 6}
+plot_compare_states_tp(res_regions, plot_type = "jitter")
+```
+
+Every peptide is shown; significant ones are colored.
+`plot_type = "box"` or `"violin"` adds a summary shape.
+
+## `compare_regions()`: a whole region
+
+`compare_regions()` tests whether the states differ in a region.
+Each peptide is its own control: the model is `uptake ~ peptide + state` on the peptide averages.
+For two states this is a paired t-test of the peptide differences.
+The peptides must be found in every state.
+
+```{r}
+reg <- compare_regions(file_nm, times = "1800.00s",
+                       regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+reg$summary
+reg$pairs
+```
+
+-   `p_state`: do the states differ in this region?
+-   `p_state_x_peptide`: does the difference change from peptide to peptide? If yes, the effect is local - look at the single peptides.
+-   `estimate`: the average difference per peptide (state2 - state1).
+
+Here cterm differs clearly (p = 0.0006).
+nterm is borderline (p = 0.08): some of its peptides change and some do not.
+
+All time points in one model, with a test for state x time:
+
+```{r}
+compare_regions(file_nm, regions = list(nterm = c(1, 100), cterm = c(101, 225)),
+                time_model = TRUE)$summary
+```
+
+## `compare_states_unmatched()`: different peptides in the states
+
+Use this function when the states do not share the same peptides.
+All peptides in a region are pooled per state, and the states are compared.
+`regions` is required.
+
+```{r}
+res_unmatched <- compare_states_unmatched(file_nm, times = "1800.00s",
+                                          regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+res_unmatched$summary
+res_unmatched$coverage
+```
+
+Read the first columns first: `frac_peptides_significant` is the fraction of the shared peptides that differ by the rule above.
+The pooled test after it is only approximate.
+
+Here the pooled test is not significant (p = 0.29 and 0.58), but 5/9 nterm peptides and 6/19 cterm peptides differ.
+A non-significant pooled result does **not** mean nothing changed.
+
+`frac_shared_all_states` in `coverage` is the fraction of peptides found in every state.
+If it is low, a difference can come from different peptides rather than different exchange.
+
+```{r, fig.height = 6}
+plot_coverage_diagnostics(res_unmatched)
+```
+
+```{r, fig.height = 5}
+plot_compare_states_unmatched(res_unmatched, plot_type = "jitter",
+                              state_labels = c(Unbound = "Unbound", bound = "Bound"))
+```
+
+More than two states work the same way, and the mutant peptides are included:
+
+```{r, fig.height = 6}
+res3_unmatched <- compare_states_unmatched(file_3state, times = "1800.00s",
+                                           regions = list(nterm = c(1, 90), cterm = c(91, 175)))
+plot_compare_states_unmatched(res3_unmatched, plot_type = "jitter")
+```
+
+Options:
+
+```{r, eval = FALSE}
+## values: uptake in Da (default), percent, or uptake per exchangeable residue
+compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)), value = "frac_deut")
+## methods: "peptide" (default), "resample" (permutation p-values and bootstrap CI),
+## "classic" (every replicate pooled; only to reproduce old analyses)
+compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1, 100)),
+                         method = "resample", seed = 1)
+```
+
+## `compare_timecourse()`: the whole time course
+
+`compare_timecourse()` judges each peptide on all time points together.
+It gives the summed difference over time with its own CI, and the number of time points where the peptide is significant.
+
+```{r}
+tc <- compare_timecourse(file_nm, "Unbound", "bound")
+head(tc[order(tc$p_value), c("Start", "End", "summed_delta", "p_value", "ci_sum",
+                             "sig_summed", "n_timepoints_sig")])
+```
+
+Robot plots can show only peptides significant at two or more time points: `robot_plot_All(..., min_timepoints = 2)`.
+
+## `residue_regions()`: stretches of residues
+
+`residue_regions()` finds stretches of residues that changed in the same direction.
+A residue is included when at least `min_peptides` (default 2) significant peptides cover it.
+The effect is given per exchangeable residue.
+
+```{r}
+a_da <- output_tp(file_nm)
+rr <- residue_regions(a_da, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+rr
+```
+
+Check the regions against your own domains:
+
+```{r}
+residue_regions_subset_summary(rr, regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+```

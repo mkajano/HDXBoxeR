@@ -8,29 +8,35 @@ woods_CI_plot(
   thP,
   th,
   replicates = 3,
-  pv_cutoff = 0.01,
+  pvalue = 0.01,
   states,
-  CI_factor = 1,
+  alpha = 0.01,
   ylim = c(0, 120),
-  ...
+  p_adjust = "none",
+  ...,
+  pv_cutoff
 )
 }
 \arguments{
-\item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
+\item{thP}{output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses}
 
-\item{th}{output of output_tcourse() function. Raw data for uptake deuteration for time courses}
+\item{th}{output of output_tc(). Raw data for uptake deuteration for time courses}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{states}{Protein states from the set. As default all states are chosen.}
 
-\item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 
 \item{ylim}{y axis limit}
 
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
 \item{...}{other variables}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 Woods plots with chosen statistically different peptides
@@ -48,6 +54,6 @@ Peptides ranges are plotted as a line at corresponding \% deuteration values.
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tc(file_nm)
 b<-output_tc(file_nm, percent=TRUE)
-woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, CI_factor = 1, replicates=3)
+woods_CI_plot(thP=b, th=a, pvalue = 0.001, alpha = 0.01, replicates=3)
 }
 }

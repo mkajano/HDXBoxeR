@@ -7,6 +7,7 @@
 #' @examples
 #' res<-c(1,5, 19, 100, 109)
 #' pymol_str(res)
+#' @keywords internal
 #' @export
   pymol_str<-function(ind1) {ind2<-paste(as.character(ind1), sep="' '", collapse="+")
   return(ind2)}

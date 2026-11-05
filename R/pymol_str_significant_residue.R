@@ -5,36 +5,43 @@
 #' Residues are being colored by maximum uptake from significant peptides per residues.
 #'
 #' @param df average data frame. Generated using ave_timepoint() function.
-#' @param path location where the Pymol scripts will be saved
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param path location where the Pymol scripts will be saved. Default `""`: the working directory.
+#' @param alpha cutoff for critical interval
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
+#' @param resno_offset integer added to every residue number written to the PyMOL script, so the data's numbering matches the structure's (e.g. `-20` when the structure numbering starts 20 residues later, as with an N-terminal tag). Default `0`.
 #' @return pymol script with colors assigned per residues by maximum uptake per residue
 #' @examples
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' pymol_script_significant_residue(df=a, path=tempdir(), replicates=3, pv_cutoff=0.01,
+#' pymol_script_significant_residue(df=a, path=tempdir(), replicates=3, pvalue=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 #' pymol_script_significant_residue(df=a, path=tempdir())
 #' }
 #' @export
-pymol_script_significant_residue<-function(df, path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-                                           pv_cutoff=0.01,  replicates=3){
+pymol_script_significant_residue<-function(df, path="",
+                                           ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+                                           alpha=0.01,
+                                           pvalue=0.01,  replicates=3, p_adjust="none", resno_offset=0, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   #####from HDX get data and
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
-  setwd(path)
+  if (nzchar(path)) setwd(path)
 
   for ( deut_time in(unique(df$Deut.Time))){
-    pv<-pv_timepoint(df[df$Deut.Time==deut_time,])
-    sd<-sd_timepoint(df[df$Deut.Time==deut_time,])
-    df1<-ave_timepoint(df[df$Deut.Time==deut_time,])
+    pv<-pv_timepoint(df[df$Deut.Time==deut_time,], replicates, p_adjust = p_adjust)
+    sd<-sd_timepoint(df[df$Deut.Time==deut_time,], replicates)
+    df1<-ave_timepoint(df[df$Deut.Time==deut_time,], replicates)
 
 
     #preparation significance per residue & coverage
-    cl1<-significant_peptide_uptake(df1, pv, sd, pv_cutoff, replicates)
+    cl1<-significant_peptide_uptake(df1, pv, sd,alpha,  pvalue, replicates)
 
 
     start_col<-which(colnames(df1)=='Start')
@@ -93,14 +100,14 @@ pymol_script_significant_residue<-function(df, path="", ranges=c(-Inf, seq(-30, 
       set_colors<-c(set_colors, paste("set_color ", col_nm[i],", [",  rgb_col[1,i],
                                       ",", rgb_col[2,i], ",", rgb_col[3,i], "]", sep=""))}
     ###write outputs per each state in the
-    nm1<-str_sub(colnames(df1[8:dim(df1)[2]]), start=4, end=-9)
+    nm1<-sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", sub("^av_", "", colnames(df1)[8:dim(df1)[2]]))
     for (j in 1:dim(si_apc)[2]){
       output_name<-paste("pymol_maxuptake_", nm1[j],"_", deut_time, ".txt", sep="")
       res.txt<-c()
       for ( i in 1:length(col_nm)){
         if (length(which(si_apc[,j]==i)) !=0){
           res.txt<-c(res.txt, (paste(c("color ", col_nm[i],", resi ",
-                                       pymol_str(which(si_apc[,j] ==i))), sep="", collapse="")))}}
+                                       pymol_str(which(si_apc[,j] ==i) + resno_offset)), sep="", collapse="")))}}
       fileConn<-file(output_name)
       writeLines(c("hide","show cartoon","color grey", "bg white",set_colors,res.txt ), fileConn)
       close(fileConn)}}

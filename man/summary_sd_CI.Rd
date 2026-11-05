@@ -4,21 +4,26 @@
 \alias{summary_sd_CI}
 \title{Provides summary table with Critical interval and standard deviation within the set.}
 \usage{
-summary_sd_CI(filepath, replicates = 3)
+summary_sd_CI(filepath, replicates = NULL, alpha = 0.01)
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 
-\item{replicates}{number of replicates. Default set to 3.}
+\item{replicates}{optional maximum number of replicates per state.
+Default \code{NULL} uses every replicate.}
+
+\item{alpha}{critical interval, to have more restrictive use lower values, default=0.01}
 }
 \value{
 Returns summary table.
 }
 \description{
-Returns summary data.
-Function returns: Protein states, timepoints, number of replicates,  # peptides, \% coveregae, average peptide length and redundancy.
+For each protein state: the pooled replicate standard deviation of all
+peptides and time points (each peptide's SD weighted by its replicates
+minus one), and the critical interval of that state alone (\code{\link[=CI_single]{CI_single()}})
+using the state's average number of replicates.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- summary_sd_CI(file_nm, replicates=3)
+a<- summary_sd_CI(file_nm, alpha=0.01)
 }

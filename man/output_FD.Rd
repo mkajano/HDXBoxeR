@@ -7,13 +7,14 @@
 output_FD(filepath)
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 }
 \value{
 data frame with reorganized data where in columns is uptake data for Protein States.
 }
 \description{
-Returns a data frame for Full deuteration set
+Returns the fully deuterated (\code{"FD"}) control: one row per peptide and
+protein state, one column per FD replicate (uptake in Da).
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

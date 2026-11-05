@@ -1,0 +1,215 @@
+#' Cluster significant peptides into contiguous destabilized/protected regions
+#'
+#' Takes a peptide-level comparison between two states at one timepoint and
+#' derives contiguous residue regions that are consistently destabilized
+#' (more exposed) or protected (less exposed), rather than reporting a flat
+#' list of significant peptides. A peptide counts as significant by the same
+#' rule as everywhere else in the package: Welch p-value below `pvalue`
+#' (raw, or adjusted with `p_adjust`) AND absolute difference above the
+#' pooled Hageman & Weis critical interval. A residue enters a region only
+#' once at least `min_peptides` distinct significant peptides of the *same
+#' direction* cover it, so a single peptide alone cannot create a region.
+#' Charge states of the same peptide count once.
+#'
+#' The per-residue effect reported for a region is each covering peptide's
+#' difference divided by its number of exchangeable amides
+#' ([nb_exch_deut()]), averaged over the peptides covering each residue.
+#'
+#' @param df output of [output_tp()] called with `percent = FALSE`, i.e.
+#'   deuteration uptake in Daltons - this function works in Da so that
+#'   `delta` is additive across residues, same requirement as
+#'   [residue_deconvolution()].
+#' @param state1 First protein state, matched the same way as in
+#'   [plot_fissure_vent()].
+#' @param state2 Second protein state, same matching rule.
+#' @param times a single Deut.Time value to derive regions for (e.g.
+#'   `"1800.00s"`). Call this function once per timepoint of interest and
+#'   `rbind()` the results if you want regions across multiple timepoints.
+#' @param replicates number of replicates in sample, only used for tables
+#'   without named replicate columns. Default set to 3.
+#' @param pvalue p-value cutoff for a peptide to count as significant.
+#'   Default `0.01`.
+#' @param p_adjust multiple-testing correction of the per-peptide Welch
+#'   p-values, passed to [stats::p.adjust()]: `"none"` (default) or e.g.
+#'   `"BH"`, applied across the peptides of the comparison.
+#' @param min_peptides minimum number of distinct, same-direction,
+#'   significant peptides that must cover a residue before that residue is
+#'   included in a region. Default `2`.
+#' @param gap_tolerance maximum number of consecutive non-covered residues
+#'   allowed inside one region before it is split into two. Default `2`.
+#' @param alpha alpha of the pooled Hageman & Weis critical interval
+#'   ([CI_2pts()]), the same threshold [plot_fissure_vent()] draws as its
+#'   grey band. Default `0.01`.
+#' @param fdr_cutoff deprecated. Earlier versions called a peptide
+#'   significant when its BH-adjusted p-value was below `fdr_cutoff`, without
+#'   the critical-interval condition. Supplying it reproduces that rule, with
+#'   a warning.
+#' @return data.frame with one row per region: `direction`
+#'   ("destabilized"/"protected"), `region_start`, `region_end`,
+#'   `n_residues`, `n_peptides` (distinct significant, same-direction
+#'   peptides overlapping the region), `mean_per_residue_delta` (Da per
+#'   exchangeable amide), and `pooled_CI_Da` (the pooled critical interval
+#'   for this comparison, repeated on every row for reference).
+#' @seealso [plot_fissure_vent()], [residue_deconvolution()],
+#'   [residue_level_average()]
+#' @examples
+#' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a <- output_tp(file_nm, percent = FALSE)
+#' residue_regions(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+#' @export
+residue_regions <- function(df, state1, state2, times, replicates = 3,
+                             pvalue = 0.01, p_adjust = "none", min_peptides = 2,
+                             gap_tolerance = 2, alpha = 0.01, fdr_cutoff) {
+  legacy <- !missing(fdr_cutoff)
+  if (legacy) {
+    warning("fdr_cutoff is deprecated: use pvalue (with p_adjust = \"BH\"). ",
+            "Using the previous rule: BH-adjusted p < fdr_cutoff, no critical-interval condition.",
+            call. = FALSE)
+    pvalue <- fdr_cutoff; p_adjust <- "BH"
+  }
+
+  sub_df <- df[df$Deut.Time == times, ]
+  if (nrow(sub_df) == 0) {
+    stop(sprintf("no rows with Deut.Time == '%s'", times))
+  }
+
+  raw_cols1 <- .hdx_state_cols(state1, colnames(sub_df))
+  raw_cols2 <- .hdx_state_cols(state2, colnames(sub_df))
+  m1 <- .hdx_block_matrix(sub_df, raw_cols1); m2 <- .hdx_block_matrix(sub_df, raw_cols2)
+
+  sd1 <- sd_timepoint(sub_df, replicates)
+  sd_prefixes <- c("sd_ci_", "sd_")
+  sd_state1 <- .hdx_summary_col(state1, colnames(sd1), sd_prefixes)
+  sd_state2 <- .hdx_summary_col(state2, colnames(sd1), sd_prefixes)
+  pooled_CI <- CI_2pts(sd1[[sd_state1]], sd1[[sd_state2]], replicates, alpha,
+                       n1 = .hdx_n_for(sd1, sd_state1), n2 = .hdx_n_for(sd1, sd_state2))
+
+  pep <- data.frame(sub_df[, c("Start", "End", "Sequence")],
+                    delta = .hdx_row_mean(m2) - .hdx_row_mean(m1),
+                    p_value = .hdx_row_welch(m1, m2), stringsAsFactors = FALSE)
+  pep$p_adj <- stats::p.adjust(pep$p_value, method = p_adjust)
+  pep$sig <- !is.na(pep$p_adj) & pep$p_adj < pvalue &
+    (legacy | (!is.na(pep$delta) & abs(pep$delta) > pooled_CI))
+  n_exch <- nb_exch_deut(pep)
+  pep$per_residue_delta <- ifelse(n_exch > 0, pep$delta / n_exch, NA_real_)
+  ## one entry per distinct peptide: charge states of the same peptide are
+  ## not independent evidence
+  pep$pep_id <- paste(pep$Start, pep$End, pep$Sequence, sep = "_")
+
+  max_pos <- max(pep$End)
+
+  # for each residue, how many distinct significant peptides of the given
+  # direction cover it, and their mean per-residue delta
+  same_dir <- function(direction) {
+    hit <- pep[pep$sig & !is.na(pep$per_residue_delta) &
+                 (if (direction == "destabilized") pep$per_residue_delta > 0 else pep$per_residue_delta < 0), ]
+    if (nrow(hit) == 0) return(hit)
+    agg <- stats::aggregate(per_residue_delta ~ pep_id + Start + End, data = hit, FUN = mean)
+    agg
+  }
+  residue_hit_counts <- function(hit) {
+    counts <- integer(max_pos)
+    sum_prd <- numeric(max_pos)
+    for (i in seq_len(nrow(hit))) {
+      rng <- hit$Start[i]:hit$End[i]
+      rng <- rng[rng >= 1 & rng <= max_pos]
+      counts[rng] <- counts[rng] + 1
+      sum_prd[rng] <- sum_prd[rng] + hit$per_residue_delta[i]
+    }
+    list(counts = counts, mean_prd = ifelse(counts > 0, sum_prd / counts, NA_real_))
+  }
+
+  cluster_regions <- function(confirmed_positions) {
+    if (length(confirmed_positions) == 0) return(list())
+    pos <- sort(confirmed_positions)
+    breaks <- which(diff(pos) > gap_tolerance + 1)
+    starts <- c(1, breaks + 1)
+    ends <- c(breaks, length(pos))
+    lapply(seq_along(starts), function(i) c(pos[starts[i]], pos[ends[i]]))
+  }
+
+  out <- list()
+  for (direction in c("destabilized", "protected")) {
+    hit <- same_dir(direction)
+    hc <- residue_hit_counts(hit)
+    confirmed <- which(hc$counts >= min_peptides)
+    regions <- cluster_regions(confirmed)
+
+    for (r in regions) {
+      lo <- r[1]; hi <- r[2]
+      rng <- lo:hi
+      covering <- hit[hit$End >= lo & hit$Start <= hi, ]
+      out[[length(out) + 1]] <- data.frame(
+        direction = direction, region_start = lo, region_end = hi,
+        n_residues = length(rng), n_peptides = nrow(covering),
+        mean_per_residue_delta = mean(hc$mean_prd[rng], na.rm = TRUE),
+        pooled_CI_Da = pooled_CI
+      )
+    }
+  }
+
+  if (length(out) == 0) {
+    return(data.frame(direction = character(0), region_start = integer(0), region_end = integer(0),
+                       n_residues = integer(0), n_peptides = integer(0),
+                       mean_per_residue_delta = numeric(0), pooled_CI_Da = numeric(0)))
+  }
+  result <- do.call(rbind, out)
+  result <- result[order(result$direction, result$region_start), ]
+  rownames(result) <- NULL
+  .hdx_stamp(result, list(state1 = state1, state2 = state2, times = times, pvalue = pvalue,
+                          p_adjust = p_adjust, alpha = alpha, min_peptides = min_peptides,
+                          gap_tolerance = gap_tolerance))
+}
+
+#' Roll up derived regions against named residue subsets
+#'
+#' A companion to [residue_regions()]: that function always scans every
+#' residue covered by any tested peptide - the unrestricted, data-driven
+#' "total" picture, deliberately not pre-restricted to any subset you might
+#' already suspect matters. This function takes that unrestricted result
+#' and a named list of residue subsets (e.g. structural domains) and
+#' reports, per subset, how much of it the data-driven regions actually
+#' cover - a cross-check for a structural hypothesis against the
+#' unconstrained result, not a replacement for it. Call [residue_regions()]
+#' once (it does the expensive per-peptide testing and clustering), then
+#' this function as many times as you like against different subset
+#' definitions - it's a cheap rollup over an already-computed result.
+#'
+#' @param region_df the data.frame returned by [residue_regions()].
+#' @param regions named list of `c(start, end)` residue ranges to check
+#'   against `region_df`, e.g. `list(NTR = c(1, 85), ACD = c(86, 165))`.
+#' @return data.frame with one row per named subset: `subset`,
+#'   `n_residues` (subset size), `n_residues_significant` (residues in the
+#'   subset covered by any region in `region_df`), `frac_significant`,
+#'   `n_regions_overlapping`, and `directions` (comma-separated set of
+#'   `direction` values among the overlapping regions, `""` if none).
+#' @seealso [residue_regions()]
+#' @examples
+#' file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+#' a <- output_tp(file_nm, percent = FALSE)
+#' rr <- residue_regions(a, state1 = "Unbound", state2 = "bound", times = "1800.00s")
+#' residue_regions_subset_summary(rr, regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+#' @export
+residue_regions_subset_summary <- function(region_df, regions) {
+  if (!is.data.frame(region_df) || !all(c("region_start", "region_end", "direction") %in% colnames(region_df))) {
+    stop("region_df must be the data.frame returned by residue_regions().")
+  }
+  if (missing(regions) || is.null(regions) || length(regions) == 0) {
+    stop("regions is required - a named list of c(start, end) residue ranges to check.")
+  }
+  out <- do.call(rbind, lapply(names(regions), function(rname) {
+    rng <- regions[[rname]]
+    res_in_subset <- rng[1]:rng[2]
+    overlap <- region_df[region_df$region_end >= rng[1] & region_df$region_start <= rng[2], ]
+    sig_positions <- if (nrow(overlap) > 0) {
+      unique(unlist(lapply(seq_len(nrow(overlap)), function(i) overlap$region_start[i]:overlap$region_end[i])))
+    } else integer(0)
+    n_sig <- sum(res_in_subset %in% sig_positions)
+    data.frame(subset = rname, n_residues = length(res_in_subset), n_residues_significant = n_sig,
+               frac_significant = n_sig / length(res_in_subset), n_regions_overlapping = nrow(overlap),
+               directions = paste(sort(unique(overlap$direction)), collapse = ","),
+               stringsAsFactors = FALSE)
+  }))
+  rownames(out) <- NULL
+  out
+}

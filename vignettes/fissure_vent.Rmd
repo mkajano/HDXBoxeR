@@ -1,0 +1,108 @@
+---
+title: "Fissure Vent Plots"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Fissure Vent Plots}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  fig.width = 6,
+  fig.height = 6
+)
+```
+
+The fissure vent plot compares two protein states peptide by peptide.
+It uses the same significance test as the rest of the package (Hageman & Weis, Anal. Chem. 2019, 91, 8008-8016).
+The difference from a volcano plot is that the deuteration of both states stays on the plot.
+
+## How to read it
+
+-   x axis: deuteration of state 1. y axis: deuteration of state 2.
+-   The black diagonal (y = x) means no change between the states.
+-   The dashed grey lines are the critical interval (CI). It is calculated from the standard deviations of all peptides at that time point (`CI_2pts()`).
+-   Each peptide is an ellipse. The ellipse comes from the Welch t-test of that peptide. If the ellipse touches the diagonal, the peptide's p-value is above the cutoff.
+-   A peptide is significant (colored) when it is outside the grey lines **and** its ellipse does not touch the diagonal.
+
+The size of the ellipse shows how precise the replicates are.
+A small ellipse means the replicates agree well.
+
+## Example
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a <- output_tp(file_nm)
+```
+
+Keep the figure square (`fig.width = fig.height`), so the diagonal stays at 45 degrees.
+
+```{r fig_fissure_basic}
+plot_fissure_vent(df = a, times = "3.00s", alpha = 0.01, pvalue = 0.01,
+                  state1 = "Unbound", state2 = "bound")
+title(main = "Unbound vs bound, t = 3.00s")
+```
+
+Most peptides sit on the diagonal: at 3 s the states hardly differ.
+The colored peptides are above the diagonal and their ellipses have cleared it.
+
+A later time point:
+
+```{r fig_fissure_late}
+plot_fissure_vent(df = a, times = "1800.00s", alpha = 0.01, pvalue = 0.01,
+                  state1 = "Unbound", state2 = "bound")
+title(main = "Unbound vs bound, t = 1800.00s")
+```
+
+Colors and transparency can be changed with `sig_col`, `nonsig_col`, and `fill_alpha`:
+
+```{r fig_fissure_colors}
+plot_fissure_vent(df = a, times = "1800.00s", alpha = 0.01, pvalue = 0.01,
+                  state1 = "Unbound", state2 = "bound",
+                  sig_col = "darkorange", nonsig_col = "steelblue", fill_alpha = 0.5)
+title(main = "Unbound vs bound, t = 1800.00s (custom colors)")
+```
+
+The function also returns the numbers behind the plot:
+
+```{r}
+res <- plot_fissure_vent(df = a, times = "1800.00s", state1 = "Unbound", state2 = "bound")
+head(res[res$is_sig, c("Start", "End", "Sequence", "delta", "p_value", "ci")])
+```
+
+## Useful options
+
+-   `p_adjust = "BH"`: corrects the p-values for multiple testing.
+-   `output_tp(..., percent = "per_residue")`: uptake per residue, so peptide length does not affect the result.
+-   `sd_source = "CI"`: the older, wider critical interval.
+
+## Good to know
+
+-   Only the extent of the ellipse across the diagonal is a confidence interval. Its width and height alone are not.
+-   A peptide with identical replicates in both states cannot be tested. It is skipped, and a message says so.
+
+## How this connects to the rest of the package
+
+All of these use the same significance test; they differ in what they show.
+
+| Question | Use |
+|---|---|
+| The classic difference vs p-value picture | `plots_vol_tp()` |
+| The list of significant peptides | `diff_peptides_prep()`, `hdx_results_table()` |
+| Both states' uptake, with uncertainty, peptide by peptide | `plot_fissure_vent()` (this vignette) |
+| The same, interactive and linked to other plots | `interactive_fissure_vent()` (`vignette("interactive_explorer")`) |
+| More than two states | `compare_states_tp()` (`vignette("multistate")`) |
+| A whole region or time course | `compare_regions()`, `compare_timecourse()` (`vignette("multistate")`) |
+| Single residues | `residue_deconvolution()`, `residue_level_average()`, `residue_regions()` |

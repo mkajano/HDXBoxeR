@@ -4,12 +4,14 @@
 \alias{legend_raw_ave_proc}
 \title{Preparatory function to draw legends for average procent}
 \usage{
-legend_raw_ave_proc(df, cola)
+legend_raw_ave_proc(df, col, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp or output_tp_proc.}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 legend for average deuteration procent for timepoints

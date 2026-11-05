@@ -1,0 +1,96 @@
+---
+title: "Mapping HDX Data onto a 3D Structure"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Mapping HDX Data onto a 3D Structure}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+    \usepackage[UTF-8]{inputenc}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+has_deps <- requireNamespace("bio3d", quietly = TRUE) &&
+  requireNamespace("NGLVieweR", quietly = TRUE)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.align = "center",
+  eval = has_deps
+)
+```
+
+```{r, echo = FALSE, eval = !has_deps, results = "asis"}
+cat("This vignette needs the bio3d and NGLVieweR packages. ",
+    "Install them with install.packages(c(\"bio3d\", \"NGLVieweR\")).", sep = "")
+```
+
+`plot_hdx_structure()` colors a protein structure by HDX data, directly in R.
+It shows an interactive 3D view that can be rotated, saved, or put into a report.
+To color structures in PyMOL instead, use the `pymol_script_*()` functions (see `vignette("HDXBoxeR")`).
+
+The function needs the bio3d and NGLVieweR packages.
+They are optional and are not installed with HDXBoxeR.
+
+## What is colored
+
+The input is per-residue data from `residue_level_average()` or `residue_deconvolution()`.
+For one time point, each residue is colored by the difference `state2 - state1`.
+The colors are the same red/blue scale as the heat maps.
+Residues without data are grey.
+
+## Example
+
+```{r}
+library(HDXBoxeR)
+file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
+a <- output_tp(file_nm, percent = TRUE)
+res <- residue_level_average(a, protein_length = 225)
+```
+
+The structure below is **not** the protein of the example data.
+It is lysozyme (`1HEL`), a small structure that comes with bio3d, used only to show how the function works.
+Use the PDB of your own protein.
+
+```{r fig_structure_basic}
+pdb_demo <- system.file("examples", "1hel.pdb", package = "bio3d")
+plot_hdx_structure(res, pdb = pdb_demo, state1 = "Unbound", state2 = "bound",
+                   times = "1800.00s", chain = "A")
+```
+
+The legend is drawn separately with `plot_hdx_structure_legend()`, using the same `ranges`:
+
+```{r fig_structure_legend, fig.width = 3, fig.height = 4}
+res_1800 <- res[res$Deut.Time == "1800.00s", ]
+delta <- rowMeans(res_1800[, grep("^bound", colnames(res_1800))], na.rm = TRUE) -
+  rowMeans(res_1800[, grep("^Unbound", colnames(res_1800))], na.rm = TRUE)
+step <- max(abs(delta), na.rm = TRUE) / 3
+plot_hdx_structure_legend(c(-Inf, -3*step, -2*step, -step, 0, step, 2*step, 3*step, Inf),
+                          unit_label = "% Deut")
+```
+
+## Residue numbering
+
+If the HDX numbering and the PDB numbering differ (for example because of a tag), use `resno_offset`.
+It is added to every residue number before matching the PDB.
+The same argument exists in the `pymol_script_*()` functions.
+
+## Good to know
+
+-   Residues are colored by the size of the difference, not by significance.
+-   One time point and one pair of states per call.
+
+## How this connects to the rest of the package
+
+| Question | Use |
+|---|---|
+| Per-residue values to color | `residue_level_average()`, `residue_deconvolution()` (`vignette("HDXBoxeR")`) |
+| Color only significant residues or peptides | `pymol_script_significant_residue()`, `pymol_script_significant_peptide()` |
+| Color by average uptake | `pymol_script_average_residue()` |
+| Regions that changed, to highlight | `residue_regions()` (`vignette("multistate")`) |
+| Peptide-level view | `plot_fissure_vent()` (`vignette("fissure_vent")`) |

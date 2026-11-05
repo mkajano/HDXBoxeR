@@ -4,19 +4,38 @@
 \alias{general_info}
 \title{Provides summary table for all data.sets.}
 \usage{
-general_info(filepath)
+general_info(filepath, protein_range = NULL)
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
+
+\item{protein_range}{residue range for the coverage, \code{c(first, last)}.
+Default: from the first to the last residue covered by any peptide in
+the data (the same range for every state).}
 }
 \value{
 Returns summary table.
 }
 \description{
-Returns data frame sumamrizing general information about the data sets.
-Function returns: Protein states, timepoints, number of replicates,  # peptides, \% coveregae, average peptide length and redundancy.
+Returns a data frame summarizing each protein state: time points, number
+of replicates, number of peptides, sequence coverage, average peptide
+length and redundancy.
+}
+\details{
+Peptides are those found at every time point of the state with at least
+two replicates (as in \code{\link[=output_tp]{output_tp()}}); each peptide sequence counts once
+for coverage, length and redundancy (charge states are not counted
+twice).
+\itemize{
+\item coverage: percent of residues in \code{protein_range} covered by at
+least one peptide;
+\item redundancy: average number of peptides covering a covered residue;
+\item \verb{# replicates}: replicates per time point (a range when they
+differ).
+}
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- general_info(file_nm)
+general_info(file_nm, protein_range = c(1, 225))
 }

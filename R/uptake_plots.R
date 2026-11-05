@@ -2,8 +2,9 @@
 #'
 #' Uptake plots per peptide
 #'
-#' @param input_data output from function output_tp(..., percent=T)
-#' @param cola colors, default NA
+#' @param input_data output from function output_tc(..., percent=TRUE)
+#' @param col colors, default NA
+#' @param cola deprecated, use `col`.
 #' @param timepoints the labeling times
 #' @param replicates replicates
 #' @param seq_match Flag TRUE or FALSE, default TRUE, match sequence of the protein states
@@ -16,7 +17,8 @@
 #' uptake_plots(a, x)
 #' }
 #' @export
-uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=TRUE) {
+uptake_plots<-function(input_data, timepoints,replicates=3,col=NA, seq_match=TRUE, cola) {
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
   indd<-c()
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
@@ -33,12 +35,12 @@ uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=TR
 
   states=unique(a1$Protein.State)
 
-  if (is.na(cola[1])==FALSE){
+  if (is.na(col[1])==FALSE){
 
   } else if (length(7:dim(a1)[2])<9){
-    cola<-c(1,brewer.pal(9,"Set1"))
+    col<-c(1,brewer.pal(9,"Set1"))
   } else{
-    cola<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(length(7:dim(a1)[2])))}
+    col<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(length(7:dim(a1)[2])))}
 
   par(mar = c(1.5, 1.5, 1.5, 1.5), oma=c(4,4,2,2), cex.axis=1,
       cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2,
@@ -56,13 +58,13 @@ uptake_plots<-function(input_data, timepoints,replicates=3,cola=NA, seq_match=TR
       suppressWarnings(arrows(timepoints, as.numeric(a1[indd[[i]][j], 7:dim(a1)[2]]+s1[indd[[i]][j], 7:dim(a1)[2]]),
              timepoints, as.numeric(a1[indd[[i]][j],7:dim(a1)[2]]-s1[indd[[i]][j], 7:dim(a1)[2]]),
              length=0.05,
-             angle=90, code=3, col=cola[coli]))
-      points(timepoints, a1[indd[[i]][j], 7:dim(a1)[2]], type = "o", col=cola[coli], pch=20, lwd=4)
+             angle=90, code=3, col=col[coli]))
+      points(timepoints, a1[indd[[i]][j], 7:dim(a1)[2]], type = "o", col=col[coli], pch=20, lwd=4)
     }
   }
 
 
-  legend_nm_bottom(states, cola[1:length(states)])
+  legend_nm_bottom(states, col[1:length(states)])
 
 }
 

@@ -4,12 +4,14 @@
 \alias{dif_tp}
 \title{Preparatory function for difference plot}
 \usage{
-dif_tp(df, cola)
+dif_tp(df, col, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp or output_tp_proc.}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 plots of difference in average
@@ -17,3 +19,4 @@ plots of difference in average
 \description{
 Returns plots with difference deuteration at each peptide.
 }
+\keyword{internal}

@@ -1,7 +1,7 @@
 Type: Package
 Package: HDXBoxeR
 Title: Analysis of Hydrogen-Deuterium Exchange Mass-Spectrometry Data
-Version: 0.0.2
+Version: 0.1.0
 Authors@R: c(person("Maria K.", "Janowska", role = c("aut", "cre"), 
             email="mka.janowska@gmail.com",
            comment = c(ORCID = "0000-0002-8232-461X")),
@@ -16,7 +16,7 @@ Author: Maria K. Janowska [aut, cre] (<https://orcid.org/0000-0002-8232-461X>),
   Rachel E. Klevit [ctb] 
 Maintainer: Maria K. Janowska <mka.janowska@gmail.com>
 Description: A protocol that facilitates the processing and analysis of Hydrogen-Deuterium Exchange Mass Spectrometry data using p-value statistics and Critical Interval analysis. 
-    It provides a pipeline for analyzing data from 'HDXExaminer' (Sierra Analytics, Trajan Scientific), 
+    It provides a pipeline for analyzing data from 'HDXExaminer' (Sierra Analytics, Trajan Scientific) and 'DynamX' (Waters),
     automating matching and comparison of protein states through Welch's T-test and the Critical Interval statistical framework. 
     Additionally, it simplifies data export, generates 'PyMol' scripts, and ensures calculations meet publication standards. 
     'HDXBoxeR' assists in various aspects of hydrogen-deuterium exchange data analysis, including reprocessing data, calculating parameters, identifying significant peptides, 
@@ -25,6 +25,8 @@ Description: A protocol that facilitates the processing and analysis of Hydrogen
     and Masson et al. (2019) <doi:10.1038/s41592-019-0459-y>.
     'HDXBoxeR' citation: Janowska et al. (2024) <doi:10.1093/bioinformatics/btae479>.
 License: GPL (>= 2)
+URL: https://github.com/mkajano/HDXBoxeR, https://mkajano.github.io/HDXBoxeR/
+BugReports: https://github.com/mkajano/HDXBoxeR/issues
 Imports: 
     dplyr,
     graphics,
@@ -35,9 +37,16 @@ Imports:
     tidyr,
     utils, 
     methods, 
-    wrapr
-Suggests: 
+    wrapr,
+    DescTools
+Suggests:
+    bio3d,
+    crosstalk,
+    DT,
+    htmltools,
     knitr,
+    NGLVieweR,
+    plotly,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: 
@@ -45,5 +54,5 @@ VignetteBuilder:
     rmarkdown
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1

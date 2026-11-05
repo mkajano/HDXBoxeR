@@ -4,28 +4,31 @@
 \alias{pv_timepoint}
 \title{Calculation of pvalue between first protein state and any other state from all_states file}
 \usage{
-pv_timepoint(df, replicates = 3)
+pv_timepoint(df, replicates = 3, p_adjust = "none")
 }
 \arguments{
-\item{df}{output from functions output_tp or output_tp_proc.}
+\item{df}{output from functions output_tp or output_tc.}
 
-\item{replicates}{number of replicates used. Default is set to replicates=3}
+\item{replicates}{only used for tables whose value columns are not named
+\verb{<state>_..._<replicate>}: the number of replicates per block. Default 3.}
+
+\item{p_adjust}{multiple-testing correction passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}:
+\code{"none"} (default, raw Welch p-values) or e.g. \code{"BH"}. P-values are
+adjusted across the peptides of each compared state, separately for
+each labeling time (the same family as everywhere in the package).}
 }
 \value{
 Data.frame with p-values
 }
 \description{
-Compares means of sets of uptake data and return dataframe with pvalues.
-Welch t.test is used for analysis.
-Sets are compared to the first state in the input file.
-If other order of the sets is required use
-Default for the number of replicates is 3.
+Welch t-test of every state (or time) against the first one in \code{df}, per
+peptide. Missing replicates are ignored; the p-value is \code{NA} when either
+side has fewer than two values or the test is undefined (e.g. all
+replicates identical).
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-pv<-pv_timepoint(df=a) ##if number of replicates is equal 3
-# pv1<-pv_timepoint(df=a, replicates=4) ##if number of replicates is equal 4
-#b<-output_tp_states(file_nm, states=c("State4", "State2", "State3" ))
-#pv_states<-pv_timepoint(df=b) ### here means of State4, will be compared to State2 and State4
+pv<-pv_timepoint(df=a)
+pv_bh<-pv_timepoint(df=a, p_adjust="BH")
 }

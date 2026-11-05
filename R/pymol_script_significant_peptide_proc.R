@@ -3,13 +3,21 @@
 #' Function write a script that can be used in pymol to color structure.
 #' Number of colors and corresponding to them ranges can be defined by user.
 #'
+#' @details Percent-deuteration counterpart of [pymol_script_significant_peptide()]: significance is
+#'   tested on the uptake table `input_up` (Da, the package-wide rule), while
+#'   peptides are colored by their difference in percent deuteration, first state minus each state (from `input_proc`); [pymol_script_significant_peptide()] uses the relative change in uptake.
+#'
 #' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(, percent=T) function.
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
-#' @param path location where the Pymol scripts will be saved
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param path location where the Pymol scripts will be saved. Default `""`: the working directory.
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
+#' @param alpha cutoff for critical interval
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param order.pep flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
+#' @param resno_offset integer added to every residue number written to the PyMOL script, so the data's numbering matches the structure's (e.g. `-20` when the structure numbering starts 20 residues later, as with an N-terminal tag). Default `0`.
 #' @return pymol script with colors assigned per peptide
 #' @examples
 #' \donttest{
@@ -17,28 +25,32 @@
 #' a_up<- output_tp(file_nm)
 #' a_proc<- output_tp(file_nm, percent=TRUE)
 #' pymol_script_significant_peptide_proc(input_proc=a_proc,
-#' input_up=a_up,  path=tempdir(),replicates=3, pv_cutoff=0.01,
+#' input_up=a_up,  path=tempdir(),replicates=3, alpha=0.01, pvalue=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE)
 #' }
 #' @export
-pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="", ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-                                                pv_cutoff=0.01, replicates=3, order.pep=TRUE){
+pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="",
+                                                ranges=c(-Inf, seq(-30, 30, by=10), Inf),
+                                                alpha=0.01,
+                                                pvalue=0.01, replicates=3, order.pep=TRUE, p_adjust="none", resno_offset=0, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
+  .hdx_check_aligned(input_proc, input_up)
   dfup=input_up
   df=input_proc
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
-  setwd(path)
+  if (nzchar(path)) setwd(path)
 
   #####from HDX get data and
   for ( deut.time in(unique(df$Deut.Time))){
-    pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates)
+    pv<-pv_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates, p_adjust = p_adjust)
     sd<-sd_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates)
     dfu<-ave_timepoint(dfup[dfup$Deut.Time==deut.time,], replicates)
     df1<-ave_timepoint(df[df$Deut.Time==deut.time,], replicates)
 
     #preparation significance per residue & coverage
-    cl1<-significant_peptide_uptake(dfu, pv, sd, pv_cutoff, replicates)
+    cl1<-significant_peptide_uptake(dfu, pv, sd,alpha, pvalue, replicates)
     start_col<-which(colnames(df1)=='Start')
     end_col<-which(colnames(df1)=='End')
 
@@ -73,7 +85,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="", ra
 
 
     ###write outputs per each state in the
-    nm1<-str_sub(colnames(df1[8:dim(df1)[2]]), start=4, end=-8)
+    nm1<-sub("_(X\\.\\.Deut|Deut\\.\\.)$", "", sub("^av_", "", colnames(df1)[8:dim(df1)[2]]))
     for (j in 1:dim(si_apc)[2]){
       output_name<-paste("pymol_all_peptides_proc_", nm1[j],"_", deut.time, ".txt", sep="")
 
@@ -83,7 +95,7 @@ pymol_script_significant_peptide_proc<-function(input_proc,input_up, path="", ra
         if (length(which(si_apc[,j]==i)) !=0 ) {
           pep_nb<-which(si_apc[,j] == i)
           for ( k in pep_nb){line<-c()
-          line<- paste(c("color ", col_nm[i],", resi ", df1[k,start_col], "-", df1[k,end_col] , sep=""))
+          line<- paste(c("color ", col_nm[i],", resi ", df1[k,start_col] + resno_offset, "-", df1[k,end_col] + resno_offset , sep=""))
           len.pep<-c(len.pep, df1[k,end_col]-df1[k,start_col] )
           res.txt<-c(res.txt,
                      paste(line, sep="' '", collapse=""))}

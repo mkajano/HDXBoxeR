@@ -11,26 +11,29 @@ output_tc(
   times,
   seq_match = FALSE,
   csv = "NA",
-  percent = FALSE
+  percent = FALSE,
+  min_replicates = 2
 )
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 
-\item{replicates}{number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.}
+\item{replicates}{optional maximum number of replicates per state and time. By default every replicate is used; missing measurements are \code{NA}. Replicates are numbered in the order their experiments appear in the file.}
 
 \item{states}{function allows to choose what states should be used for analysis. Default all states are used.}
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 
-\item{seq_match}{Flag allows to choose if the peptide sequences should be matched between states. seq_match=FALSE signifies no sequence matching, seq_match=TRUE states that the sequences are matched between the sets.}
+\item{seq_match}{How peptides are matched between time points, as in \code{\link[=output_tp]{output_tp()}}. \code{FALSE} (default): same Sequence, Start, End and Charge. \code{TRUE}: matched by position only, ignoring Sequence; differing sequences are joined with \code{"."}.}
 
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 
-\item{percent}{Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.}
+\item{percent}{What the values are. \code{FALSE} (default): deuterium uptake in Da. \code{TRUE}: percent deuteration as reported by the input (HDXExaminer's \verb{Deut \%}, i.e. relative to the theoretical maximum; for DynamX 100 x uptake / \code{MaxUptake}). \code{"FD"}: percent of the measured fully deuterated control, 100 x uptake / FD uptake of the same peptide and state (FD replicates averaged, charge states pooled); this corrects for back-exchange and D2O content. Peptides without a usable FD value (missing, or FD uptake <= 0) keep their row with empty (\code{NA}) values. \code{"per_residue"}: uptake per exchangeable amide, Da / \code{\link[=nb_exch_deut]{nb_exch_deut()}} (length - 2 - prolines after the first residue), so peptide length does not affect the critical-interval half of the significance rule (\code{TRUE} and \code{"FD"} are length-normalized too). The p-values are the same on every scale; only the critical interval and the differences change.}
+
+\item{min_replicates}{a peptide is kept for a state only if it has at least this many replicate values at every time. Default \code{2}.}
 }
 \value{
-data frame with reorganized data where in columns is the deuteration uptake for Protein States.
+data frame with reorganized data where in columns is the deuteration uptake for the time points. Attributes \code{"replicates"} (replicate columns per time point), \code{"states"}, \code{"times"} and \code{"percent"} record how it was built.
 }
 \description{
 Returns a data frame organized for additional analysis.

@@ -4,12 +4,14 @@
 \alias{lab_dif_proc}
 \title{Preparatory function for difference plot for procent deuteration}
 \usage{
-lab_dif_proc(df, cola)
+lab_dif_proc(df, col, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp or output_tp_proc.}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from RColorBrewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from RColorBrewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 legends for procent deuteration plots
@@ -17,3 +19,4 @@ legends for procent deuteration plots
 \description{
 Returns legends for plots procent deuteration at each peptide.
 }
+\keyword{internal}

@@ -7,15 +7,21 @@
 sd_timepoint(df, replicates = 3)
 }
 \arguments{
-\item{df}{output from functions output_tp or output_tp_proc.}
+\item{df}{output from functions output_tp or output_tc.}
 
-\item{replicates}{number of replicates used. Default is set to replicates=3}
+\item{replicates}{only used for tables whose value columns are not named
+\verb{<state>_..._<replicate>}: the number of replicates per block. Default 3.}
 }
 \value{
-Data.frame with standard deviation.
+Data.frame with standard deviation. The per-peptide number of
+replicates behind each SD is attached as attribute \code{"n"}.
 }
 \description{
-Calculates standard deviation for the number of replicates in the function.
+Calculates the standard deviation of the replicates of every state (or
+time, for \code{\link[=output_tc]{output_tc()}} tables) for each peptide. Replicate blocks are
+found from the column names, so states may have different numbers of
+replicates and missing replicates (\code{NA}) are ignored; a peptide with
+fewer than two values in a block gets \code{NA}.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")

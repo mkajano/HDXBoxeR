@@ -4,12 +4,14 @@
 \alias{lab_vol}
 \title{Preparatory function for volcano plot legends}
 \usage{
-lab_vol(df, cola)
+lab_vol(df, col, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 legends for volcano plots
@@ -17,3 +19,4 @@ legends for volcano plots
 \description{
 Returns volcano plots
 }
+\keyword{internal}

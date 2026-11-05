@@ -12,7 +12,7 @@ plot_heat_map_tc(
 )
 }
 \arguments{
-\item{df}{output from function output_tcourse}
+\item{df}{output from function output_tc}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 

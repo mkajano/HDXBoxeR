@@ -11,26 +11,38 @@ output_tp(
   times,
   seq_match = FALSE,
   csv = "NA",
-  percent = FALSE
+  percent = FALSE,
+  min_replicates = 2,
+  .arg_df = NULL
 )
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 
-\item{replicates}{number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.}
+\item{replicates}{optional maximum number of replicates per state and time. By default every replicate is used, so states may have different numbers of replicates (e.g. 3 and 4); missing measurements are \code{NA}. Replicates are numbered in the order their experiments appear in the file.}
 
 \item{states}{function allows to choose what states should be used for analysis. Default all states are used.}
 
 \item{times}{lists the deuteration times to be used in analysis. Default all states used.}
 
-\item{seq_match}{Flag allows to choose if the peptide sequences should be matched between states. seq_match=FALSE signifies no sequence matching, seq_match=T states that the sequences are matched between the sets.}
+\item{seq_match}{How peptides are matched between states. \code{FALSE} (default): a peptide is kept only if the same Sequence, Start, End and Charge are found in every state (exact sequence identity). \code{TRUE}: peptides are matched by position only (Start, End and Charge), ignoring Sequence, so peptides covering e.g. a point mutation are kept; where the sequences differ between states they are joined with "." in the \code{Sequence} column.}
 
 \item{csv}{Flag allowing saving the output as csv. With default csv="NA", data is not saved. If csv output is desided, provide output name.}
 
-\item{percent}{Flag allowing to choose output as deteuration uptake (FALSE) or percent deuteration (TRUE). Default deuteration uptake.}
+\item{percent}{What the values are. \code{FALSE} (default): deuterium uptake in Da. \code{TRUE}: percent deuteration as reported by the input (HDXExaminer's \verb{Deut \%}, i.e. relative to the theoretical maximum; for DynamX 100 x uptake / \code{MaxUptake}). \code{"FD"}: percent of the measured fully deuterated control, 100 x uptake / FD uptake of the same peptide and state (FD replicates averaged, charge states pooled); this corrects for back-exchange and D2O content. Peptides without a usable FD value (missing, or FD uptake <= 0) keep their row with empty (\code{NA}) values. \code{"per_residue"}: uptake per exchangeable amide, Da / \code{\link[=nb_exch_deut]{nb_exch_deut()}} (length - 2 - prolines after the first residue), so peptide length does not affect the critical-interval half of the significance rule (\code{TRUE} and \code{"FD"} are length-normalized too). The p-values are the same on every scale; only the critical interval and the differences change.}
+
+\item{min_replicates}{a peptide is kept only if it has at least this many replicate values in every state at that time. Default \code{2}, the minimum for a standard deviation and a t-test.}
+
+\item{.arg_df}{advanced/internal: a pre-computed \code{\link[=arg_df]{arg_df()}} data.frame for
+this same \code{filepath}, to skip re-reading and re-parsing the file from
+disk. Default \code{NULL} reads \code{filepath} as usual - only pass this when
+calling \code{output_tp()} many times for the same file (e.g. once per pair
+of states) and \code{arg_df(filepath)} has already been computed once by the
+caller; passing a data.frame that doesn't match \code{filepath} will
+silently produce wrong results, since nothing here re-checks it.}
 }
 \value{
-data frame with reorganized data where in columns is the deuteration uptake for Protein States.
+data frame with reorganized data where in columns is the deuteration uptake for Protein States. Attributes \code{"replicates"} (number of replicate columns per state), \code{"states"}, \code{"times"} and \code{"percent"} record how it was built.
 }
 \description{
 Returns a data frame organized for additional analysis.

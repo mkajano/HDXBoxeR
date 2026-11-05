@@ -19,7 +19,7 @@ boxplot_tp<-function(df, replicates=3, ...){
   pparLM(c(length(unique(df$Deut.Time)),1))
   av1<-ave_timepoint(df, replicates)
   s1<-sd_timepoint(df, replicates)
-  nm1<-str_sub(colnames(av1[c(6+(1:(dim(s1)[2]-6)))]), start = 4, end=-9)
+  nm1<-.hdx_strip_suffix(colnames(av1[c(6+(1:(dim(s1)[2]-6)))]))
   for ( i in(unique(df$Deut.Time))){
     boxplot(av1[av1$Deut.Time==i,7:dim(av1)[2]], names = nm1, ...)
     mtext(i, side=3, outer=FALSE, line=-0.9, cex=0.5 )}

@@ -3,20 +3,23 @@
 #' Returns volcano plots
 #'
 #' @param df output from functions output_tp
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
 #' @return legends for volcano plots
+#' @keywords internal
 #' @export
-lab_vol<-function(df, cola){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
+lab_vol<-function(df, col, cola){
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
+  if(missing(col)) col=c(brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
   yloc =1
   yadj =0
   xloc =getCoords1(1, input = "p")
   xadj =0
   n1=max((dim(df)[2]-7), 3)
-  #cola<-c(brewer.pal(n = n1, name = "Paired"))
-  nmx<-str_sub(colnames(df[8:dim(df)[2]]), start = 4, end=-9)
-  nm1<-c(paste(str_sub(colnames(df)[7], start = 4, end=-9), "-"), nmx)
-  cola2<-c("white", cola)
+  #col<-c(brewer.pal(n = n1, name = "Paired"))
+  nmx<-.hdx_strip_suffix(colnames(df)[8:dim(df)[2]])
+  nm1<-c(paste(.hdx_strip_suffix(colnames(df)[7]), "-"), nmx)
+  cola2<-c("white", col)
 
   legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
          yjust = yadj,
@@ -27,31 +30,34 @@ lab_vol<-function(df, cola){
 #' Returns volcano plots
 #'
 #' @param df1 differences in averages data.frame calculated using diff_ave function
-#' @param CI critical interval, here is multiple sets are using maximun CI is used.
+#' @param CI critical interval: one value per compared state (as from [CI_tp()]), or a single value used for all.
 #' @param pv pvalues dataframes calculated using pv_timepoint function
-#' @param pv_cutoff p-value cutoff here set up to 0.01
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
 #' @return volcano plots
+#' @keywords internal
 #' @export
-vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
-  abs.a<-abs(df1[,8:dim(df1)[2]])>CI
-  cl1<-pv[,8:dim(df1)[2]]< pv_cutoff
-  col_res<-data.frame(abs.a*cl1)
-  n1=max((dim(df1)[2]-7), 3)###either 3 or length of the variants compared to chosen state
-  #cola<-c(brewer.pal(n = n1, name = "Paired"))
-  xl_val<-max(abs(c(min(df1[,8:dim(df1)[2]]),max(df1[,8:dim(df1)[2]]))))
-  plot(df1[,8], pv[,8], log="y", ylim=c(1, 10^-7), xlab="", ylab="", col=1,
+vol_tp<-function(df1, pv, CI, pvalue=0.01, col, pv_cutoff, cola){
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if(missing(col)) col=c(brewer.pal(n = max((dim(df1)[2]-7), 3), name = "Paired"));
+  vcols <- 8:dim(df1)[2]
+  ## one CI per compared state (a single value is used for every state)
+  CI <- rep_len(CI, length(vcols))
+  vals <- as.matrix(df1[, vcols, drop = FALSE])
+  xl_val<-max(abs(vals), na.rm = TRUE)
+  plot(1, 1, log="y", ylim=c(1, 10^-7), xlab="", ylab="", col=1,
        pch=20, yaxt="n", type="n", xlim=c(-xl_val, xl_val ))
-  rect(xleft=c(min(df1[,8:dim(df1)[2]])-5),xright = -CI, ybottom = pv_cutoff, ytop=10^-50, col="grey95", lty=3)
-  rect(xleft=CI,xright = max(df1[,8:dim(df1)[2]] )+5, ybottom = pv_cutoff, ytop=10^-50, col="grey95", lty=3)
-  for ( i in 8:dim(df1)[2]){
-    nm_of_state<-c(paste(str_sub(colnames(df1)[7], start = 4, end=-9)), " - ",
-            str_sub(colnames(df1)[i], start = 4, end=-9))
-    #message(paste(nm_of_state, collapse = ""))
-
-    cola1<-c("black", cola[i-7])
-    c1<-cola1[(col_res[,i-7])+1]
+  ## shaded area drawn for the largest CI; points are colored with their own state's CI
+  rect(xleft=-xl_val-5, xright = -max(CI), ybottom = pvalue, ytop=10^-50, col="grey95", lty=3)
+  rect(xleft=max(CI), xright = xl_val+5, ybottom = pvalue, ytop=10^-50, col="grey95", lty=3)
+  for ( i in vcols){
+    sig <- abs(df1[,i]) > CI[i-7] & pv[,i] < pvalue
+    sig[is.na(sig)] <- FALSE
+    cola1<-c("black", col[i-7])
+    c1<-cola1[sig+1]
     points(df1[,i], pv[,i],col=c1, pch=20, type="p") }
   box(lwd=2)
   exp_ddu<-expression(Delta*' D'[2]*'O uptake [Da]')
@@ -67,22 +73,28 @@ vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
 #' Returns volcano plots for each peptide. Critical interval is calculated according to #' Reliable Identification of Significant Differences in Differential Hydrogen Exchange-Mass Spectrometry Measurements Using a Hybrid Significance Testing Approach
 #' Tyler S. Hageman and David D. Weis
 #' Analytical Chemistry 2019 91 (13), 8008-8016 DOI: 10.1021/acs.analchem.9b01325
-#' calculations for alpha 0.99
-#' pvalues calculated using Welch t-test.
+#' pvalues calculated using Welch t-test. Each state is colored with its own
+#' critical interval (vs the first state).
 #'
 #' @param df output from functions output_tp
 #' @param replicates number of replicates in set as default set to 3.
-#' @param pv_cutoff p-value cutoff here set up to 0.01
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
+#' @param alpha cutoff for Critical interval. Default=0.01
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return volcano plots
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' plots_vol_tp(df=a, replicates=3, cola=c(1:4), pv_cutoff=0.01 )
-#' plots_vol_tp(df=a, pv_cutoff=0.05)
+#' plots_vol_tp(df=a, replicates=3, col=c(1:4), pvalue=0.01, alpha=0.01 )
+#' plots_vol_tp(df=a, pvalue=0.05)
 #' @export
-plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, cola){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
+plots_vol_tp<-function(df,replicates=3, pvalue=0.01, alpha=0.01, col, p_adjust="none", pv_cutoff, cola){
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
+  if(missing(col)) col=c(brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
@@ -92,18 +104,18 @@ plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, cola){
 
   av1<-ave_timepoint(df, replicates)
   da1<-dif_ave(av1)
-  pv1<-pv_timepoint(df, replicates)
+  pv1<-pv_timepoint(df, replicates, p_adjust = p_adjust)
   s1<-sd_timepoint(df,  replicates)
 
   for ( i in(unique(df$Deut.Time))){
-    CI<-max(CI_tp(s1[s1$Deut.Time==i,], replicates, pv_cutoff))
-    vol_tp(da1[da1$Deut.Time==i,], pv1[pv1$Deut.Time==i,], CI, pv_cutoff, cola)
-    message(paste("CI @", i, ":", round(CI, digits = 2)))
+    CI<-CI_tp(s1[s1$Deut.Time==i,], replicates, alpha)
+    vol_tp(da1[da1$Deut.Time==i,], pv1[pv1$Deut.Time==i,], CI, pvalue, col)
+    message(paste("CI @", i, ":", paste(round(CI, digits = 2), collapse = ", ")))
 
     mtext(i,  c(NORTH<-3),line=-1, outer=FALSE, cex=0.5)
   }
   par(mfrow=c(1, 1))
 
-  lab_vol(da1, cola)
+  lab_vol(da1, col)
   }
 

@@ -1,0 +1,143 @@
+---
+title: "Input Formats, Replicates and Normalization"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Input Formats, Replicates and Normalization}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette shows how to load data, how replicates are handled, and which value scales are available.
+
+```{r}
+library(HDXBoxeR)
+```
+
+## Reading data
+
+Every function that takes `filepath` also takes a table that is already loaded.
+Load the data once with `read_hdx()` and pass it on.
+
+### HDXExaminer
+
+Export from HDXExaminer: Tools > Export > All results table (see `?All_results_table`).
+
+```{r}
+f3 <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
+d3 <- read_hdx(f3)
+table(d3$Protein.State, d3$Deut.Time)
+```
+
+### Waters DynamX
+
+`read_hdx()` also reads DynamX cluster data and state data (DynamX 2.x and 3.x).
+
+-   Cluster data: each raw file is one replicate. Uptake is calculated from the centroid mass.
+-   State data: one average value per peptide, without replicates. It can be plotted, but the significance tests need cluster data.
+-   DynamX exposure times (minutes) become seconds: 0.5 min is `"30.00s"`.
+
+```{r, eval = FALSE}
+d <- read_hdx("cluster_data.csv",
+              fd = "Full Deuteration control",  # state with the FD control, or "last"
+              combine_charges = FALSE)          # TRUE merges charge states
+```
+
+### Other software
+
+`as_hdx_long()` takes a table with one row per measurement.
+Name the columns that hold each value:
+
+```{r}
+long <- data.frame(state = rep(c("apo", "holo"), each = 6),
+                   t_min = rep(rep(c(1, 10), each = 3), 2),
+                   run = rep(paste0("r", 1:3), 4),
+                   from = 5, to = 14, seq = "YIAKQRPISF",
+                   D = c(1.1, 1.2, 1.15, 2.4, 2.5, 2.45, 0.9, 1.0, 0.95, 2.0, 2.1, 2.05))
+d_long <- as_hdx_long(long, state = "state", time = "t_min", replicate = "run",
+                      start = "from", end = "to", sequence = "seq", uptake = "D",
+                      time_unit = "min")
+output_tp(d_long)
+```
+
+## Replicates
+
+All replicates are used, and states can have different numbers of replicates.
+In `three_states.csv` the wild type has 4 replicates; the mutants have 3 or 4, depending on the peptide.
+The table has one column per replicate (4 per state here), and a missing replicate is `NA`.
+
+```{r}
+a3 <- output_tp(d3)
+attr(a3, "replicates")
+## replicates with a value, per state, for the first peptides
+sapply(c("WT", "D109H", "R120G"), function(s) rowSums(!is.na(a3[1:5, grep(s, colnames(a3))])))
+```
+
+-   A peptide is used when it has at least 2 replicates in every state (`min_replicates`). Dropped peptides are reported.
+-   `replicates = 3` uses at most 3 replicates per state.
+
+## Point mutants
+
+Peptides covering a mutation have a different sequence in the mutant.
+By default only peptides with the same sequence are compared.
+`seq_match = TRUE` matches peptides by position, so these peptides are kept:
+
+```{r}
+by_seq <- output_tp(d3, times = "60.00s")
+by_pos <- output_tp(d3, times = "60.00s", seq_match = TRUE)
+c(by_sequence = nrow(by_seq), by_position = nrow(by_pos))
+```
+
+`compare_states_tp()` and `compare_regions()` do the same with `by = "position"`.
+
+## Value scales
+
+`percent` sets the values used everywhere:
+
+| `percent` | Values |
+|---|---|
+| `FALSE` (default) | uptake in Da |
+| `TRUE` | percent deuteration from the input (HDXExaminer `Deut %`) |
+| `"per_residue"` | uptake per exchangeable residue (Da / `nb_exch_deut()`) |
+| `"FD"` | percent of the fully deuterated control |
+
+Long peptides take up more deuterium in Da than short ones.
+`TRUE`, `"per_residue"` and `"FD"` remove this, so peptide length does not affect the result.
+`"FD"` also corrects for back-exchange.
+p-values are the same on every scale.
+
+```{r}
+a_fd <- output_tp(d3, times = "60.00s", percent = "FD")
+summary(unlist(a_fd[, 7:ncol(a_fd)]))
+```
+
+With `"FD"`, peptides without an FD value stay in the table with `NA`.
+
+## Peptide checks
+
+`peptide_qc()` flags missing controls, uptake of 0 at every time point, negative uptake, and odd FD values.
+It does not remove anything.
+
+```{r}
+qc <- peptide_qc(d3)
+qc[qc$issues != "", c("Protein.State", "Start", "End", "issues")]
+```
+
+## How this connects to the rest of the package
+
+| After loading | Use |
+|---|---|
+| Check the data | `peptide_qc()`, `general_info()`, `plot_peptide_coverage_map()` (`vignette("data_quality")`) |
+| Organize for analysis | `output_tp()` (time points), `output_tc()` (time courses) |
+| Compare two states | `plot_fissure_vent()` and the plots in `vignette("HDXBoxeR")` |
+| Compare more states, regions, time courses | `compare_states_tp()`, `compare_regions()`, `compare_timecourse()` (`vignette("multistate")`) |
+| Report | `hdx_summary_table()`, `hdx_results_table()`, `render_report()` |

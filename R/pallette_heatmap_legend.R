@@ -4,6 +4,7 @@
 #'
 #' @param col_pallette pallette to be used in the heat map
 #' @return legend for the heatmap
+#' @keywords internal
 #' @export
 pallette_legend<-function(col_pallette){
   xl <- 1; yb <- 1; xr <- 1.5; yt <- 2 ## seq values
@@ -18,6 +19,7 @@ pallette_legend<-function(col_pallette){
 #' @param pallette pallette to be used in the heat map
 #' @param lab labels to be used in pallette
 #' @return legend for the heatmap
+#' @keywords internal
 #' @export
 pallette_ll<-function(pallette, lab){
   oldpar<-par(no.readonly = TRUE)
@@ -45,7 +47,7 @@ pallette_ll<-function(pallette, lab){
 #' legend_heat_map_tp(df=a)
 #' @export
 legend_heat_map_tp<-function(df){
-  nm1<-str_sub(colnames(df[8:dim(df)[2]]), start=4, end=-9)
+  nm1<-.hdx_strip_suffix(colnames(df[8:dim(df)[2]]))
   axis(2, at=0.5:(dim(df)[2]-7.5), labels=nm1, las=2, line = , cex.axis=0.7)
 }
 
@@ -57,7 +59,7 @@ legend_heat_map_tp<-function(df){
 #' @return legend for the heatmap prercent
 #' @export
 legend_heat_map_tp_proc<-function(df){
-  nm1<-str_sub(colnames(df[8:dim(df)[2]]), start=4, end=-8)
+  nm1<-.hdx_strip_suffix(colnames(df[8:dim(df)[2]]))
   axis(2, at=0.5:(dim(df)[2]-7.5), labels=nm1, las=2, line = , cex.axis=0.7)
 }
 

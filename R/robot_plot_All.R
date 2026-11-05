@@ -8,25 +8,29 @@
 #' Peptides ranges are plotted as a line at corresponding % deuteration values.
 #'
 #'
-#' @param thP output of output_tcourse_proc() function. Raw data for procent deuteration for time courses
-#' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param thP output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses
+#' @param th output of output_tc(). Raw data for uptake deuteration for time courses
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
-#' @param CI_factor Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.
+#' @param alpha critical interval, to have more restrictive use lower values, default=0.01
+#' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
+#' @param min_timepoints a peptide is drawn when it is significant at at least this many time points. Default `1` (any time point, as before).
 #' @return Robot maps for timecourses
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' tm_df<-output_tc(filepath=file_nm)
 #' tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
-#' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001)
+#' robot_plot_All(thP = tmP_df, th=tm_df, pvalue=0.001)
 #'
 #' # more restrictive peptide selection
-#' robot_plot_All(thP = tmP_df, th=tm_df, pv_cutoff=0.001, CI_factor=3)
+#' robot_plot_All(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.001)
 #'
 #' @export
 robot_plot_All<-function(thP, th, replicates=3,
-                         pv_cutoff=0.01, states, CI_factor=1){
+                         pvalue=0.01, alpha=0.01, states, p_adjust="none", min_timepoints=1, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff; if (missing(alpha)) alpha <- pv_cutoff }
   if(missing(states)) states=unique(thP$Protein.State)
 
   oldpar<-par(no.readonly = TRUE)
@@ -44,7 +48,7 @@ robot_plot_All<-function(thP, th, replicates=3,
     control_df_up<- th[th$Protein.State==states[1],]
     variant_df_up<- th[th$Protein.State==state,]
 
-    pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates)
+    pv1<-pv_timecourse(df_c = control_df_up, df_v=variant_df_up, replicates, p_adjust = p_adjust)
     lav.proc<-prep_timecourse_plot_ave(control_df, variant_df, replicates)
     lav.proc_up<-prep_timecourse_plot_ave(control_df_up, variant_df_up, replicates)
 
@@ -53,8 +57,9 @@ robot_plot_All<-function(thP, th, replicates=3,
     sh_avc_up<-lav.proc_up[[1]]
     sh_avv_up<-lav.proc_up[[2]]
 
-    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up, replicates=3, pv_cutoff = pv_cutoff)
-    CI_all<-CI_all*CI_factor
+    CI_all<-prep_timecourse_plot_sd(control_df_up, variant_df_up,
+                                    replicates=replicates,  alpha=alpha)
+
 
     cola<-(brewer.pal(n = length(7:dim(sh_avc)[2])+1, name = "Oranges"))
 
@@ -70,10 +75,7 @@ robot_plot_All<-function(thP, th, replicates=3,
 
     nb1=1
     peptide_all<-c()
-    for (i in 7:dim(sh_avc)[2]) {
-      peptide_all<-c(peptide_all, which(pv1[, i]<pv_cutoff &
-                                          abs(sh_avc_up[, i]-sh_avv_up[, i]) > CI_all[i-6]))
-    }
+    peptide_all<-c(peptide_all, .robot_sig_rows(pv1, sh_avc_up, sh_avv_up, CI_all, pvalue, min_timepoints))
     peptide_all<-sort(unique(peptide_all))
 
     colg<-(brewer.pal(n = length(7:dim(sh_avc)[2])+2, name = "Blues"))
@@ -88,7 +90,7 @@ robot_plot_All<-function(thP, th, replicates=3,
     abline(h=0)
 
     for ( j in 7:dim(sh_avc)[2]){
-      peptide_index<-which(pv1[,j]<pv_cutoff & abs(sh_avc_up[,j]-sh_avv_up[,j]) > CI_all[j-6])
+      peptide_index<-which(pv1[,j]<pvalue & abs(sh_avc_up[,j]-sh_avv_up[,j]) > CI_all[j-6])
       nb1=nb1+1
       for ( i in peptide_all){
         points(c(sh_avc$Start[i], sh_avc$End[i]), c(sh_avc[i,j],sh_avc[i,j] ), type="l", col="grey45")

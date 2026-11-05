@@ -4,7 +4,13 @@
 \alias{verbose_timepoint_output}
 \title{Returns csv with averages from analysis for uptake file, standard deviation, p-values.}
 \usage{
-verbose_timepoint_output(filepath, output_name, replicates = 3, ...)
+verbose_timepoint_output(
+  filepath,
+  output_name,
+  replicates = 3,
+  ...,
+  p_adjust = "none"
+)
 }
 \arguments{
 \item{filepath}{path to All.Data.csv input from HDX-Examiner.}
@@ -14,6 +20,8 @@ verbose_timepoint_output(filepath, output_name, replicates = 3, ...)
 \item{replicates}{number of replicates used}
 
 \item{...}{other variables for output_tp}
+
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
 }
 \value{
 csv with analysis for uptake file, standard deviation, p-values for all protein states.

@@ -4,13 +4,16 @@
 #' Masson, G.R., Burke, J.E., Ahn, N.G. et al. Recommendations for performing, interpreting and reporting hydrogen deuterium exchange mass spectrometry (HDX-MS) experiments. Nat Methods 16, 595–602 (2019). https://doi.org/10.1038/s41592-019-0459-y
 #' It generates csv file in format ready for publication of the data.
 #'
-#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.
+#' @param filepath filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from [read_hdx()] / [as_hdx_long()].
 #' @param output_name Name of output file. It has to be csv file
-#' @param replicates number of replicates to be used in analysis. The function takes number of replicates up to specified number. If no argument provided number maximal common number of replicates it used.
+#' @param replicates optional maximum number of replicates per state and time. Default `NULL` uses every replicate; states may differ.
 #' @param states function allows to choose what states should be used for analysis. Default all states are used.
 #' @param times lists the deuteration times to be used in analysis. Default all states used.
 #' @param percent return either uptake or percent deuteration, default=FALSE, return uptake
-#' @return Returns&saves data.frame in format that is accepted for the publications.
+#' @return Writes the table to `output_name` and returns it invisibly.
+#'   `Mean.Peptide_Mass_[Da]` is the mean measured neutral peptide mass,
+#'   Charge x (centroid m/z - proton mass); earlier versions reported the
+#'   centroid m/z under this name.
 #' @importFrom grDevices col2rgb colorRampPalette rgb
 #' @importFrom graphics abline axis box boxplot legend mtext par plot points polygon rect text arrows
 #' @importFrom stats df na.omit qt sd t.test
@@ -21,101 +24,71 @@
 #' @importFrom tidyr separate
 #' @importFrom methods rbind2
 #' @importFrom wrapr orderv
+#' @importFrom DescTools DrawEllipse
 #' @examples
 #' \donttest{
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' output_prep(filepath=file_nm, output_name=tempfile())
 #' }
 #' @export
-output_prep<-function(filepath, output_name, states, replicates, times, percent=FALSE){
-  if(missing(states)) { states=arguments_call1(filepath); message(cat("Protein.States used:", states))}
-  if(missing(times)) times=arguments_call2(filepath, states); message(cat("Deut.times used:", times))
-  if(missing(replicates)) replicates=arguments_call3(filepath, states, times); message(cat("Number of replicates used:", replicates))
+output_prep<-function(filepath, output_name, states, replicates = NULL, times, percent=FALSE){
+  if(missing(states)) { states=arguments_call1(filepath); .hdx_msg("Protein.States used:", states)}
+  if(missing(times)) { times=arguments_call2(filepath, states); .hdx_msg("Deut.times used:", times)}
 
-  undeut<-arg_UN_FD(filepath)[[1]]
-  FD<-arg_UN_FD(filepath)[[2]]
-  a<-arg_UN_FD(filepath)[[3]]
+  ctl <- arg_UN_FD(filepath)
+  undeut <- ctl[[1]]
+  FD <- ctl[[2]]
 
-  a<-na.omit(a)
-  rownames(a)<-1:dim(a)[1] ##name rows
-  ##loop below will go through Protein states, timepoints and Experiments to get replicates
-  ##it will save a dataframe in wide format instead of long format, result of this loop is dataframe named "b"
-  b<-c()
-  for (state in states){##
-    temp1<-a[which(a$Protein.State ==state ),] ##creates temporary df, temp1, with Protein states going through all unique protein states
-    for (time in times){
-      temp2<-temp1[which(temp1$Deut.Time ==time),]##creates temporary df, temp2 from one state of protein with the same timepoints
-      nb=0
-      bs<-c()
-      for (exp in unique(temp2$Experiment)[1:replicates]){
-        nb=nb+1
-        df_nm<-paste("b",nb,sep="")
-        temp3<-temp2[which(temp2$Experiment == exp),]
-        n_tmp<-names(temp3)
-        nms<-c(n_tmp[1:2],paste(n_tmp[3],"_",nb,sep=""),n_tmp[4:8] , paste(n_tmp[9],"_",nb,sep=""), paste(n_tmp[10],"_",nb,sep=""),
-               paste(n_tmp[11],"_",nb,sep="")) ## creates names for the dataframe
-        colnames(temp3)<-nms
-        assign(df_nm, temp3)
-        bs<-c(bs, df_nm) ##creates number of data.frames that equals to number of replicates
-        df_List<-mget(bs)
-        ##will merge all the replicates dataframes to bp dataframe
-        bp<-Reduce(function(x, y) merge(x, y, by = c('Protein.State', 'Deut.Time', 'Start','End', 'Sequence', 'Search.RT',
-                                                     'Charge')), df_List)}
-      b=rbind(b, bp)}} ## b has all information bound together again to have all information df
+  ## one row per measurement; mean and SD over the replicates (Experiments)
+  ## of each state, time and peptide - states may have different numbers of
+  ## replicates, and a missing centroid does not remove the uptake value
+  a <- .hdx_raw(filepath)
+  a <- a[a$Protein.State %in% states & a$Deut.Time %in% times, , drop = FALSE]
+  a$val <- suppressWarnings(as.numeric(if (percent == FALSE) a$X..Deut else a$Deut..))
+  a <- a[!is.na(a$val), , drop = FALSE]
+  if (!is.null(replicates)) {
+    keep <- unlist(lapply(split(seq_len(nrow(a)), list(a$Protein.State, a$Deut.Time), drop = TRUE), function(i) {
+      i[a$Experiment[i] %in% utils::head(unique(a$Experiment[i]), replicates)]
+    }))
+    a <- a[sort(keep), , drop = FALSE]
+  }
+  ## replicates per state and time point (experiment names differ by time)
+  n_st <- tapply(a$Experiment, list(a$Protein.State, a$Deut.Time), function(e) length(unique(e)))
+  n_rep <- apply(n_st, 1, function(v) { v <- v[!is.na(v)]; if (min(v) == max(v)) min(v) else paste0(min(v), "-", max(v)) })
+  .hdx_msg("Number of replicates used:", paste0(names(n_rep), "=", n_rep))
 
-  ###order columns
-  #### names(b)[grep("Exp.Cent", colnames(b))] gives position of all variable with pattern and return position
-  ord1<-c('Protein.State', 'Deut.Time', 'Start', 'End', 'Sequence', 'Search.RT', 'Charge',
-          names(b)[grep("Experiment", colnames(b))],
-          names(b)[grep("Exp.Cent", colnames(b))], names(b)[grep("X..Deut", colnames(b))], names(b)[grep("Deut.._", colnames(b))] )
-  b<-b[,ord1]
+  ## Exp.Cent is a centroid m/z: the peptide mass column reports the neutral
+  ## mass, Charge * (m/z - proton mass), in Da
+  to_mass <- function(mz, z) as.numeric(z) * (suppressWarnings(as.numeric(mz)) - .proton_mass)
+  a$mass <- to_mass(a$Exp.Cent, a$Charge)
+  g <- interaction(a$Protein.State, a$Deut.Time, a$Start, a$End, a$Sequence, a$Charge, drop = TRUE, sep = "\r")
+  first <- !duplicated(g)
+  m <- function(v) { x <- tapply(v, g, mean, na.rm = TRUE); x[is.nan(x)] <- NA; as.numeric(x[as.character(g[first])]) }
+  s <- function(v) as.numeric(tapply(v, g, function(x) if (sum(!is.na(x)) < 2) NA_real_ else stats::sd(x, na.rm = TRUE))[as.character(g[first])])
+  rt <- as.numeric(tapply(suppressWarnings(as.numeric(a$Search.RT)), g, stats::median, na.rm = TRUE)[as.character(g[first])])
+  b <- a[first, c("Protein.State", "Deut.Time", "Start", "End", "Sequence", "Search.RT", "Charge")]
+  b$Search.RT <- rt
+  out <- data.frame(b, m(a$mass), s(a$mass), round(m(a$val), digits = 4), round(s(a$val), digits = 4))
 
-
-
-  ###calculate means +sd and write to out dataframe. Later assign names, choose only important
-
-  FD2<-data.frame(FD[,c(1,2,4:6,8,7,9)], rep(0,times=dim(FD)[1]), rep(0,times=dim(FD)[1]), rep(0,times=dim(FD)[1]))
+  ## FD's "mean" column is not a real average: undeut is defined as 0
+  ## exchange in both modes; FD uses its own measured X..Deut (Da) in uptake
+  ## mode, or the conventional 100% in percent mode. SD stays 0.
+  FD[,9] <- to_mass(FD[,9], FD$Charge)
+  undeut[,9] <- to_mass(undeut[,9], undeut$Charge)
+  FD2<-data.frame(FD[,c(1,2,4:6,8,7,9)], rep(0,times=dim(FD)[1]),
+                  if (percent==FALSE) as.numeric(FD[,10]) else rep(100,times=dim(FD)[1]),
+                  rep(0,times=dim(FD)[1]))
   undeut2<-data.frame(undeut[,c(1,2,4:6,8,7,9)], rep(0,times=dim(undeut)[1]),  rep(0,times=dim(undeut)[1]), rep(0,times=dim(undeut)[1]))
+  FD2 <- FD2[FD2[[1]] %in% states, , drop = FALSE]
+  undeut2 <- undeut2[undeut2[[1]] %in% states, , drop = FALSE]
 
-  if (percent==FALSE){
-    col_deut<-c(grep("X..Deut", colnames(b)))
-    chars <- sapply(b[, col_deut], is.character)
-    if (chars[1] == TRUE){
-      b[ , col_deut[which(chars==TRUE)]] <- as.data.frame(apply(b[ , col_deut[which(chars==TRUE)]], 2, as.numeric))}
-
-  ###prepare Full deuteration data.frame to be bound without data.frame.
-    out<-data.frame(b[,1:7], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
-                    round(rowMeans(b[,grep("X..Deut", colnames(b))]), digits = 4),
-                    round(apply(b[,grep("X..Deut", colnames(b))],1,sd), digits=4))
-
-  nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge",
+  nm_final<-c("Protein.State", "Deut.Time", "Start", "End", "Sequence", "Retention_Time_[min]","Charge",
               "Mean.Peptide_Mass_[Da]", "st.dev_Peptide_Mass",
-              "Mean.Deut.Uptake_[Da]", "st.dev_Deut_Uptake")
-
+              if (percent == FALSE) c("Mean.Deut.Uptake_[Da]", "st.dev_Deut_Uptake")
+              else c("Mean.Percent_Deut_[%]", "st.dev_Percent_Deut"))
   colnames(FD2)<-nm_final
   colnames(undeut2)<-nm_final
   colnames(out)<-nm_final
-  } else { ###percent deuteration
-    col_deut<-c(grep("Deut.._", colnames(b)))
-    chars <- sapply(b[, col_deut], is.character)
-    if (chars[1] == TRUE){
-      b[ , col_deut[which(chars==TRUE)]] <- as.data.frame(apply(b[ , col_deut[which(chars==TRUE)]], 2, as.numeric))}
-
-
-    out<-data.frame(b[,1:7], rowMeans(b[,grep("Exp.Cent", colnames(b))]), apply(b[,grep("Exp.Cent", colnames(b))],1,sd),
-                    round(rowMeans(b[,grep("Deut.._", colnames(b))]), digits = 4),
-                    round(apply(b[,grep("Deut.._", colnames(b))],1,sd), digits=4))
-
-    nm_final<-c(names(out)[1:5], "Retention_Time_[min]","Charge",
-                "Mean.Peptide_Mass_[Da]", "st.dev_Peptide_Mass",
-                "Mean.Percent_Deut_[Da]", "st.dev_Percent_Deut")
-
-    colnames(FD2)<-nm_final
-    colnames(undeut2)<-nm_final
-    colnames(out)<-nm_final
-  }
-
-
 
   out<-rbind(out, FD2)
   out<-rbind(out, undeut2)
@@ -132,12 +105,13 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
   ord[ord== "FD"]<- c("10000000000000.0s")
   ord=as.numeric(str_sub(ord, end=-2))
 
-  bp<-data.frame(out, ord)
+  bp<-data.frame(out, ord, check.names = FALSE)
   bp<-arrange(bp, Start, End, Protein.State, Charge, ord)
   bp<-bp[,-dim(bp)[2]]
+  rownames(bp) <- NULL
   ###write output
   write.csv(bp, output_name, row.names = FALSE)
-  return()}
+  invisible(bp)}
 
 
 
@@ -148,25 +122,10 @@ output_prep<-function(filepath, output_name, states, replicates, times, percent=
 #'
 #' @param filepath input file location
 #' @return Data.frame for further processing
+#' @keywords internal
 #' @export
 arg_UN_FD<-function(filepath){
-  a <- read.csv(file = filepath, header = F, skip = 1)
-  nm <- read.csv(file = filepath, header = T, row.names = NULL,
-                 nrows = 1)
-  nm1 <- colnames(nm)
-
-  if(length(unique(nm1=="row.names"))==2){
-    nm1<-nm1[-which(nm1=="row.names")]
-    nm1<-c(nm1, "row.names")}
-
-  colnames(a) <- c(nm1)
-
-  dif_col<- setdiff(c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
-                      "Charge", "Search.RT", "X..Deut", "Deut.."), nm1)
-
-  if (length(dif_col)!=0)
-  {stop(paste("input file missing column(s): ", dif_col, sep=""))}
-
+  a <- .hdx_raw(filepath)
 
   undeut <- a[a$Deut.Time=="0s",c("Protein.State", "Deut.Time", "Experiment", "Start", "End", "Sequence",
                                   "Charge", "Search.RT","Exp.Cent", "X..Deut", "Deut..")]

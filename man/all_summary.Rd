@@ -4,17 +4,29 @@
 \alias{all_summary}
 \title{Returns full summary table.}
 \usage{
-all_summary(filepath, replicates = 3, Dfact = 0.85)
+all_summary(
+  filepath,
+  replicates = NULL,
+  Dfact = 0.85,
+  alpha = 0.01,
+  protein_range = NULL
+)
 }
 \arguments{
-\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export.}
+\item{filepath}{filepath to the input file. Input file is All_results table from HDX_Examiner, where all the fields are marked for export. Can also be a DynamX cluster/state export, or a table from \code{\link[=read_hdx]{read_hdx()}} / \code{\link[=as_hdx_long]{as_hdx_long()}}.}
 
-\item{replicates}{number of replicates. Default set to 3.}
+\item{replicates}{optional maximum number of replicates per state.
+Default \code{NULL} uses every replicate.}
 
 \item{Dfact}{Dfact is the fraction of D/H in the labeling buffer used. Default set up to 0.85}
+
+\item{alpha}{Critical interval, level of stringency}
+
+\item{protein_range}{residue range for the coverage, as in \code{\link[=general_info]{general_info()}}.}
 }
 \value{
-Returns summary table.
+Returns summary table. Back-exchange columns are \code{NA} when the
+input has no usable undeuterated/fully deuterated controls.
 }
 \description{
 Returns summary data.
@@ -24,5 +36,5 @@ Function requires undeuterated and Fully deuterated sets marked in Deut.time as 
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
-a<- all_summary(file_nm, replicates=3, Dfact=0.85)
+a<- all_summary(file_nm, Dfact=0.85)
 }

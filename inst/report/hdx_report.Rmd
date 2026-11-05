@@ -1,0 +1,133 @@
+---
+title: "`r params$title`"
+date: "`r format(Sys.time(), '%Y-%m-%d %H:%M')`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+params:
+  data: NULL
+  title: "HDX-MS report"
+  states: NULL
+  times: NULL
+  reference: NULL
+  regions: NULL
+  alpha: 0.01
+  pvalue: 0.01
+  p_adjust: "none"
+  percent: FALSE
+  metadata: NULL
+  results_file: NULL
+  Dfact: 0.85
+  protein_range: NULL
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, fig.width = 7, fig.height = 6)
+library(HDXBoxeR)
+d <- readRDS(params$data)
+states <- if (is.null(params$states)) unique(arg_df(d)$Protein.State) else params$states
+times <- if (is.null(params$times)) arguments_call2(d, states) else params$times
+reference <- if (is.null(params$reference)) states[1] else params$reference
+others <- setdiff(states, reference)
+tab <- function(x, digits = 3) knitr::kable(x, digits = digits, row.names = FALSE)
+```
+
+## Parameters
+
+```{r}
+tab(data.frame(
+  Parameter = c("States", "Reference state", "Time points", "Value scale", "Critical interval alpha",
+                "p-value cutoff", "Multiple-testing correction", "Significance rule", "HDXBoxeR version"),
+  Value = c(paste(states, collapse = ", "), reference, paste(times, collapse = ", "),
+            switch(as.character(params$percent), "FALSE" = "uptake (Da)", "TRUE" = "percent deuteration",
+                   FD = "percent of fully deuterated control", per_residue = "uptake per exchangeable amide (Da)"),
+            params$alpha, params$pvalue, params$p_adjust,
+            "Welch p < cutoff AND |difference| > pooled critical interval (Hageman & Weis)",
+            as.character(utils::packageVersion("HDXBoxeR")))))
+```
+
+## Summary (Masson et al. 2019)
+
+```{r}
+tab(hdx_summary_table(d, states = states, metadata = if (is.null(params$metadata)) list() else params$metadata,
+                      alpha = params$alpha, pvalue = params$pvalue, Dfact = params$Dfact,
+                      protein_range = params$protein_range))
+```
+
+## Data quality
+
+```{r}
+qc <- peptide_qc(d)
+qc <- qc[qc$Protein.State %in% states & qc$issues != "", c("Protein.State", "Start", "End", "Sequence", "Charge", "issues")]
+if (nrow(qc) == 0) cat("No peptide-level issues found.") else tab(qc)
+```
+
+```{r, fig.height = 4 + 1.5 * length(states)}
+plot_peptide_coverage_map(d, states = states)
+```
+
+## Peptide-level results
+
+```{r}
+res <- hdx_results_table(d, states = states, times = times, reference = reference, alpha = params$alpha,
+                         pvalue = params$pvalue, p_adjust = params$p_adjust, percent = params$percent,
+                         file = params$results_file)
+counts <- stats::aggregate(cbind(significant = is_sig, protected = is_sig & delta < 0,
+                                 destabilized = is_sig & delta > 0) ~ Deut.Time + state1 + state2,
+                           data = res, FUN = sum)
+tab(counts)
+```
+
+```{r, results = "asis"}
+if (!is.null(params$results_file)) {
+  cat("The full table is written to **", basename(params$results_file),
+      "**, with its parameters in the matching _parameters.txt file.\n", sep = "")
+}
+```
+
+```{r, results = "asis"}
+a <- output_tp(d, states = states, times = times, percent = params$percent)
+for (s in others) {
+  for (t in times) {
+    cat("\n\n### ", reference, " vs ", s, ", ", t, "\n\n", sep = "")
+    plot_fissure_vent(a, times = t, state1 = reference, state2 = s, alpha = params$alpha,
+                      pvalue = params$pvalue, p_adjust = params$p_adjust)
+    cat("\n\n")
+  }
+}
+```
+
+```{r, results = "asis"}
+if (!is.null(params$regions)) {
+  cat("\n\n## Regions\n\n")
+  reg <- compare_regions(d, times = times, regions = params$regions, states = states, reference = reference,
+                         percent = params$percent, p_adjust = params$p_adjust)
+  cat("Region ANOVA (peptide + state on per-peptide means; peptides are the replication unit).\n\n")
+  print(tab(reg$summary))
+  cat("\n\nPairwise state differences per region:\n\n")
+  print(tab(reg$pairs))
+}
+```
+
+```{r, results = "asis"}
+if (length(times) > 1) {
+  cat("\n\n## Whole time course\n\n")
+  for (s in others) {
+    tc <- compare_timecourse(d, reference, s, times = times, alpha = params$alpha, pvalue = params$pvalue,
+                             p_adjust = params$p_adjust, percent = params$percent)
+    cat("\n\n### ", reference, " vs ", s, "\n\n", sep = "")
+    cat(sum(tc$sig_summed), "of", nrow(tc), "peptides differ over the summed time course;",
+        sum(tc$sig_min_timepoints), "are significant at two or more time points.\n\n")
+    top <- tc[tc$sig_summed, c("Start", "End", "Sequence", "Charge", "summed_delta", "p_value", "p_adj",
+                               "n_timepoints_sig")]
+    if (nrow(top)) print(tab(top[order(top$p_value), ]))
+  }
+}
+```
+
+## Session
+
+```{r}
+cat(utils::capture.output(print(utils::sessionInfo())), sep = "\n")
+```

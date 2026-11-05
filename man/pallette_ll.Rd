@@ -17,3 +17,4 @@ legend for the heatmap
 \description{
 Returns names for legend for the heatmaps
 }
+\keyword{internal}

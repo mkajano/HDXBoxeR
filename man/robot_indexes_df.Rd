@@ -4,20 +4,33 @@
 \alias{robot_indexes_df}
 \title{Returns dataframe with peptides which exhibit significant difference between two sets}
 \usage{
-robot_indexes_df(thP, th, replicates = 3, pvalue = 0.01, states, CI_factor = 1)
+robot_indexes_df(
+  thP,
+  th,
+  replicates = 3,
+  pvalue = 0.01,
+  alpha = 0.01,
+  states,
+  p_adjust = "none",
+  min_timepoints = 1
+)
 }
 \arguments{
-\item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
+\item{thP}{output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses}
 
-\item{th}{output of output_tcourse() function. Raw data for uptake deuteration for time courses}
+\item{th}{output of output_tc(). Raw data for uptake deuteration for time courses}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 
 \item{pvalue}{p-value cutoff. Default set up to 0.01}
 
+\item{alpha}{cutoff for Critical interval. Default=0.01}
+
 \item{states}{Protein states from the set. As default all states are chosen.}
 
-\item{CI_factor}{Multiplication factor for Critical Interval. Allows for more restrictive selection of Critial interval.}
+\item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{min_timepoints}{a peptide is selected when it is significant at at least this many time points. Default \code{1} (any time point, as before); \code{2} or more ignores one-off calls at a single time point.}
 }
 \value{
 Returns dataframe listing peptides that are significantly different between sets.
@@ -31,5 +44,5 @@ tm_df<-output_tc(filepath=file_nm)
 tmP_df<-output_tc(filepath=file_nm, percent=TRUE)
 
 # more restictive peptide selection
-robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.01, CI_factor=1.5)
+robot_indexes_df(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01)
 }

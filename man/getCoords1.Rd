@@ -19,3 +19,4 @@ coordinates of margins
 \description{
 Margin coordinates
 }
+\keyword{internal}

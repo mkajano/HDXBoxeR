@@ -7,6 +7,7 @@
 #' @param ddlab label
 #' @param ... other
 #' @return Plot window
+#' @keywords internal
 #' @export
 pl_gen_ch2<-function(df,  ddlab=1, ...){
   plot(x = 1, type = "n",  xlim = c(min(df$Start),
@@ -44,7 +45,8 @@ legend_states_PerD_bottom<-function (df, cols)
 {
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
-  nm1 <- unique(str_sub(colnames(df[7:dim(df)[2]]), start = 1, end = -11))
+  ## time-course columns are "t<time>": show the time without the "t"
+  nm1 <- unique(sub("^t(?=[0-9])", "", .hdx_strip_suffix(colnames(df[7:dim(df)[2]])), perl = TRUE))
   par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0,
                                                         0, 0, 0), new = TRUE)
   plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
@@ -77,6 +79,7 @@ legend_nm_bottom<-function (names, cols)
 #'
 #' @param df dataframe
 #' @return duplicate sets
+#' @keywords internal
 #' @export
 duplicate_sets <- function(df) {
   # assuming a data.frame
@@ -95,6 +98,7 @@ duplicate_sets <- function(df) {
 #' @param timepoints deuteration times used
 #' @param ... other
 #' @return Plot window
+#' @keywords internal
 #' @export
 pl_gen_uptake<-function(df, timepoints, ddlab=1, ...){
   plot(x = timepoints, type = "n",  ylab = "",
@@ -116,3 +120,74 @@ pl_gen_uptake<-function(df, timepoints, ddlab=1, ...){
   abline(h=seq(-180, 180, by=10), col="grey70", lty=3, lwd=0.5)
   abline(h=0, lty=2)}
 
+
+
+
+#' Prepares the plot window for the woods functions
+#'
+#' Internal function
+#'
+#' @param df dataframe
+#' @param ddlab label
+#' @param ... other
+#' @return Plot window
+#' @keywords internal
+#' @export
+pl_gen_ch_frac<-function(df,  ddlab=3, ...){
+  plot(x = 1, type = "n",  xlim = c(min(df$Start),
+                                    max(df$End)), ylab = "",
+       xlab = "",   yaxt = "n", ...)
+
+
+  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = F,
+       tcl = -0.2)
+  axis(2, at = seq(-1, 10, by = 0.25), cex.axis = 1,
+       labels = c( seq(-1, 10, by = 0.25)))
+  axis(2, at = seq(-1, 10, by = 0.1), cex.axis = 1,
+       labels = F, tcl = -0.2)
+  box(lwd=2)
+  exp_ddu <- c(expression("% Deuteration"), expression(Delta * " %D"[2] * "O"),
+               "Fraction Deuterated")
+  mtext(c("Residue"), c(SOUTH <- 1), line = 0.6,
+        outer = TRUE, cex=1)
+  mtext(exp_ddu[ddlab], c(WEST <- 2), line = 0.7, outer = TRUE)
+  nb1 = 1
+
+  abline(h=seq(-18, 18, by=0.1), col="grey70", lty=3, lwd=0.5)
+  abline(h=0, lty=2)}
+
+
+
+#' Prepares the plot window for the woods functions
+#'
+#' Internal function
+#'
+#' @param ddlab label
+#' @param min_x x axis starting number
+#' @param max_x x axis max value
+#' @param ... other
+#' @return Plot window
+#' @keywords internal
+#' @export
+pl_gen_ch_list_frac<-function(min_x, max_x,  ddlab=3, ...){
+  plot(x = 1, type = "n",  xlim = c(min_x,
+                                    max_x), ylab = "",
+       xlab = "",   yaxt = "n", ...)
+
+
+  axis(1, at = seq(0, 1000, by = 10), cex.axis = 1, labels = F,
+       tcl = -0.2)
+  axis(2, at = seq(-1, 10, by = 0.25), cex.axis = 1,
+       labels = c( seq(-1, 10, by = 0.25)))
+  axis(2, at = seq(-1, 10, by = 0.1), cex.axis = 1,
+       labels = F, tcl = -0.2)
+  box(lwd=2)
+  exp_ddu <- c(expression("% Deuteration"), expression(Delta * " %D"[2] * "O"),
+               "Fraction Deuterated")
+  mtext(c("Residue"), c(SOUTH <- 1), line = 0.6,
+        outer = TRUE, cex=1)
+  mtext(exp_ddu[ddlab], c(WEST <- 2), line = 0.7, outer = TRUE)
+  nb1 = 1
+
+  abline(h=seq(-18, 18, by=0.1), col="grey70", lty=3, lwd=0.5)
+  abline(h=0, lty=2)}

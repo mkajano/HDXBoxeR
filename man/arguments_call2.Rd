@@ -17,3 +17,4 @@ The default arguments to output_tp functions.
 \description{
 Function used as internal function
 }
+\keyword{internal}
