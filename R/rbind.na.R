@@ -14,6 +14,7 @@
 #' row1 <- c("a","b","c","d")
 #' row2 <- c("A", "B", "C")
 #' row3 <- rbind_na(row1, row2)
+#' @keywords internal
 #' @export
 #'
 rbind_na <- function(..., deparse.level = 1)

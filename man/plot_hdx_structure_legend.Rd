@@ -4,18 +4,25 @@
 \alias{plot_hdx_structure_legend}
 \title{Legend for \code{\link[=plot_hdx_structure]{plot_hdx_structure()}}'s color scale}
 \usage{
-plot_hdx_structure_legend(ranges, colors_initial = "grey80", unit_label = "")
+plot_hdx_structure_legend(
+  ranges,
+  col = "grey80",
+  unit_label = "",
+  colors_initial
+)
 }
 \arguments{
 \item{ranges}{the same \code{ranges} vector passed to \code{\link[=plot_hdx_structure]{plot_hdx_structure()}}
 (or, if that call used the default \code{NULL}, the auto-scaled vector -
 see \code{\link[=plot_hdx_structure]{plot_hdx_structure()}}'s \verb{@details} on reconstructing it).}
 
-\item{colors_initial}{the same \code{colors_initial} passed to
-\code{\link[=plot_hdx_structure]{plot_hdx_structure()}}. Default \code{"grey80"}.}
+\item{col}{the same \code{col} passed to}
 
 \item{unit_label}{axis label for the bins, e.g. \code{"Da"} or \code{"\%"}. Default
 \code{""}.}
+
+\item{colors_initial}{deprecated, use \code{col}.
+\code{\link[=plot_hdx_structure]{plot_hdx_structure()}}. Default \code{"grey80"}.}
 }
 \value{
 draws a base-R legend plot; returns \code{NULL} invisibly.

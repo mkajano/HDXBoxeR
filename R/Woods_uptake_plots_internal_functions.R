@@ -7,6 +7,7 @@
 #' @param ddlab label
 #' @param ... other
 #' @return Plot window
+#' @keywords internal
 #' @export
 pl_gen_ch2<-function(df,  ddlab=1, ...){
   plot(x = 1, type = "n",  xlim = c(min(df$Start),
@@ -77,6 +78,7 @@ legend_nm_bottom<-function (names, cols)
 #'
 #' @param df dataframe
 #' @return duplicate sets
+#' @keywords internal
 #' @export
 duplicate_sets <- function(df) {
   # assuming a data.frame
@@ -95,6 +97,7 @@ duplicate_sets <- function(df) {
 #' @param timepoints deuteration times used
 #' @param ... other
 #' @return Plot window
+#' @keywords internal
 #' @export
 pl_gen_uptake<-function(df, timepoints, ddlab=1, ...){
   plot(x = timepoints, type = "n",  ylab = "",
@@ -127,6 +130,7 @@ pl_gen_uptake<-function(df, timepoints, ddlab=1, ...){
 #' @param ddlab label
 #' @param ... other
 #' @return Plot window
+#' @keywords internal
 #' @export
 pl_gen_ch_frac<-function(df,  ddlab=3, ...){
   plot(x = 1, type = "n",  xlim = c(min(df$Start),
@@ -162,6 +166,7 @@ pl_gen_ch_frac<-function(df,  ddlab=3, ...){
 #' @param max_x x axis max value
 #' @param ... other
 #' @return Plot window
+#' @keywords internal
 #' @export
 pl_gen_ch_list_frac<-function(min_x, max_x,  ddlab=3, ...){
   plot(x = 1, type = "n",  xlim = c(min_x,

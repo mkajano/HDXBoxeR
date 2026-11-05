@@ -8,8 +8,9 @@
 #' Peptides ranges are plotted as a line at corresponding % deuteration values.
 #'
 #'
-#' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param th output of output_tc(). Raw data for uptake deuteration for time courses
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
 #' @param ylim y axis limit
@@ -22,11 +23,12 @@
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tc(file_nm)
 #' b<-output_tc(file_nm, percent=TRUE)
-#' woods_CI_plot_frac(th=a, pv_cutoff = 0.01, alpha = 0.01, replicates=3)
+#' woods_CI_plot_frac(th=a, pvalue = 0.01, alpha = 0.01, replicates=3)
 #' }
 #' @export
 woods_CI_plot_frac<-function(th, replicates=3,
-                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,1.2), p_adjust="none", ...){
+                        pvalue=0.01, states, alpha=0.01, ylim=c(0,1.2), p_adjust="none", ..., pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
   if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -82,7 +84,7 @@ woods_CI_plot_frac<-function(th, replicates=3,
 
     peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {
-      peptide_all<-c(peptide_all, which(pv1[, i]<pv_cutoff &
+      peptide_all<-c(peptide_all, which(pv1[, i]<pvalue &
                                           abs(sh_avc_up[, i]-sh_avv_up[, i]) > CI_all[i-6]))
     }
     peptide_all<-sort(unique(peptide_all))
@@ -94,7 +96,7 @@ woods_CI_plot_frac<-function(th, replicates=3,
     for ( j in 7:dim(sh_avc)[2]){
       pl1f()
 
-      peptide_index<-which(pv1[,j]<pv_cutoff & abs(sh_avc_up[,j]-sh_avv_up[,j]) > CI_all[j-6])
+      peptide_index<-which(pv1[,j]<pvalue & abs(sh_avc_up[,j]-sh_avv_up[,j]) > CI_all[j-6])
       nb1=nb1+1
       for ( i in peptide_all){
         points(c(sh_avc$Start[i], sh_avc$End[i]), c(sh_avc[i,j],sh_avc[i,j] ), type="l", col=cola[4])

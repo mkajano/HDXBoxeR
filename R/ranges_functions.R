@@ -5,6 +5,7 @@
 #' @param df_ave average per residues
 #' @param values_df data frame with values.
 #' @return ranges per set
+#' @keywords internal
 #' @export
 ranges_function<-function(df_ave, values_df){
   values_df<-na.omit(values_df)
@@ -27,6 +28,7 @@ ranges_function<-function(df_ave, values_df){
 #' @param df_ave average per residues
 #' @param values_df data frame with values.
 #' @return ranges per set
+#' @keywords internal
 #' @export
 ranges_function_tc<-function(df_ave, values_df){
   values_df<-na.omit(values_df)

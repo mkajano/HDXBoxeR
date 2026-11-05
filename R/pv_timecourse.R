@@ -9,6 +9,7 @@
 #'   `"none"` (default) or e.g. `"BH"`, applied across all peptides and time
 #'   points of the comparison.
 #' @return pvalue comparisons between two sets.
+#' @keywords internal
 #' @export
 pv_timecourse<-function(df_c,df_v, replicates=3, p_adjust="none") {
   keys <- c('Start','End', 'Sequence', 'Search.RT', 'Charge')

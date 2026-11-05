@@ -4,6 +4,7 @@
 #'
 #' @param filepath input file location, or a table from [read_hdx()]
 #' @return Data.frame for further processing
+#' @keywords internal
 #' @export
 arg_df<-function(filepath){
   a <- .hdx_raw(filepath)

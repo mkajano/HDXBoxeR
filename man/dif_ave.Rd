@@ -7,22 +7,20 @@
 dif_ave(df)
 }
 \arguments{
-\item{df}{output from functions output_tp, output_tp_proc,  output_tp_states or output_tp_proc_states.}
+\item{df}{output of ave_timepoint() on an output_tp() table.}
 }
 \value{
 Data.frame with difference values btw control and other protein states.
 }
 \description{
 Returns average difference data.frame.
-Sets are compared to the first state in the input file.
-If other order of the sets is required use
-Default for the number of replicates is 3.
+Every state is compared to the first state in \code{df} (state - first state).
+To use another reference, put it first with \code{output_tp(states = ...)}.
 }
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-pv<-pv_timepoint(df=a) ##if number of replicates is equal 3
-pv1<-pv_timepoint(df=a, replicates=3) ##if number of replicates is equal 4
-#b<-output_tp_states(file_nm, states=c("4EHP", "State2", "State3" ))
-#pv_states<-pv_timepoint(df=b) ### here means of State4, will be compared to State2 and State4
+d<-dif_ave(ave_timepoint(a))
+## bound as the reference instead
+d2<-dif_ave(ave_timepoint(output_tp(file_nm, states=c("bound", "Unbound"))))
 }

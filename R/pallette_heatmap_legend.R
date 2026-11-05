@@ -4,6 +4,7 @@
 #'
 #' @param col_pallette pallette to be used in the heat map
 #' @return legend for the heatmap
+#' @keywords internal
 #' @export
 pallette_legend<-function(col_pallette){
   xl <- 1; yb <- 1; xr <- 1.5; yt <- 2 ## seq values
@@ -18,6 +19,7 @@ pallette_legend<-function(col_pallette){
 #' @param pallette pallette to be used in the heat map
 #' @param lab labels to be used in pallette
 #' @return legend for the heatmap
+#' @keywords internal
 #' @export
 pallette_ll<-function(pallette, lab){
   oldpar<-par(no.readonly = TRUE)

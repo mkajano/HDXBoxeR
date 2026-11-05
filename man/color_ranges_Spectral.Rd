@@ -4,12 +4,14 @@
 \alias{color_ranges_Spectral}
 \title{Returns Spectral pallette with colors matching defined ranges}
 \usage{
-color_ranges_Spectral(ranges, colors_initial)
+color_ranges_Spectral(ranges, col, colors_initial)
 }
 \arguments{
 \item{ranges}{vector of numbers. Should have the same mumber of positive and negative values and contain 0.}
 
-\item{colors_initial}{additional color that should be first in the pallette.}
+\item{col}{additional color that should be first in the pallette.}
+
+\item{colors_initial}{deprecated, use \code{col}.}
 }
 \value{
 color scheme for number
@@ -18,5 +20,5 @@ color scheme for number
 Spectral pallette for timecourse data
 }
 \examples{
-color_ranges_Spectral(ranges=c(-Inf, -100, -50, 0, 50, 100, Inf), colors_initial="white")
+color_ranges_Spectral(ranges=c(-Inf, -100, -50, 0, 50, 100, Inf), col="white")
 }

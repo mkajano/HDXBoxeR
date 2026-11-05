@@ -18,3 +18,4 @@ Prepares a plotting window with specified margins with specific number of figure
 \examples{
 ppar(c(2,1))
 }
+\keyword{internal}

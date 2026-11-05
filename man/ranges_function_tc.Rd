@@ -17,3 +17,4 @@ ranges per set
 \description{
 Function used as internal function to get ranges in the function.
 }
+\keyword{internal}

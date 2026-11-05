@@ -21,3 +21,4 @@ Combine data of unequal row length avoiding repetition or errors by filling with
 qpcr.cbind.na(1:10, 1:3)
 
 }
+\keyword{internal}

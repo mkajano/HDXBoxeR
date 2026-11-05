@@ -9,10 +9,12 @@ pymol_script_significant_peptide(
   path = "",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
-  pv_cutoff = 0.01,
+  pvalue = 0.01,
   replicates = 3,
   order.pep = TRUE,
-  p_adjust = "none"
+  p_adjust = "none",
+  resno_offset = 0,
+  pv_cutoff
 )
 }
 \arguments{
@@ -24,13 +26,17 @@ pymol_script_significant_peptide(
 
 \item{alpha}{cutoff for critical interval}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 
 \item{order.pep}{flag allowing to either order peptide acccording to the peptide length (default), or to position in the protein sequence.}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{resno_offset}{integer added to every residue number written to the PyMOL script, so the data's numbering matches the structure's (e.g. \code{-20} when the structure numbering starts 20 residues later, as with an N-terminal tag). Default \code{0}.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 pymol script with colors assigned per peptide
@@ -44,7 +50,7 @@ Number of colors and corresponding to them ranges can be defined by user.
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
 pymol_script_significant_peptide(df=a, replicates=3, path=tempdir(),
-alpha=0.01, pv_cutoff=0.01,
+alpha=0.01, pvalue=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), order.pep=TRUE )
 pymol_script_significant_peptide(df=a, path=tempdir())
 }

@@ -24,3 +24,4 @@ file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
 coverage_residue(df1=a,start_col=2, end_col=3 )
 }
+\keyword{internal}

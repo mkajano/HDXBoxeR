@@ -57,19 +57,11 @@ library(HDXBoxeR)
 file_nm <- system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 ```
 
-The shipped example data only has two states ("Unbound", "bound").
-To demonstrate the three-or-more-state code path, this vignette builds a synthetic third state by jittering "bound"'s values - **this is a synthetic demonstration, not real data**; it exists only to exercise the function's mechanics.
+The three-state examples use `three_states.csv`: a wild-type protein and two point mutants (D109H, R120G), with 3-4 replicates per state and time (Woods et al. 2025, PNAS; see `?three_states`).
+Peptides covering residue 109 or 120 have different sequences in the mutants, so they are only compared when peptides are matched by position (`by = "position"`).
 
 ```{r}
-set.seed(42)
-raw <- read.csv(file_nm)
-synthetic_state <- raw[raw$Protein.State == "bound", ]
-synthetic_state$Protein.State <- "synthetic"
-synthetic_state$X..Deut <- as.numeric(synthetic_state$X..Deut) + rnorm(nrow(synthetic_state), sd = 0.3)
-synthetic_state$Experiment <- gsub("^bound", "synthetic", synthetic_state$Experiment)
-raw3 <- rbind(raw, synthetic_state)
-file_3state <- tempfile(fileext = ".csv")
-write.csv(raw3, file_3state, row.names = FALSE)
+file_3state <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
 ```
 
 `compare_states_tp()` takes a **filepath**, not an already-loaded `output_tp()` table, and calls `output_tp()` internally - once per pair of states, plus once for all states together for the omnibus test.
@@ -92,8 +84,15 @@ Most multi-state HDX designs are one reference (apo/wild-type) against several p
 `reference` restricts to exactly that - N-1 tests instead of N(N-1)/2:
 
 ```{r}
-res_ref <- compare_states_tp(file_3state, times = "1800.00s", reference = "Unbound")
+res_ref <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5")
 unique(res_ref[, c("state1", "state2")])
+```
+
+Matching by position adds the peptides that span the mutated residues:
+
+```{r}
+res_pos <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5", by = "position")
+c(by_sequence = nrow(res_ref), by_position = nrow(res_pos))
 ```
 
 ### Restricting to specific regions
@@ -101,8 +100,8 @@ unique(res_ref[, c("state1", "state2")])
 `regions` takes a named list of `c(start, end)` residue ranges and runs the comparison separately within each, tagging the result with a `region` column - useful for comparing named domains rather than the whole protein at once:
 
 ```{r}
-res_regions <- compare_states_tp(file_3state, times = "1800.00s",
-                                  regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+res_regions <- compare_states_tp(file_3state, times = "1800.00s", reference = "WT_pH7.5",
+                                  regions = list(nterm = c(1, 90), cterm = c(91, 175)))
 table(res_regions$region)
 ```
 
@@ -150,11 +149,11 @@ compare_states_unmatched(file_nm, times = "1800.00s", regions = list(nterm = c(1
 
 The per-peptide p-values behind the diagnostic below do not depend on `value` (dividing one peptide's two states by the same constant cannot change its t-test), but the critical-interval half of the per-peptide rule and the *pooled* numbers (`shift_hl`, `p_value`, `p_omnibus`) are computed on the chosen scale.
 
-`states` defaults to every state found in the file and isn't limited to two - passing the same 3-state file used above runs every pairwise comparison plus one omnibus test per region, in a single call:
+`states` defaults to every state found in the file and isn't limited to two - passing the same 3-state file used above runs every pairwise comparison plus one omnibus test per region, in a single call. Because no peptide matching is needed, the mutant-specific peptides are included too:
 
 ```{r, fig.height = 6}
 res3_unmatched <- compare_states_unmatched(file_3state, times = "1800.00s",
-                                            regions = list(nterm = c(1, 100), cterm = c(101, 225)))
+                                            regions = list(nterm = c(1, 90), cterm = c(91, 175)))
 plot_compare_states_unmatched(res3_unmatched, plot_type = "jitter")
 ```
 

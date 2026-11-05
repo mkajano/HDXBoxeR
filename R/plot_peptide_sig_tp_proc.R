@@ -6,17 +6,20 @@
 #' @param dfup average data frame for deuteration uptake. Generated using ave_timepoint() function.
 #' @param pv pvalues dataframes calculated using pv_timepoint() function
 #' @param sd standard deviation data.frame generated using sd_timepoint function
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param alpha cutoff for Critical interval
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param nb_row number of peptides in each row. Plotting parameter.
 #' @return plot with peptides which are significantly different between sets.
+#' @keywords internal
 #' @export
 peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-                             alpha=0.01, pv_cutoff=0.01, replicates=3){
+                             alpha=0.01, pvalue=0.01, replicates=3, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
   #preparation significance per residue & coverage
-  cl1<-significant_peptide_uptake(dfup, pv, sd,alpha,  pv_cutoff, replicates)
+  cl1<-significant_peptide_uptake(dfup, pv, sd,alpha,  pvalue, replicates)
   cl1[is.na(cl1) ] <- 0
 
 
@@ -62,10 +65,15 @@ peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30
 #'
 #' Returns plot where significant peptides are colored in blue-red scheme.
 #'
-#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.
+#' @details Percent-deuteration counterpart of [plot_peptide_sig_tp()]: significance is
+#'   tested on the uptake table `input_up` (Da, the package-wide rule), while
+#'   peptides are colored by their difference in percent deuteration, first state minus each state (from `input_proc`); [plot_peptide_sig_tp()] uses the relative change in uptake.
+#'
+#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
 #' @param alpha cutoff for critical interval
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param nb_pep_row number of peptides in each row. Plotting parameter. Default set to 100.
@@ -76,13 +84,14 @@ peptide_pv_tp_proc<-function(df, dfup, pv, sd,nb_row=100, ranges=c(-Inf, seq(-30
 #' a_up<- output_tp(file_nm)
 #' a_proc<- output_tp(file_nm, percent=TRUE)
 #' plot_peptide_sig_tp_proc(input_proc=a_proc, input_up=a_up, replicates=3,
-#' alpha=0.01, pv_cutoff=0.01,
+#' alpha=0.01, pvalue=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf), nb_pep_row=40 )
 #' @export
 plot_peptide_sig_tp_proc<-function(input_proc, input_up, nb_pep_row=100,
                                    ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                    alpha=0.01,
-                                   pv_cutoff=0.01, replicates=3, p_adjust="none"){
+                                   pvalue=0.01, replicates=3, p_adjust="none", pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
@@ -99,7 +108,7 @@ plot_peptide_sig_tp_proc<-function(input_proc, input_up, nb_pep_row=100,
     au=avu[avu$Deut.Time==i,]
     p1=pv1[pv1$Deut.Time==i,]
     sd=s1[s1$Deut.Time==i,]
-    peptide_pv_tp_proc(a1, au, p1, sd, nb_pep_row,ranges,alpha, pv_cutoff, replicates)
+    peptide_pv_tp_proc(a1, au, p1, sd, nb_pep_row,ranges,alpha, pvalue, replicates)
     #legend_heat_map_tp(av1)
     mtext(i, side=4, outer=FALSE, line=0.2, cex=0.7)}
   mtext(c("Residues"),  c(NORTH<-3),line=0, outer=TRUE, cex=0.7)}

@@ -21,3 +21,4 @@ Plot window
 \description{
 Internal function
 }
+\keyword{internal}

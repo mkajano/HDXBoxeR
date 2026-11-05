@@ -9,8 +9,9 @@ significant_peptide_uptake(
   pv,
   sd,
   alpha = 0.01,
-  pv_cutoff = 0.01,
-  replicates = 3
+  pvalue = 0.01,
+  replicates = 3,
+  pv_cutoff
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ significant_peptide_uptake(
 
 \item{alpha}{cutoff for Critical interval. Default=0.01}
 
-\item{pv_cutoff}{cuttoff for pval. Default=0.01}
+\item{pvalue}{cuttoff for pval. Default=0.01}
 
 \item{replicates}{number of replicates as default set to 3.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 ranges per set
@@ -32,3 +35,4 @@ ranges per set
 \description{
 Returns data frame with significant peptides.
 }
+\keyword{internal}

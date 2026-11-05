@@ -3,7 +3,8 @@
 #' All the peptides are plotted based on their uptake.
 #'
 #' @param input_data output from function output_tp(..., percent=TRUE)
-#' @param cola colors, default NA
+#' @param col colors, default NA
+#' @param cola deprecated, use `col`.
 #' @param times Deuteration times, if missing all deuteration times used
 #' @param replicates replicates
 #' @param ylim y axis limits
@@ -17,7 +18,8 @@
 #' }
 #' @export
 deuteration_woods_timepoints<-function(input_data,times, replicates=3,
-                                       cola=NA, ylim=c(0,120), ...) {
+                                       col=NA, ylim=c(0,120), ..., cola) {
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
   if(missing(times)) times=unique(input_data$Deut.Time)
 
   oldpar<-par(no.readonly = TRUE)
@@ -26,12 +28,12 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3,
   a1<-ave_timepoint(input_data, replicates)
   s1<-sd_timepoint(input_data, replicates)
 
-  if (is.na(cola[1])==FALSE){
+  if (is.na(col[1])==FALSE){
 
   } else if (length(7:dim(a1)[2])<9){
-    cola<-c(1,brewer.pal(9,"Set1"))
+    col<-c(1,brewer.pal(9,"Set1"))
   } else{
-    cola<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(length(7:dim(a1)[2])))}
+    col<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(length(7:dim(a1)[2])))}
 
 
   par(mfrow=c(length(times), 1), mar = c(1.5, 1.5, 1.5, 1.5), oma=c(4,4,2,2), cex.axis=1,
@@ -55,10 +57,10 @@ deuteration_woods_timepoints<-function(input_data,times, replicates=3,
 
        suppressWarnings(arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
-               angle=90, code=3, col=cola[indc]))
-        points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
+               angle=90, code=3, col=col[indc]))
+        points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=col[indc])
       }}}
-  legend_states_PerD_bottom(input_data, cola[1:length(7:dim(a1)[2])])
+  legend_states_PerD_bottom(input_data, col[1:length(7:dim(a1)[2])])
 }
 
 
@@ -131,9 +133,10 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' Peptides ranges are plotted as a line at corresponding % deuteration values.
 #'
 #'
-#' @param thP output of output_tcourse_proc() function. Raw data for procent deuteration for time courses
-#' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param thP output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses
+#' @param th output of output_tc(). Raw data for uptake deuteration for time courses
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
 #' @param ylim y axis limit
@@ -146,11 +149,12 @@ deuteration_woods_timecourse<-function(input_data, states, replicates=3, ylim=c(
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tc(file_nm)
 #' b<-output_tc(file_nm, percent=TRUE)
-#' woods_CI_plot(thP=b, th=a, pv_cutoff = 0.001, alpha = 0.01, replicates=3)
+#' woods_CI_plot(thP=b, th=a, pvalue = 0.001, alpha = 0.01, replicates=3)
 #' }
 #' @export
 woods_CI_plot<-function(thP, th, replicates=3,
-                        pv_cutoff=0.01, states, alpha=0.01, ylim=c(0,120), p_adjust="none", ...){
+                        pvalue=0.01, states, alpha=0.01, ylim=c(0,120), p_adjust="none", ..., pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
   if(missing(states)) states=unique(th$Protein.State)
 
   nm<-colnames(ave_timepoint(th, replicates))
@@ -201,7 +205,7 @@ woods_CI_plot<-function(thP, th, replicates=3,
 
     peptide_all<-c()
     for (i in 7:dim(sh_avc)[2]) {
-      peptide_all<-c(peptide_all, which(pv1[, i]<pv_cutoff &
+      peptide_all<-c(peptide_all, which(pv1[, i]<pvalue &
                                           abs(sh_avc_up[, i]-sh_avv_up[, i]) > CI_all[i-6]))
     }
     peptide_all<-sort(unique(peptide_all))
@@ -213,7 +217,7 @@ woods_CI_plot<-function(thP, th, replicates=3,
     for ( j in 7:dim(sh_avc)[2]){
       pl1f()
 
-      peptide_index<-which(pv1[,j]<pv_cutoff & abs(sh_avc_up[,j]-sh_avv_up[,j]) > CI_all[j-6])
+      peptide_index<-which(pv1[,j]<pvalue & abs(sh_avc_up[,j]-sh_avv_up[,j]) > CI_all[j-6])
       nb1=nb1+1
       for ( i in peptide_all){
         points(c(sh_avc$Start[i], sh_avc$End[i]), c(sh_avc[i,j],sh_avc[i,j] ), type="l", col=cola[4])

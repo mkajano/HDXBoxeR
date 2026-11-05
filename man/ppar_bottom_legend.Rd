@@ -18,3 +18,4 @@ Prepares a plotting window with specified margins with specific number of figure
 \examples{
 ppar_bottom_legend(c(2,3))
 }
+\keyword{internal}

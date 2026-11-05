@@ -4,7 +4,7 @@
 \alias{dif_tp}
 \title{Preparatory function for difference plot}
 \usage{
-dif_tp(df, cola)
+dif_tp(df, col, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp or output_tp_proc.}
@@ -17,3 +17,4 @@ plots of difference in average
 \description{
 Returns plots with difference deuteration at each peptide.
 }
+\keyword{internal}

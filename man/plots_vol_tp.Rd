@@ -7,10 +7,12 @@
 plots_vol_tp(
   df,
   replicates = 3,
-  pv_cutoff = 0.01,
+  pvalue = 0.01,
   alpha = 0.01,
-  cola,
-  p_adjust = "none"
+  col,
+  p_adjust = "none",
+  pv_cutoff,
+  cola
 )
 }
 \arguments{
@@ -18,13 +20,17 @@ plots_vol_tp(
 
 \item{replicates}{number of replicates in set as default set to 3.}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{alpha}{cutoff for Critical interval. Default=0.01}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 volcano plots
@@ -39,6 +45,6 @@ pvalues calculated using Welch t-test.
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-plots_vol_tp(df=a, replicates=3, cola=c(1:4), pv_cutoff=0.01, alpha=0.01 )
-plots_vol_tp(df=a, pv_cutoff=0.05)
+plots_vol_tp(df=a, replicates=3, col=c(1:4), pvalue=0.01, alpha=0.01 )
+plots_vol_tp(df=a, pvalue=0.05)
 }

@@ -11,8 +11,9 @@ peptide_pv_tp(
   nb_row,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
-  pv_cutoff = 0.01,
-  replicates = 3
+  pvalue = 0.01,
+  replicates = 3,
+  pv_cutoff
 )
 }
 \arguments{
@@ -28,9 +29,11 @@ peptide_pv_tp(
 
 \item{alpha}{cutoff for critical interval}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 plot with peptides which are significantly different between sets.
@@ -38,3 +41,4 @@ plot with peptides which are significantly different between sets.
 \description{
 Returns plot where significant peptides are colored in blue-red scheme.
 }
+\keyword{internal}

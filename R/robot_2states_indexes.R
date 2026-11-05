@@ -8,8 +8,8 @@
 #' Peptides ranges are plotted as a line at corresponding % deuteration values.
 #'
 #'
-#' @param thP output of output_tcourse_proc() function. Raw data for procent deuteration for time courses
-#' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
+#' @param thP output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses
+#' @param th output of output_tc(). Raw data for uptake deuteration for time courses
 #' @param indexes indexes of peptides to be drawn.
 #' @param pvalue p-value cutoff here set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
@@ -28,6 +28,7 @@
 #' ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01, states=names_states[1:2])
 #' robot_2states_indexes(thP = tmP_df, th=tm_df,
 #'  states=names_states[1:2],indexes =ind1, pvalue=0.001, alpha=0.001)
+#' @keywords internal
 #' @export
 
 robot_2states_indexes<-function(thP, th,indexes, states, replicates=3,

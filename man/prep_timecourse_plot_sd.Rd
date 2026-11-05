@@ -26,3 +26,4 @@ Critial interval for all sets
 \description{
 Preparatory function
 }
+\keyword{internal}

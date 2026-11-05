@@ -3,7 +3,8 @@
 #' All the peptides are plotted based on their uptake.
 #'
 #' @param input_data output from function output_tp(..., percent=TRUE)
-#' @param cola colors, default NA
+#' @param col colors, default NA
+#' @param cola deprecated, use `col`.
 #' @param times Deuteration times, if missing all deuteration times used
 #' @param replicates replicates
 #' @param ylim y axis limits
@@ -11,7 +12,8 @@
 #' @return Woods plots for the timepoints
 #' @export
 deuteration_woods_timepoints_frac<-function(input_data,times, replicates=3,
-                                       cola=NA, ylim=c(0,1.1), ...) {
+                                       col=NA, ylim=c(0,1.1), ..., cola) {
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
   if(missing(times)) times=unique(input_data$Deut.Time)
 
   oldpar<-par(no.readonly = TRUE)
@@ -23,12 +25,12 @@ deuteration_woods_timepoints_frac<-function(input_data,times, replicates=3,
 
   s1<-sd_timepoint(input_data2, replicates)
 
-  if (is.na(cola[1])==FALSE){
+  if (is.na(col[1])==FALSE){
 
   } else if (length(7:dim(a1)[2])<9){
-    cola<-c(1,brewer.pal(9,"Set1"))
+    col<-c(1,brewer.pal(9,"Set1"))
   } else{
-    cola<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(length(7:dim(a1)[2])))}
+    col<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(length(7:dim(a1)[2])))}
 
 
   par(mfrow=c(length(times), 1), mar = c(1.5, 1.5, 1.5, 1.5), oma=c(4,4,2,2), cex.axis=1,
@@ -52,10 +54,10 @@ deuteration_woods_timepoints_frac<-function(input_data,times, replicates=3,
 
        suppressWarnings(arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
-               angle=90, code=3, col=cola[indc]))
-        points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
+               angle=90, code=3, col=col[indc]))
+        points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=col[indc])
       }}}
-  legend_states_PerD_bottom(input_data, cola[1:length(7:dim(a1)[2])])
+  legend_states_PerD_bottom(input_data, col[1:length(7:dim(a1)[2])])
 }
 
 
@@ -65,7 +67,8 @@ deuteration_woods_timepoints_frac<-function(input_data,times, replicates=3,
 #'
 #' @param list_input_data list of multiple outputs from function
 #' output_tp(..., percent=TRUE)
-#' @param cola colors, default NA
+#' @param col colors, default NA
+#' @param cola deprecated, use `col`.
 #' @param times Deuteration times, if missing all deuteration times used
 #' @param replicates replicates
 #' @param ylim y axis limits
@@ -75,7 +78,8 @@ deuteration_woods_timepoints_frac<-function(input_data,times, replicates=3,
 
 
 deuteration_woods_timepoints_frac_list<-function(list_input_data,times, replicates=3,
-                                            cola=NA, ylim=c(0,1.1), ...) {
+                                            col=NA, ylim=c(0,1.1), ..., cola) {
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
   if(missing(times)) times=unique(list_input_data[[1]]$Deut.Time)
 
   oldpar<-par(no.readonly = TRUE)
@@ -103,12 +107,12 @@ deuteration_woods_timepoints_frac_list<-function(list_input_data,times, replicat
   }
 
 
-  if (is.na(cola[1])==FALSE){
+  if (is.na(col[1])==FALSE){
 
   } else if (nb_datasets<9){
-    cola<-c(1,brewer.pal(9,"Set1"))
+    col<-c(1,brewer.pal(9,"Set1"))
   } else{
-    cola<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(nb_datasets))}
+    col<-c(1,colorRampPalette(brewer.pal(9,"Set1"))(nb_datasets))}
 
 
   par(mfrow=c(length(times), 1), mar = c(1.5, 1.5, 1.5, 1.5), oma=c(4,4,2,2), cex.axis=1,
@@ -142,10 +146,10 @@ for (list_nb in 1: length(ls_a1)){
 
         suppressWarnings(arrows((a2$Start[i]+2 + a2$End[i])/2, a2[i, j]-s2[i,j],
                                 (a2$Start[i]+2 + a2$End[i])/2, a2[i, j]+s2[i,j], length=0.02,
-                                angle=90, code=3, col=cola[indc]))
-        points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=cola[indc])
+                                angle=90, code=3, col=col[indc]))
+        points(c(a2$Start[i]+2, a2$End[i]), c(a2[i, j], a2[i, j]), type = "l", col=col[indc])
       }}}}
-legend_nm_bottom(nms_dt, cola[1:nb_datasets])
+legend_nm_bottom(nms_dt, col[1:nb_datasets])
 }
 
 

@@ -4,14 +4,16 @@
 \alias{plots_av_tcourse}
 \title{Generates average deuteration plot for the time-course.}
 \usage{
-plots_av_tcourse(df, replicates = 3, cola)
+plots_av_tcourse(df, replicates = 3, col, cola)
 }
 \arguments{
-\item{df}{output from functions output_tcourse or output_tcourse_proc.}
+\item{df}{output from functions output_tc (uptake or percent = TRUE).}
 
 \item{replicates}{number of replicates in set as default set to 3.}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from RColorBrewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from RColorBrewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 average deuteration plots
@@ -22,6 +24,6 @@ Returns plots with average deuteration at each peptide.
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tc(file_nm)
-plots_av_tcourse(df=a, replicates=3, cola=c(1:4))
+plots_av_tcourse(df=a, replicates=3, col=c(1:4))
 plots_av_tcourse(df=a)
 }

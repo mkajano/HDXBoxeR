@@ -2,7 +2,7 @@
 #'
 #' Returns names for legend for the heatmaps. Extracts names from data.frame
 #'
-#' @param df generated using output_tcourse()
+#' @param df generated using output_tc()
 #' @return legend for the heatmap
 #' @export
 legend_heat_map_tc<-function(df){

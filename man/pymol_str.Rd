@@ -19,3 +19,4 @@ Function rearrange vector to string by adding + sign between the numbers.
 res<-c(1,5, 19, 100, 109)
 pymol_str(res)
 }
+\keyword{internal}

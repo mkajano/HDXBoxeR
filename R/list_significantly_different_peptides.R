@@ -4,11 +4,13 @@
 #' @param df differences in averages data.frame calculated using diff_ave function
 #' @param alpha critical interval, here is multiple sets are using maximum CI is used.
 #' @param replicates number of replicates
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return list of the dataframes
 #' @export
-diff_peptides_prep<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, p_adjust="none"){
+diff_peptides_prep<-function(df,replicates=3, pvalue=0.01, alpha=0.01, p_adjust="none", pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
 
   av1<-ave_timepoint(df, replicates)
   df1<-dif_ave(av1)
@@ -32,7 +34,7 @@ diff_peptides_prep<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, p_adju
                      str_sub(colnames(df1)[i], start = 4, end=-9)))
 
       abs.a<-abs(df1[df1$Deut.Time==k,i])>CI
-      cl1<-pv[pv$Deut.Time==k,i]< pv_cutoff
+      cl1<-pv[pv$Deut.Time==k,i]< pvalue
       df_sig_pep<-c(abs.a*cl1)
 
       ind_sig<-which(df_sig_pep==1)

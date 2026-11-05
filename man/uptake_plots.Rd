@@ -8,8 +8,9 @@ uptake_plots(
   input_data,
   timepoints,
   replicates = 3,
-  cola = NA,
-  seq_match = TRUE
+  col = NA,
+  seq_match = TRUE,
+  cola
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ uptake_plots(
 
 \item{replicates}{replicates}
 
-\item{cola}{colors, default NA}
+\item{col}{colors, default NA}
 
 \item{seq_match}{Flag TRUE or FALSE, default TRUE, match sequence of the protein states}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 Uptake plots

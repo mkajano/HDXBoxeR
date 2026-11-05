@@ -17,3 +17,4 @@ heat map for timecourses
 \description{
 Returns heat map on timecourses with raw data.
 }
+\keyword{internal}

@@ -8,6 +8,7 @@
 #' @return  modified par function with adjusted parameters
 #' @examples
 #' ppar(c(2,1))
+#' @keywords internal
 #' @export
 ppar<-function(mfrow2){
   par(mfrow=mfrow2,mar = c(1.5, 1.5, 1, 1), oma=c(4,4,1,1), cex.axis=1, cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
@@ -23,6 +24,7 @@ ppar<-function(mfrow2){
 #' @return  modified par function with adjusted parameters
 #' @examples
 #' pparLM(c(2,1))
+#' @keywords internal
 #' @export
 pparLM<-function(mfrow2){
   par(mfrow=mfrow2,mar = c(1.5, 1.5, 1, 1), oma=c(4,4,2,2), cex.axis=1, cex.main=1, cex.lab=1.1, mgp=c(0.1, 0.4, 0), ps=14, font=2, bg="white", font.lab=2, font.axis=2)
@@ -37,6 +39,7 @@ pparLM<-function(mfrow2){
 #' @return  modified par function with adjusted parameters
 #' @examples
 #' ppar_bottom_legend(c(2,3))
+#' @keywords internal
 #' @export
 ppar_bottom_legend<-function(mfrow2){
   par(mfrow=mfrow2,mar = c(1.5, 1.5, 1.5, 1.5), oma=c(5, 5,5,5),
@@ -52,6 +55,7 @@ ppar_bottom_legend<-function(mfrow2){
 #' @return default plotting window
 #' @examples
 #' ppar_wider(c(2,1))
+#' @keywords internal
 #' @export
 ppar_wider<-function(mfrow2){
   par(mfrow=mfrow2,mar = c(1.5, 1.5, 1.5, 1.5), oma=c(3,2.4,2,2), cex.axis=1,

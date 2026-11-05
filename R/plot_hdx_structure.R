@@ -57,7 +57,8 @@
 #'   7-bin symmetric range from the largest `|delta|` present, in whatever
 #'   units `res_df` is already in (Da, percent, or fraction - unchanged
 #'   from `res_df`, not re-derived here).
-#' @param colors_initial color for residues with no HDX data at this
+#' @param col color for residues with no HDX data at this
+#' @param colors_initial deprecated, use `col`.
 #'   timepoint (`NA` delta, or simply absent from `res_df`). Default
 #'   `"grey80"`.
 #' @param background background color for the 3D viewer. Default `"white"`.
@@ -77,8 +78,9 @@
 #' @export
 plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
                                 chain = NULL, resno_offset = 0,
-                                ranges = NULL, colors_initial = "grey80",
-                                background = "white") {
+                                ranges = NULL, col = "grey80",
+                                background = "white", colors_initial) {
+  if (!missing(colors_initial)) { .hdx_deprecated("colors_initial", "col"); col <- colors_initial }
   .hdx_require_structure()
 
   sub_df <- res_df[res_df$Deut.Time == times, ]
@@ -137,7 +139,7 @@ plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
     }
   }
 
-  colors_all <- color_ranges_Blue_Red_heat_map(ranges, colors_initial)
+  colors_all <- color_ranges_Blue_Red_heat_map(ranges, col)
   bin_idx <- findInterval(delta, ranges)
   bin_idx[is.na(bin_idx) | bin_idx < 1 | bin_idx > length(ranges) - 1] <- 0
 
@@ -164,7 +166,8 @@ plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
 #' @param ranges the same `ranges` vector passed to [plot_hdx_structure()]
 #'   (or, if that call used the default `NULL`, the auto-scaled vector -
 #'   see [plot_hdx_structure()]'s `@details` on reconstructing it).
-#' @param colors_initial the same `colors_initial` passed to
+#' @param col the same `col` passed to
+#' @param colors_initial deprecated, use `col`.
 #'   [plot_hdx_structure()]. Default `"grey80"`.
 #' @param unit_label axis label for the bins, e.g. `"Da"` or `"%"`. Default
 #'   `""`.
@@ -173,8 +176,9 @@ plot_hdx_structure <- function(res_df, pdb, state1, state2, times,
 #' @examples
 #' plot_hdx_structure_legend(ranges = c(-Inf, -20, -10, 0, 10, 20, Inf), unit_label = "Da")
 #' @export
-plot_hdx_structure_legend <- function(ranges, colors_initial = "grey80", unit_label = "") {
-  colors_all <- color_ranges_Blue_Red_heat_map(ranges, colors_initial)
+plot_hdx_structure_legend <- function(ranges, col = "grey80", unit_label = "", colors_initial) {
+  if (!missing(colors_initial)) { .hdx_deprecated("colors_initial", "col"); col <- colors_initial }
+  colors_all <- color_ranges_Blue_Red_heat_map(ranges, col)
   lab <- c("no data")
   for (i in seq_len(length(ranges) - 1)) {
     lab <- c(lab, sprintf("%s:%s %s", round(ranges[i], 1), round(ranges[i + 1], 1), unit_label))

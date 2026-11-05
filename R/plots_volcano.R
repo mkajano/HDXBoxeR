@@ -3,20 +3,23 @@
 #' Returns volcano plots
 #'
 #' @param df output from functions output_tp
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
 #' @return legends for volcano plots
+#' @keywords internal
 #' @export
-lab_vol<-function(df, cola){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
+lab_vol<-function(df, col, cola){
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
+  if(missing(col)) col=c(brewer.pal(n = max((dim(df)[2]-7), 3), name = "Paired"));
   yloc =1
   yadj =0
   xloc =getCoords1(1, input = "p")
   xadj =0
   n1=max((dim(df)[2]-7), 3)
-  #cola<-c(brewer.pal(n = n1, name = "Paired"))
+  #col<-c(brewer.pal(n = n1, name = "Paired"))
   nmx<-str_sub(colnames(df[8:dim(df)[2]]), start = 4, end=-9)
   nm1<-c(paste(str_sub(colnames(df)[7], start = 4, end=-9), "-"), nmx)
-  cola2<-c("white", cola)
+  cola2<-c("white", col)
 
   legend(x = xloc, y = yloc,  legend = nm1,xjust = xadj,
          yjust = yadj,
@@ -29,28 +32,33 @@ lab_vol<-function(df, cola){
 #' @param df1 differences in averages data.frame calculated using diff_ave function
 #' @param CI critical interval, here is multiple sets are using maximum CI is used.
 #' @param pv pvalues dataframes calculated using pv_timepoint function
-#' @param pv_cutoff p-value cutoff here set up to 0.01
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
 #' @return volcano plots
+#' @keywords internal
 #' @export
-vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(df1)[2]-7), 3), name = "Paired"));
+vol_tp<-function(df1, pv, CI, pvalue=0.01, col, pv_cutoff, cola){
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if(missing(col)) col=c(brewer.pal(n = max((dim(df1)[2]-7), 3), name = "Paired"));
   abs.a<-abs(df1[,8:dim(df1)[2]])>CI
-  cl1<-pv[,8:dim(df1)[2]]< pv_cutoff
+  cl1<-pv[,8:dim(df1)[2]]< pvalue
   col_res<-data.frame(abs.a*cl1)
   n1=max((dim(df1)[2]-7), 3)###either 3 or length of the variants compared to chosen state
-  #cola<-c(brewer.pal(n = n1, name = "Paired"))
+  #col<-c(brewer.pal(n = n1, name = "Paired"))
   xl_val<-max(abs(c(min(df1[,8:dim(df1)[2]]),max(df1[,8:dim(df1)[2]]))))
   plot(df1[,8], pv[,8], log="y", ylim=c(1, 10^-7), xlab="", ylab="", col=1,
        pch=20, yaxt="n", type="n", xlim=c(-xl_val, xl_val ))
-  rect(xleft=c(min(df1[,8:dim(df1)[2]])-5),xright = -CI, ybottom = pv_cutoff, ytop=10^-50, col="grey95", lty=3)
-  rect(xleft=CI,xright = max(df1[,8:dim(df1)[2]] )+5, ybottom = pv_cutoff, ytop=10^-50, col="grey95", lty=3)
+  rect(xleft=c(min(df1[,8:dim(df1)[2]])-5),xright = -CI, ybottom = pvalue, ytop=10^-50, col="grey95", lty=3)
+  rect(xleft=CI,xright = max(df1[,8:dim(df1)[2]] )+5, ybottom = pvalue, ytop=10^-50, col="grey95", lty=3)
   for ( i in 8:dim(df1)[2]){
     nm_of_state<-c(paste(str_sub(colnames(df1)[7], start = 4, end=-9)), " - ",
             str_sub(colnames(df1)[i], start = 4, end=-9))
     #message(paste(nm_of_state, collapse = ""))
 
-    cola1<-c("black", cola[i-7])
+    cola1<-c("black", col[i-7])
     c1<-cola1[(col_res[,i-7])+1]
     points(df1[,i], pv[,i],col=c1, pch=20, type="p") }
   box(lwd=2)
@@ -72,19 +80,23 @@ vol_tp<-function(df1, pv, CI, pv_cutoff=0.01, cola){
 #'
 #' @param df output from functions output_tp
 #' @param replicates number of replicates in set as default set to 3.
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param alpha cutoff for Critical interval. Default=0.01
-#' @param cola color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param col color pallette for different Protein States. As default Paired pallette from color.Brewer is used.
+#' @param cola deprecated, use `col`.
 #' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
 #' @return volcano plots
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' plots_vol_tp(df=a, replicates=3, cola=c(1:4), pv_cutoff=0.01, alpha=0.01 )
-#' plots_vol_tp(df=a, pv_cutoff=0.05)
+#' plots_vol_tp(df=a, replicates=3, col=c(1:4), pvalue=0.01, alpha=0.01 )
+#' plots_vol_tp(df=a, pvalue=0.05)
 #' @export
-plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, cola, p_adjust="none"){
-  if(missing(cola)) cola=c(brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
+plots_vol_tp<-function(df,replicates=3, pvalue=0.01, alpha=0.01, col, p_adjust="none", pv_cutoff, cola){
+  if (!missing(cola)) { .hdx_deprecated("cola", "col"); col <- cola }
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
+  if(missing(col)) col=c(brewer.pal(n = max((dim(ave_timepoint(df, replicates))[2]-7), 3), name = "Paired"));
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
@@ -99,13 +111,13 @@ plots_vol_tp<-function(df,replicates=3, pv_cutoff=0.01, alpha=0.01, cola, p_adju
 
   for ( i in(unique(df$Deut.Time))){
     CI<-max(CI_tp(s1[s1$Deut.Time==i,], replicates, alpha))
-    vol_tp(da1[da1$Deut.Time==i,], pv1[pv1$Deut.Time==i,], CI, pv_cutoff, cola)
+    vol_tp(da1[da1$Deut.Time==i,], pv1[pv1$Deut.Time==i,], CI, pvalue, col)
     message(paste("CI @", i, ":", round(CI, digits = 2)))
 
     mtext(i,  c(NORTH<-3),line=-1, outer=FALSE, cex=0.5)
   }
   par(mfrow=c(1, 1))
 
-  lab_vol(da1, cola)
+  lab_vol(da1, col)
   }
 

@@ -13,8 +13,9 @@ plot_hdx_structure(
   chain = NULL,
   resno_offset = 0,
   ranges = NULL,
-  colors_initial = "grey80",
-  background = "white"
+  col = "grey80",
+  background = "white",
+  colors_initial
 )
 }
 \arguments{
@@ -54,11 +55,13 @@ symmetric around (and include) \code{0}, e.g.
 units \code{res_df} is already in (Da, percent, or fraction - unchanged
 from \code{res_df}, not re-derived here).}
 
-\item{colors_initial}{color for residues with no HDX data at this
-timepoint (\code{NA} delta, or simply absent from \code{res_df}). Default
-\code{"grey80"}.}
+\item{col}{color for residues with no HDX data at this}
 
 \item{background}{background color for the 3D viewer. Default \code{"white"}.}
+
+\item{colors_initial}{deprecated, use \code{col}.
+timepoint (\code{NA} delta, or simply absent from \code{res_df}). Default
+\code{"grey80"}.}
 }
 \value{
 an \code{NGLVieweR} \code{htmlwidget}.

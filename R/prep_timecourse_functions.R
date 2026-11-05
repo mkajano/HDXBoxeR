@@ -6,6 +6,7 @@
 #' @param variant_df dataframe for variant
 #' @param replicates number of replicates. Default set to 3.
 #' @return dataframes with matched peptides in time course
+#' @keywords internal
 #' @export
 prep_timecourse_plot_ave<-function(control_df, variant_df, replicates=3){
   av_c<-  ave_timepoint(control_df, replicates)
@@ -26,6 +27,7 @@ prep_timecourse_plot_ave<-function(control_df, variant_df, replicates=3){
 #' @param replicates number of replicates. Default set to 3.
 #' @param alpha cut off of pvalue used in calculation of critical interval. Default set to 0.01
 #' @return Critial interval for all sets
+#' @keywords internal
 #' @export
 prep_timecourse_plot_sd<-function(control_df_up, variant_df_up,
                                   replicates=3, alpha=0.01){

@@ -8,6 +8,7 @@
 #' @param replicates number of replicates. Default set to 3.
 #' @param alpha pvalue cutoff. Default set to 0.01
 #' @return Critical interval for 2 sets
+#' @keywords internal
 #' @export
 CI_tc<-function(sd_c, sd_v, replicates=3, alpha=0.01 ){
   CI_all<-c()

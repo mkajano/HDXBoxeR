@@ -16,9 +16,9 @@ robot_indexes(
 )
 }
 \arguments{
-\item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
+\item{thP}{output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses}
 
-\item{th}{output of output_tcourse() function. Raw data for uptake deuteration for time courses}
+\item{th}{output of output_tc(). Raw data for uptake deuteration for time courses}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 

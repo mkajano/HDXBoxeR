@@ -5,6 +5,7 @@
 #' @param side side of plot
 #' @param input plot or figure position
 #' @return  coordinates of margins
+#' @keywords internal
 #' @export
 getCoords1<-function (pos = 1.1, side = 1, input = "p")
 {

@@ -1,0 +1,137 @@
+---
+title: "Input Formats, Replicates and Normalization"
+author: "Maria K. Janowska"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+vignette: |
+  %\VignetteIndexEntry{Input Formats, Replicates and Normalization}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+```
+
+This vignette covers getting data into HDXBoxeR: the supported file formats, how replicates and missing values are handled, the value scales (Da, percent, percent of the fully deuterated control, per residue), and the quality checks to run first.
+
+```{r}
+library(HDXBoxeR)
+```
+
+## Reading data
+
+Every function that takes `filepath` accepts a file path or a table that has already been read.
+Reading once with `read_hdx()` and passing the table on avoids re-reading the file in every call.
+
+### HDXExaminer
+
+Export from HDXExaminer: Tools > Export > All results table (see `?All_results_table`).
+
+```{r}
+f3 <- system.file("extdata", "three_states.csv", package = "HDXBoxeR")
+d3 <- read_hdx(f3)
+table(d3$Protein.State, d3$Deut.Time)
+```
+
+### Waters DynamX
+
+`read_hdx()` recognizes DynamX **cluster data** (one row per peptide, state, exposure, raw file and charge state) and **state data** (one averaged row per peptide, state and exposure), from DynamX 2.x and 3.x.
+
+- In cluster data each raw file is a replicate, and uptake is computed from the centroid: neutral mass = z x (Center - proton mass), minus the mean undeuterated (Exposure 0) mass of the same peptide, charge and state.
+- State data holds no replicates, so it can be plotted, but the significance tests need cluster data; a warning says so.
+- Exposure is in minutes in DynamX and becomes a time label in seconds (`0.5` min -> `"30.00s"`).
+
+```{r, eval = FALSE}
+d <- read_hdx("cluster_data.csv",
+              fd = "Full Deuteration control",  # a DynamX state holding the FD control,
+                                                # or "last" for each state's longest exposure
+              combine_charges = FALSE)          # TRUE merges charge states per raw file
+```
+
+### Any other software
+
+`as_hdx_long()` builds the input from a long table with one row per measurement; you name the columns that hold each quantity.
+
+```{r}
+long <- data.frame(state = rep(c("apo", "holo"), each = 6),
+                   t_min = rep(rep(c(1, 10), each = 3), 2),
+                   run = rep(paste0("r", 1:3), 4),
+                   from = 5, to = 14, seq = "YIAKQRPISF",
+                   D = c(1.1, 1.2, 1.15, 2.4, 2.5, 2.45, 0.9, 1.0, 0.95, 2.0, 2.1, 2.05))
+d_long <- as_hdx_long(long, state = "state", time = "t_min", replicate = "run",
+                      start = "from", end = "to", sequence = "seq", uptake = "D",
+                      time_unit = "min")
+output_tp(d_long)
+```
+
+## Replicates and missing values
+
+All replicates of every state are used, so states may have different numbers of replicates.
+In `three_states.csv` the states have 3 or 4 replicates per time point.
+Each state gets as many columns as its largest replicate count (`attr(, "replicates")`); where a state has fewer replicates at a time point, the extra column is `NA`:
+
+```{r}
+a3 <- output_tp(d3)
+attr(a3, "replicates")
+## replicates actually measured per state at 4 s
+sapply(c("WT_pH7.5", "D109H_pH7.5", "R120G_ph7.5"), function(s)
+  max(rowSums(!is.na(a3[a3$Deut.Time == "4.00s", grep(paste0("^", s, "_"), colnames(a3))]))))
+```
+
+A missing measurement is kept as `NA`.
+A peptide is kept for a comparison when it has at least `min_replicates` values (default 2) in every state; dropped peptides are reported.
+Standard deviations, p-values and the pooled critical interval use each state's actual number of replicates.
+`replicates = 3` caps every state at 3 replicates if you prefer equal numbers.
+
+## Point mutants: matching peptides by position
+
+Peptides covering a mutated residue have different sequences in the states, so by default (`seq_match = FALSE`, identical sequence required) they are not compared.
+Matching by position keeps them, and the sequences are joined with `"."`:
+
+```{r}
+by_seq <- output_tp(d3, times = "60.00s")
+by_pos <- output_tp(d3, times = "60.00s", seq_match = TRUE)
+c(sequence_matched = nrow(by_seq), position_matched = nrow(by_pos))
+head(by_pos$Sequence[grepl("\\.", by_pos$Sequence)], 3)
+```
+
+`compare_states_tp(by = "position")` and `compare_regions(by = "position")` use the same matching.
+
+## Value scales
+
+`percent` chooses what the values are, everywhere in the package:
+
+| `percent` | Values | Peptide length | Back-exchange |
+|---|---|---|---|
+| `FALSE` (default) | uptake in Da | not removed | not corrected |
+| `TRUE` | the input's percent deuteration (HDXExaminer `Deut %`, relative to the theoretical maximum) | removed | not corrected |
+| `"per_residue"` | uptake per exchangeable amide, Da / `nb_exch_deut()` | removed | not corrected |
+| `"FD"` | percent of the measured fully deuterated control | removed | corrected |
+
+The Welch p-values are identical on every scale (dividing one peptide by a constant does not change its t-test); the differences and the critical interval change.
+A long peptide collects more deuterium in Da than a short one for the same per-residue change, so on the Da scale it clears a fixed critical interval more easily; `"per_residue"`, `TRUE` and `"FD"` remove that.
+
+```{r}
+a_fd <- output_tp(d3, times = "60.00s", percent = "FD")
+attr(a_fd, "percent")
+summary(unlist(a_fd[, 7:ncol(a_fd)]))
+```
+
+With `"FD"`, peptides without a usable FD value (missing, or FD uptake <= 0) keep their row with empty (`NA`) values.
+
+## Quality checks
+
+`peptide_qc()` lists, per peptide and state, missing controls, uptake reported as 0 at every time (a missing undeuterated reference rather than a real measurement), negative uptake, and implausible FD values.
+It only reports; nothing is removed.
+
+```{r}
+qc <- peptide_qc(d3)
+qc[qc$issues != "", c("Protein.State", "Start", "End", "fd_fraction", "issues")]
+```
+
+See `vignette("data_quality")` for coverage, redundancy and back-exchange.

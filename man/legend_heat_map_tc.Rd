@@ -7,7 +7,7 @@
 legend_heat_map_tc(df)
 }
 \arguments{
-\item{df}{generated using output_tcourse()}
+\item{df}{generated using output_tc()}
 }
 \value{
 legend for the heatmap

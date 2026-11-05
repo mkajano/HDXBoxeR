@@ -1,0 +1,148 @@
+template:
+  bootstrap: 5
+
+articles:
+- title: Getting started
+  contents:
+  - HDXBoxeR
+  - input_formats
+  - data_quality
+- title: Comparing states
+  contents:
+  - fissure_vent
+  - multistate
+  - interactive_explorer
+  - hdx_structure
+  - correlations_plots
+
+reference:
+- title: Reading data
+  contents:
+  - read_hdx
+  - read_hdxexaminer
+  - read_dynamx
+  - as_hdx_long
+  - nm_states
+  - All_results_table
+  - three_states
+- title: Organizing data
+  desc: Wide tables of replicate values used by every analysis.
+  contents:
+  - output_tp
+  - output_tc
+  - select_indices
+  - boxer_input_to_long
+  - all_data_long_input
+  - output_FD
+  - output_FD_proc
+  - output_UD
+  - output_UD_proc
+- title: Data quality and summaries
+  contents:
+  - peptide_qc
+  - general_info
+  - backHX_calculations
+  - summary_sd_CI
+  - all_summary
+  - nb_exch_deut
+  - plot_peptide_coverage_map
+- title: Statistics
+  desc: Averages, SDs, Welch p-values and the Hageman & Weis critical interval.
+  contents:
+  - ave_timepoint
+  - sd_timepoint
+  - pv_timepoint
+  - dif_ave
+  - sd_ci_timepoint
+  - CI_2pts
+  - CI_tp
+  - CI_single
+  - diff_peptides_prep
+- title: Comparing states
+  contents:
+  - plot_fissure_vent
+  - compare_states_tp
+  - plot_compare_states_tp
+  - compare_regions
+  - compare_timecourse
+  - compare_states_unmatched
+  - plot_compare_states_unmatched
+  - plot_coverage_diagnostics
+  - residue_regions
+  - residue_regions_subset_summary
+- title: Per-residue values
+  contents:
+  - residue_deconvolution
+  - residue_level_average
+- title: Plots - time points
+  desc: >
+    Uptake (`*_tp`) and percent-deuteration (`*_proc`) versions; the `_proc`
+    functions show differences in percent deuteration and test significance
+    on the uptake table.
+  contents:
+  - plots_av_tp
+  - plots_av_tp_proc
+  - plots_diff_tp
+  - plots_diff_tp_proc
+  - plots_vol_tp
+  - plot_heat_map_tp
+  - plot_heat_map_tp_proc
+  - plot_heat_map_max_uptake_tp
+  - plot_heat_map_max_uptake_tp_proc
+  - plot_peptide_sig_tp
+  - plot_peptide_sig_tp_proc
+  - boxplot_tp
+  - deuteration_woods_timepoints
+  - deuteration_woods_timepoints_frac
+  - deuteration_woods_timepoints_frac_list
+  - plot_cor_pts_elps
+  - plot_correlation_functions
+- title: Plots - time courses
+  contents:
+  - plots_av_tcourse
+  - plot_heat_map_tc
+  - uptake_plots
+  - robot_plot_All
+  - robot_indexes
+  - robot_indexes_df
+  - woods_CI_plot
+  - woods_CI_plot_frac
+  - deuteration_woods_timecourse
+  - deuteration_woods_timecourse_frac
+  - average_timecourse
+  - sd_timecourse
+  - sd_timecourse_proc
+- title: Legends and colors
+  contents:
+  - starts_with("legend_")
+  - color_ranges_Blue_Red_heat_map
+  - color_ranges_Spectral
+  - reset_par
+- title: Interactive plots and structures
+  contents:
+  - interactive_fissure_explorer
+  - interactive_fissure_vent
+  - interactive_volcano
+  - interactive_woods
+  - significant_peptides_table
+  - plot_hdx_structure
+  - plot_hdx_structure_legend
+- title: PyMOL scripts
+  contents:
+  - starts_with("pymol_script")
+- title: Reporting and export
+  contents:
+  - render_report
+  - hdx_summary_table
+  - hdx_results_table
+  - output_prep
+  - verbose_timepoint_output
+  - verbose_timecourse_output
+- title: External tools
+  contents:
+  - extreme_input_gap
+  - extreme_input_undeut
+- title: internal
+  contents:
+  - has_keyword("internal")
+  - is.nan.data.frame

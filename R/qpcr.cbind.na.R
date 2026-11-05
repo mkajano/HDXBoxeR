@@ -8,6 +8,7 @@
 #' @examples
 #' qpcr.cbind.na(1:10, 1:3)
 #'
+#' @keywords internal
 #' @export
 qpcr.cbind.na<-function (..., deparse.level = 1)
 {na <- nargs() - (!missing(deparse.level))

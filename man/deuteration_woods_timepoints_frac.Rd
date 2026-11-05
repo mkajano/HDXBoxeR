@@ -8,9 +8,10 @@ deuteration_woods_timepoints_frac(
   input_data,
   times,
   replicates = 3,
-  cola = NA,
+  col = NA,
   ylim = c(0, 1.1),
-  ...
+  ...,
+  cola
 )
 }
 \arguments{
@@ -20,11 +21,13 @@ deuteration_woods_timepoints_frac(
 
 \item{replicates}{replicates}
 
-\item{cola}{colors, default NA}
+\item{col}{colors, default NA}
 
 \item{ylim}{y axis limits}
 
 \item{...}{other parameters}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 Woods plots for the timepoints

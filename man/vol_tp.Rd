@@ -4,7 +4,7 @@
 \alias{vol_tp}
 \title{Preparatory function for volcano plot}
 \usage{
-vol_tp(df1, pv, CI, pv_cutoff = 0.01, cola)
+vol_tp(df1, pv, CI, pvalue = 0.01, col, pv_cutoff, cola)
 }
 \arguments{
 \item{df1}{differences in averages data.frame calculated using diff_ave function}
@@ -13,9 +13,13 @@ vol_tp(df1, pv, CI, pv_cutoff = 0.01, cola)
 
 \item{CI}{critical interval, here is multiple sets are using maximum CI is used.}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 volcano plots
@@ -23,3 +27,4 @@ volcano plots
 \description{
 Returns volcano plots
 }
+\keyword{internal}

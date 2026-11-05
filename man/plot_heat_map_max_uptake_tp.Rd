@@ -10,8 +10,9 @@ plot_heat_map_max_uptake_tp(
   mar_x = 3.5,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
-  pv_cutoff = 0.01,
-  p_adjust = "none"
+  pvalue = 0.01,
+  p_adjust = "none",
+  pv_cutoff
 )
 }
 \arguments{
@@ -25,9 +26,11 @@ plot_heat_map_max_uptake_tp(
 
 \item{alpha}{cutoff for critical interval}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 heat map for maximum uptake per residue
@@ -38,7 +41,7 @@ Returns heat map with maximum uptake per residue.
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-plot_heat_map_max_uptake_tp(df=a, replicates=3, alpha=0.01,pv_cutoff=0.01,
+plot_heat_map_max_uptake_tp(df=a, replicates=3, alpha=0.01,pvalue=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 plot_heat_map_max_uptake_tp(df=a)
 }

@@ -4,12 +4,14 @@
 \alias{lab_dif}
 \title{Legend for difference in averages plot.}
 \usage{
-lab_dif(df, cola)
+lab_dif(df, col, cola)
 }
 \arguments{
 \item{df}{output from functions average difference}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 legend for difference in average plot for time points
@@ -17,3 +19,4 @@ legend for difference in average plot for time points
 \description{
 Returns legend for difference in average plots. Preparatory function.
 }
+\keyword{internal}

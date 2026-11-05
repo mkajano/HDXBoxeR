@@ -10,15 +10,17 @@ pymol_script_significant_residue_proc(
   path = "",
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
-  pv_cutoff = 0.01,
+  pvalue = 0.01,
   replicates = 3,
-  p_adjust = "none"
+  p_adjust = "none",
+  resno_offset = 0,
+  pv_cutoff
 )
 }
 \arguments{
 \item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.}
 
-\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.}
+\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).}
 
 \item{path}{location where the Pymol scripts will be saved}
 
@@ -26,11 +28,15 @@ pymol_script_significant_residue_proc(
 
 \item{alpha}{cutoff for critical interval}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{resno_offset}{integer added to every residue number written to the PyMOL script, so the data's numbering matches the structure's (e.g. \code{-20} when the structure numbering starts 20 residues later, as with an N-terminal tag). Default \code{0}.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 pymol script with residues colored based on average of procent deuteration per residue.
@@ -40,13 +46,18 @@ Function write a script that can be used in pymol to color structure.
 Number of colors and corresponding to them ranges can be defined by user.
 Residues are colored by average procent_deuteration from the significant peptides per residues.
 }
+\details{
+Percent-deuteration counterpart of \code{\link[=pymol_script_significant_residue]{pymol_script_significant_residue()}}: significance is
+tested on the uptake table \code{input_up} (Da, the package-wide rule), while
+residues are colored by the largest significant difference in percent deuteration, first state minus each state (from \code{input_proc}); \code{\link[=pymol_script_significant_residue]{pymol_script_significant_residue()}} uses the relative change in uptake.
+}
 \examples{
 \donttest{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a_up<- output_tp(file_nm)
 a_proc<- output_tp(file_nm, percent=TRUE)
 pymol_script_significant_residue_proc(input_proc=a_proc,
-input_up=a_up, path=tempdir(), replicates=3, alpha=0.01, pv_cutoff=0.01,
+input_up=a_up, path=tempdir(), replicates=3, alpha=0.01, pvalue=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
 }
 }

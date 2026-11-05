@@ -23,3 +23,4 @@ pvalue comparisons between two sets.
 \description{
 Preparatory function for calculation of pvalue between sets.
 }
+\keyword{internal}

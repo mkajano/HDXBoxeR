@@ -10,8 +10,9 @@ plot_peptide_sig_tp(
   nb_pep_row = 100,
   ranges = c(-Inf, seq(-30, 30, by = 10), Inf),
   alpha = 0.01,
-  pv_cutoff = 0.01,
-  p_adjust = "none"
+  pvalue = 0.01,
+  p_adjust = "none",
+  pv_cutoff
 )
 }
 \arguments{
@@ -25,9 +26,11 @@ plot_peptide_sig_tp(
 
 \item{alpha}{cutoff for critical interval}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 plot with peptides which are significantly different between sets.

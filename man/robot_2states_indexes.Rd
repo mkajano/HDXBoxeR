@@ -18,9 +18,9 @@ robot_2states_indexes(
 )
 }
 \arguments{
-\item{thP}{output of output_tcourse_proc() function. Raw data for procent deuteration for time courses}
+\item{thP}{output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses}
 
-\item{th}{output of output_tcourse() function. Raw data for uptake deuteration for time courses}
+\item{th}{output of output_tc(). Raw data for uptake deuteration for time courses}
 
 \item{indexes}{indexes of peptides to be drawn.}
 
@@ -58,3 +58,4 @@ ind1<-robot_indexes(thP = tmP_df, th=tm_df, pvalue=0.001, alpha=0.01, states=nam
 robot_2states_indexes(thP = tmP_df, th=tm_df,
  states=names_states[1:2],indexes =ind1, pvalue=0.001, alpha=0.001)
 }
+\keyword{internal}

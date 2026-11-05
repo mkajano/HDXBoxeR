@@ -21,3 +21,4 @@ Critical interval for 2 sets
 \description{
 Preparatory function for calculation of pvalue between sets.
 }
+\keyword{internal}

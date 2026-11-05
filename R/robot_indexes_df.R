@@ -15,8 +15,8 @@
 #' Function to help decide which peptides will be drawn on Robot plots.
 #'
 #'
-#' @param thP output of output_tcourse_proc() function. Raw data for procent deuteration for time courses
-#' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
+#' @param thP output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses
+#' @param th output of output_tc(). Raw data for uptake deuteration for time courses
 #' @param pvalue p-value cutoff. Default set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.
@@ -76,8 +76,8 @@ robot_indexes_df<-function(thP, th, replicates=3,
 #' Function to help decide which peptides will be drawn on Robot plots.
 #'
 #'
-#' @param thP output of output_tcourse_proc() function. Raw data for procent deuteration for time courses
-#' @param th output of output_tcourse() function. Raw data for uptake deuteration for time courses
+#' @param thP output of output_tc(percent = TRUE). Raw data for procent deuteration for time courses
+#' @param th output of output_tc(). Raw data for uptake deuteration for time courses
 #' @param pvalue p-value cutoff. Default set up to 0.01
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param states Protein states from the set. As default all states are chosen.

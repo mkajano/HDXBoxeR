@@ -7,9 +7,10 @@
 diff_peptides_prep(
   df,
   replicates = 3,
-  pv_cutoff = 0.01,
+  pvalue = 0.01,
   alpha = 0.01,
-  p_adjust = "none"
+  p_adjust = "none",
+  pv_cutoff
 )
 }
 \arguments{
@@ -17,11 +18,13 @@ diff_peptides_prep(
 
 \item{replicates}{number of replicates}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{alpha}{critical interval, here is multiple sets are using maximum CI is used.}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 list of the dataframes

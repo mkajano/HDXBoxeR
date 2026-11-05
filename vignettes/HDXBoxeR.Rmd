@@ -1,7 +1,7 @@
 ---
 title: "HDXBoxeR"
 author: "Maria K. Janowska, Katherine Reiter, Pearl Magala, Miklos Guttman, Rachel E. Klevit"
-date: "4/2/2024"
+date: "`r Sys.Date()`"
 output:
   html_document: default
   pdf_document: default
@@ -60,7 +60,22 @@ The vignette is divided into several sections that introduce different aspects o
 7.  Data Summary: Obtain general information about the dataset.
 8.  Save Data: Save data in the reprocessed format.
 9.  ExtReme Outputs Generation: Automatically prepare input for bimodal analysis.
-10. Proposed Workflow: A section for those in a hurry. These changes aim to enhance consistency in language and formatting across the different sections.
+10. Proposed Workflow: A section for those in a hurry.
+
+### Beyond this vignette
+
+This vignette covers the core two-state workflow. Newer tools have their own vignettes:
+
+| Task | Functions | Vignette |
+|---|---|---|
+| Read DynamX or other software; uneven replicates; normalize to the fully deuterated control or per residue; peptide quality checks | `read_hdx()`, `as_hdx_long()`, `output_tp(percent = "FD" / "per_residue")`, `peptide_qc()` | `vignette("input_formats")` |
+| Coverage, redundancy, back-exchange | `plot_peptide_coverage_map()`, `general_info()` | `vignette("data_quality")` |
+| Two states, peptide by peptide, with uncertainty ellipses | `plot_fissure_vent()` | `vignette("fissure_vent")` |
+| Three or more states; whole regions (region ANOVA); whole time courses; contiguous affected regions | `compare_states_tp()`, `compare_regions()`, `compare_timecourse()`, `residue_regions()` | `vignette("multistate")` |
+| Interactive linked plots; results on a structure | `interactive_fissure_explorer()`, `plot_hdx_structure()` | `vignette("interactive_explorer")`, `vignette("hdx_structure")` |
+| Publication tables and a one-command report | `hdx_summary_table()`, `hdx_results_table()`, `render_report()` | sections 7-8 below |
+
+Every significance call in the package uses the same rule - Welch p-value below `pvalue` AND difference above the pooled critical interval - and every function takes `p_adjust = "BH"` to control the false discovery rate.
 
 ## 1. Input preparation
 
@@ -483,7 +498,7 @@ input_deut_timepoint<-output_tp(file_nm, percent=T)
 ## deuteration uptake for time points
 plots_av_tp(input_uptake_timepoint)
 ### average plots with colors chosen by user. 
-plots_av_tp(input_uptake_timepoint,replicates=3, cola=c(1:10))
+plots_av_tp(input_uptake_timepoint,replicates=3, col=c(1:10))
 ### average percent deuteration
 plots_av_tp_proc(input_deut_timepoint)
 
@@ -513,7 +528,7 @@ plots_diff_tp(input_uptake_timepoint)
 # input_deut_timepoint<-output_tp(file_nm, percent=T) 
 
 ### difference in procent deuteration
-plots_diff_tp_proc(input_deut_timepoint,replicates=3, cola=4)
+plots_diff_tp_proc(input_deut_timepoint,replicates=3, col=4)
 
 #input with different order states
 names_states<- nm_states(file_nm)
@@ -544,9 +559,9 @@ a<-output_tp(file_nm)
 ### basic volcano plot
 plots_vol_tp(a)
 # change colors for significant peptides in volcano plots
-plots_vol_tp(a, cola=c(2,3), replicates=3)
+plots_vol_tp(a, col=c(2,3), replicates=3)
 #change pv_cutoff from 0.01 to 0.1
-plots_vol_tp(a, pv_cutoff = 0.1)
+plots_vol_tp(a, pvalue = 0.1)
 
 ```
 
@@ -583,7 +598,7 @@ plot_peptide_sig_tp(a,replicates = 3)
 #p-value&critial interval was made more stingent (0.001)
 # % ranges are colored were changed. 
 #par(mfrow=c(4,1)) #uncomment if desired
-plot_peptide_sig_tp(a,nb_pep_row = 18, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff = 0.001) 
+plot_peptide_sig_tp(a,nb_pep_row = 18, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pvalue = 0.001) 
 
 ```
 
@@ -626,7 +641,7 @@ b<-output_tp(file_nm, percent=T)
 plot_heat_map_tp(a, replicates=3, mar_x=3)
 ##change some parameters
 plot_heat_map_tp(a, mar_x=1, 
-                 ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+                 ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pvalue=0.01)
 
 ### heat map for percent deuteration, require both uptake and percent deuteration data frame as input
 plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
@@ -634,7 +649,7 @@ plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
 ###Maximum uptake or percent deuteration per peptide
 plot_heat_map_max_uptake_tp(a, replicates=3)
 ### #
-plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=1, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=1, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pvalue=0.01)
 ```
 
 ```{r leg2, fig.height = 3, fig.width = 2.5}
@@ -707,9 +722,9 @@ tc_a<-output_tc(filepath = file_nm)
 tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 
 ###All peptides drawn 
-robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff = 0.01,alpha=0.01)
+robot_plot_All(thP = tc_aP, th=tc_a, pvalue = 0.01,alpha=0.01)
 ###USe more stingent parameters to have less peptides drawn. alpha modifies the CI values (works similarly to p-value)
-robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff = 0.001, alpha=0.01)
+robot_plot_All(thP = tc_aP, th=tc_a, pvalue = 0.001, alpha=0.01)
 
 
 ```
@@ -758,7 +773,7 @@ tc_aP<-output_tc(filepath = file_nm, percent=TRUE)
 ###All peptides drawn 
 woods_CI_plot(thP = tc_aP, th=tc_a)
 ###USe more stingent parameters to have less peptides drawn. alpha modifies the Critial interval. 
-woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, alpha=0.001)
+woods_CI_plot(thP = tc_aP, th=tc_a, pvalue=0.005, alpha=0.001)
 
 
 ```
@@ -783,12 +798,12 @@ b<-output_tp(file_nm, percent=T)
 ### Scripts written for significantly different peptides (uptake data). Color scheme, ranges to be colored and p-value can be changed.
 #path where the output files will be written needs to be specified!
 pymol_script_significant_peptide(a, path=tempdir())
-pymol_script_significant_peptide(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.005,replicates = 3, order.pep=FALSE, path=tempdir())
+pymol_script_significant_peptide(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), pvalue = 0.005,replicates = 3, order.pep=FALSE, path=tempdir())
 ###same but for procent deuteration
-pymol_script_significant_peptide_proc(input_proc = b, input_up = a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), alpha=0.005, pv_cutoff = 0.005,replicates = 3)
+pymol_script_significant_peptide_proc(input_proc = b, input_up = a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), alpha=0.005, pvalue = 0.005,replicates = 3)
 
 ###scripts prepared by residue
-pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), path=tempdir(), alpha=0.005,pv_cutoff = 0.005,replicates = 3)
+pymol_script_significant_residue(a,  ranges=c(-Inf, seq(-120, 120, by=10), Inf), path=tempdir(), alpha=0.005,pvalue = 0.005,replicates = 3)
 
 ```
 
@@ -801,11 +816,18 @@ The `all_summary()` function requires undeuterated and fully deuterated sets mar
 Also, for the calculation of the back exchange, the Dfact parameter needs to be specified.
 The Dfact is the fraction of Deuterium/Hydrogen used in the labeling buffer, with the default set up to 0.85.
 
-```{r echo = FALSE}
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+```{r}
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 
 all_summary(file_nm, Dfact=0.85,replicates = 3, alpha=0.01)
+```
 
+`hdx_summary_table()` lays the same numbers out as the summary table recommended by Masson et al. (one row per item, one column per state) and adds your own experimental details through `metadata`; `file = "summary.md"` or `"summary.csv"` saves it.
+
+```{r}
+hdx_summary_table(file_nm, metadata = list(
+  "HDX reaction details" = "describe buffer, pD, D2O %, temperature",
+  "Data analysis software" = "HDExaminer; HDXBoxeR"))
 ```
 
 ## 8. Outputs
@@ -815,10 +837,17 @@ Data can be exported automatically in different outputs depending on user needs.
 It can prepare a format that would be ready for publication.
 It can also return a simple .csv with all the peptides matched between the sets or provide a verbose output which includes peptides' standard deviation and p-value per peptide.
 
-```{r echo = FALSE, eval=FALSE}
-file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR") 
+```{r eval=FALSE}
+file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 
-###final output for the paper 
+### tidy table of every peptide, time point and comparison, with the significance call;
+### also writes results_parameters.txt with the settings and sessionInfo()
+hdx_results_table(file_nm, p_adjust = "BH", file = "results.csv")
+
+### everything at once: an HTML report with summary, quality checks, plots and tables
+render_report(file_nm, output_file = "hdx_report.html")
+
+###final output for the paper
 ### USAGE output_prep(pathto_allresults.csv, output_name.csv)
 output_prep(filepath = file_nm, output_name = tempfile())
 
@@ -914,15 +943,15 @@ uptake_plots(tc_aP[1:2,],x)
 boxplot_tp(a, col= c("gold2", "dodgerblue"))
 
 # Volcano plots
-plots_vol_tp(a, cola=c(2,3), replicates=3, pv_cutoff = 0.01)
+plots_vol_tp(a, col=c(2,3), replicates=3, pvalue = 0.01)
 
 # Significantly different peptides plot across the sequence
 #par(mfrow=c(4,1)) # uncomment to have 4 panels
-plot_peptide_sig_tp(a,nb_pep_row = 18, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff = 0.01) 
+plot_peptide_sig_tp(a,nb_pep_row = 18, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pvalue = 0.01) 
 
 ##Average uptake heat maps
 ### heat maps 
-plot_heat_map_tp(a, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+plot_heat_map_tp(a, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pvalue=0.01)
 
 ### heat map for procent deuteration, require both uptake and procent deuteration data frame as input
 plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
@@ -930,7 +959,7 @@ plot_heat_map_tp_proc(input_up = a, input_proc = b, replicates=3)
 ###Maximum uptake or procent deuteration per peptide
 plot_heat_map_max_uptake_tp(a, replicates=3)
 ### 
-plot_heat_map_max_uptake_tp(input_up = a, input_proc = b, replicates=3, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pv_cutoff=0.01)
+plot_heat_map_max_uptake_tp_proc(input_up = a, input_proc = b, replicates=3, mar_x=8, ranges = c(-Inf, -10, -2.5,0,2.5, 10, Inf), pvalue=0.01)
 
 ## Legend for the heatmaps.
 #default ranges for figures does not require argument
@@ -947,7 +976,7 @@ plot_heat_map_tc(tc_aP, replicates=3)
 legend_heat_map_timecourse()
 
 ###Robot plots for the timecourses
-robot_plot_All(thP = tc_aP, th=tc_a, pv_cutoff=0.01, CI_factor = 1)
+robot_plot_All(thP = tc_aP, th=tc_a, pvalue=0.01)
 
 ##############Woods plots
 ##timecourse and timepoint woods plots
@@ -961,20 +990,20 @@ deuteration_woods_timecourse(tc_aP, replicates=3)
 
 ###woods plots
 woods_CI_plot(thP = tc_aP, th=tc_a)
-###USe more stingent parameters to have less peptides drawn. CI_factor is a factor that modifies (multiplicate) Critial interval. 
-woods_CI_plot(thP = tc_aP, th=tc_a, pv_cutoff=0.005, CI_factor = 5)
+###Use more stringent parameters to have fewer peptides drawn: lower pvalue and alpha (critical interval).
+woods_CI_plot(thP = tc_aP, th=tc_a, pvalue=0.005, alpha = 0.001)
 
 
 #######################
 ##Pymol scripts
 #######################
 
-pymol_script_significant_peptide(a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+pymol_script_significant_peptide(a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pvalue = 0.01,replicates = 3)
 ###same but for percent deuteration
-pymol_script_significant_peptide_proc(input_proc = b, input_up = a,path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3, order.pep=FALSE)
+pymol_script_significant_peptide_proc(input_proc = b, input_up = a,path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pvalue = 0.01,replicates = 3, order.pep=FALSE)
 
 ###scripts prepared by residue
-pymol_script_significant_residue(a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pv_cutoff = 0.01,replicates = 3)
+pymol_script_significant_residue(a, path=tempdir(), ranges=c(-Inf, seq(-120, 120, by=10), Inf), pvalue = 0.01,replicates = 3)
 
 ##################
 ##Summary

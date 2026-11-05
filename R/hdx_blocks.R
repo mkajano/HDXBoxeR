@@ -63,6 +63,11 @@
   }, numeric(1))
 }
 
+## warning for a renamed argument (old name still accepted)
+.hdx_deprecated <- function(old, new) {
+  warning(sprintf("argument '%s' is deprecated; use '%s' instead.", old, new), call. = FALSE)
+}
+
 ## Multiple-testing adjustment of a p-value table (columns 7+ hold p-values).
 ## Family: for output_tp() tables (with Deut.Time), all peptides x compared
 ## states within each labeling time; otherwise all peptides x columns.

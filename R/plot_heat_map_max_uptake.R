@@ -4,18 +4,21 @@
 #'
 #' @param df average data frame. Generated using ave_timepoint() function.
 #' @param pv pvalues dataframes calculated using pv_timepoint() function
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param alpha cutoff for critical interval
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param sd standard deviation data.frame generated using sd_timepoint function
 #' @return maxiumum uptake heat map for timepoints
+#' @keywords internal
 #' @export
 heat_map_tp_maxuptake<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), Inf),
-                                alpha=0.01, pv_cutoff=0.01, replicates=3){
+                                alpha=0.01, pvalue=0.01, replicates=3, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
   #####
   #preparation significance per residue & coverage
-  cl1<-significant_peptide_uptake(df, pv, sd, alpha, pv_cutoff, replicates)
+  cl1<-significant_peptide_uptake(df, pv, sd, alpha, pvalue, replicates)
 
   start_col<-which(colnames(df)=='Start')
   end_col<-which(colnames(df)=='End')
@@ -88,7 +91,8 @@ heat_map_tp_maxuptake<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
 #' Returns heat map with maximum uptake per residue.
 #'
 #' @param df average data frame. Generated using ave_timepoint() function.
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param alpha cutoff for critical interval
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param mar_x margin x width. Default=3.5
@@ -98,12 +102,13 @@ heat_map_tp_maxuptake<-function(df, pv, sd, ranges=c(-Inf, seq(-30, 30, by=10), 
 #' @examples
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
-#' plot_heat_map_max_uptake_tp(df=a, replicates=3, alpha=0.01,pv_cutoff=0.01,
+#' plot_heat_map_max_uptake_tp(df=a, replicates=3, alpha=0.01,pvalue=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 #' plot_heat_map_max_uptake_tp(df=a)
 #' @export
 plot_heat_map_max_uptake_tp<-function(df, replicates=3,
-                                      mar_x=3.5, ranges=c(-Inf, seq(-30, 30, by=10), Inf), alpha=0.01,pv_cutoff=0.01, p_adjust="none"){
+                                      mar_x=3.5, ranges=c(-Inf, seq(-30, 30, by=10), Inf), alpha=0.01,pvalue=0.01, p_adjust="none", pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
 
   oldpar<-par(no.readonly = TRUE)
   on.exit(par(oldpar))
@@ -120,7 +125,7 @@ plot_heat_map_max_uptake_tp<-function(df, replicates=3,
     p1=pv1[pv1$Deut.Time==i,]
     sd1=s1[s1$Deut.Time==i,]
     message(paste("For timepoint", i))
-    colmp<-heat_map_tp_maxuptake(a1, p1, sd1, ranges, alpha, pv_cutoff, replicates)
+    colmp<-heat_map_tp_maxuptake(a1, p1, sd1, ranges, alpha, pvalue, replicates)
     legend_heat_map_tp(av1)
     mtext(i, side=3, outer=FALSE, line=0, cex=0.65)}
   mtext(c("Residues"),  c(NORTH<-1),line=0.7, outer=TRUE, cex=0.8)

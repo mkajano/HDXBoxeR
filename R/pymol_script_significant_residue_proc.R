@@ -4,14 +4,20 @@
 #' Number of colors and corresponding to them ranges can be defined by user.
 #' Residues are colored by average procent_deuteration from the significant peptides per residues.
 #'
-#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.
+#' @details Percent-deuteration counterpart of [pymol_script_significant_residue()]: significance is
+#'   tested on the uptake table `input_up` (Da, the package-wide rule), while
+#'   residues are colored by the largest significant difference in percent deuteration, first state minus each state (from `input_proc`); [pymol_script_significant_residue()] uses the relative change in uptake.
+#'
+#' @param input_proc Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).
 #' @param input_up Dataframe with organized deuteration uptake. Input generated using output_tp() function.
 #' @param path location where the Pymol scripts will be saved
 #' @param alpha cutoff for critical interval
-#' @param pv_cutoff p-value cutoff here set up to 0.01
+#' @param pvalue p-value cutoff here set up to 0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param ranges ranges for coloring scheme. Default set to c(-Inf, seq(-30, 30, by=10), Inf)
 #' @param p_adjust multiple-testing correction of the Welch p-values, passed to [stats::p.adjust()]: `"none"` (default, raw p-values) or e.g. `"BH"`. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.
+#' @param resno_offset integer added to every residue number written to the PyMOL script, so the data's numbering matches the structure's (e.g. `-20` when the structure numbering starts 20 residues later, as with an N-terminal tag). Default `0`.
 #' @return pymol script with residues colored based on average of procent deuteration per residue.
 #' @examples
 #' \donttest{
@@ -19,14 +25,15 @@
 #' a_up<- output_tp(file_nm)
 #' a_proc<- output_tp(file_nm, percent=TRUE)
 #' pymol_script_significant_residue_proc(input_proc=a_proc,
-#' input_up=a_up, path=tempdir(), replicates=3, alpha=0.01, pv_cutoff=0.01,
+#' input_up=a_up, path=tempdir(), replicates=3, alpha=0.01, pvalue=0.01,
 #' ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf))
 #' }
 #' @export
 pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
                                                 ranges=c(-Inf, seq(-30, 30, by=10), Inf),
                                                 alpha=0.01,
-                                                pv_cutoff=0.01, replicates=3, p_adjust="none"){
+                                                pvalue=0.01, replicates=3, p_adjust="none", resno_offset=0, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
 
   oldwd<-getwd()
   on.exit(setwd(oldwd))
@@ -42,7 +49,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
     df1<-ave_timepoint(df[df$Deut.Time==deut.time,], replicates = replicates)
 
     #preparation significance per residue & coverage
-    cl1<-significant_peptide_uptake(dfu, pv, sd, alpha, pv_cutoff,replicates)
+    cl1<-significant_peptide_uptake(dfu, pv, sd, alpha, pvalue,replicates)
 
     start_col<-which(colnames(df1)=='Start')
     end_col<-which(colnames(df1)=='End')
@@ -106,7 +113,7 @@ pymol_script_significant_residue_proc<-function(input_up,input_proc,path="",
       for ( i in 1:length(col_nm)){
         if (length(which(si_apc[,j]==i)) !=0){
           res.txt<-c(res.txt, (paste(c("color ", col_nm[i],", resi ",
-                                       pymol_str(which(si_apc[,j] ==i))), sep="", collapse="")))}}
+                                       pymol_str(which(si_apc[,j] ==i) + resno_offset)), sep="", collapse="")))}}
       fileConn<-file(output_name)
       writeLines(c("hide","show cartoon","color grey", "bg white",set_colors,res.txt ), fileConn)
       close(fileConn)}}

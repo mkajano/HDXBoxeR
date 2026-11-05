@@ -5,6 +5,7 @@
 #'
 #' @param filepath input file location
 #' @return The default arguments to output_tp functions.
+#' @keywords internal
 #' @export
 arguments_call1<-function (filepath) {
   a<-arg_df(filepath)
@@ -19,6 +20,7 @@ arguments_call1<-function (filepath) {
 #' @param filepath input file location
 #' @param states states used
 #' @return The default arguments to output_tp functions.
+#' @keywords internal
 #' @export
 arguments_call2<-function (filepath, states) {
 
@@ -55,6 +57,7 @@ arguments_call2<-function (filepath, states) {
 #' @param states states used
 #' @param times deuteration times
 #' @return The default arguments to output_tp functions.
+#' @keywords internal
 #' @export
 arguments_call3<-function (filepath, states, times) {
   a<-arg_df(filepath)

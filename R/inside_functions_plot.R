@@ -10,6 +10,7 @@
 #' file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 #' a<- output_tp(file_nm)
 #' coverage_residue(df1=a,start_col=2, end_col=3 )
+#' @keywords internal
 #' @export
 coverage_residue<-function(df1, start_col, end_col){
 
@@ -35,10 +36,13 @@ coverage_residue<-function(df1, start_col, end_col){
 #' @param sd data.frame with standard deviations created using sd_timepoint() function
 #' @param replicates number of replicates as default set to 3.
 #' @param alpha cutoff for Critical interval. Default=0.01
-#' @param pv_cutoff cuttoff for pval. Default=0.01
+#' @param pvalue cuttoff for pval. Default=0.01
+#' @param pv_cutoff deprecated, use `pvalue`.
 #' @return ranges per set
+#' @keywords internal
 #' @export
-significant_peptide_uptake<-function(df_av, pv, sd, alpha=0.01, pv_cutoff=0.01, replicates=3){
+significant_peptide_uptake<-function(df_av, pv, sd, alpha=0.01, pvalue=0.01, replicates=3, pv_cutoff){
+  if (!missing(pv_cutoff)) { .hdx_deprecated("pv_cutoff", "pvalue"); pvalue <- pv_cutoff }
   CI=CI_tp(sd, replicates,alpha)
   abs.a<-c()
   for ( i in 8:dim(df_av)[2]){
@@ -47,7 +51,7 @@ significant_peptide_uptake<-function(df_av, pv, sd, alpha=0.01, pv_cutoff=0.01, 
   }
   abs.a=data.frame(matrix(abs.a, ncol =length(CI) , byrow = FALSE))
 
-  cl1a<-pv[,8:dim(df_av)[2]]<pv_cutoff
+  cl1a<-pv[,8:dim(df_av)[2]]<pvalue
   cl1<-abs.a*cl1a
   return(cl1)
 }

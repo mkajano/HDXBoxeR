@@ -7,6 +7,7 @@
 #' @param df timecourse input
 #' @param ranges ranges for coloring scheme. Default set to c(seq(0, 100, by=10), Inf)
 #' @return heat map for timecourses
+#' @keywords internal
 #' @export
 heat_map_tc<-function(df, ranges=c(seq(0, 100, by=10), Inf)){
   #####
@@ -72,7 +73,7 @@ heat_map_tc<-function(df, ranges=c(seq(0, 100, by=10), Inf)){
 #' Returns heat map on timecourses with raw data.
 #'
 #'
-#' @param df output from function output_tcourse
+#' @param df output from function output_tc
 #' @param replicates number of replicates in sample. Default set to 3.
 #' @param mar_x margin x width. Default=3.5
 #' @param ranges ranges for coloring scheme. Default set to c(seq(0, 100, by=10), Inf)

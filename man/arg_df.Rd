@@ -15,3 +15,4 @@ Data.frame for further processing
 \description{
 Function used as internal function
 }
+\keyword{internal}

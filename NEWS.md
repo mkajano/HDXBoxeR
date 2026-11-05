@@ -23,6 +23,23 @@
 * New vignettes: fissure vent, interactive explorer, multi-state (anova),
   structure mapping, data quality.
 
+## Interface and documentation
+
+* Argument names are consistent: `pvalue` (was `pv_cutoff`) and `col` (was
+  `cola` / `colors_initial`). The old names still work, with a deprecation
+  warning; positional calls are unaffected.
+* PyMOL script functions gain `resno_offset` to match structure numbering.
+* Internal helper functions are marked internal (still exported; hidden
+  from the help index).
+* The `_proc` functions are documented as percent-deuteration counterparts
+  of their uptake versions (significance on uptake, differences shown in
+  percent deuteration).
+* New example data `three_states.csv` (wild type and two point mutants,
+  uneven replicates; Woods et al. 2025, PNAS).
+* New `vignette("input_formats")`; README rewritten; pkgdown reference
+  grouped by task; main vignette shows its summary/output code and points
+  to the newer tools; stale references to removed functions fixed.
+
 ## Reporting
 
 * New `render_report()`: one-command HTML report with the analysis

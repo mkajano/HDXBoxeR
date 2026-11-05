@@ -10,13 +10,14 @@ plot_heat_map_tp_proc(
   mar_x = 3.5,
   ranges = c(-Inf, -3, -2, -1, 0, 1, 2, 3, Inf),
   alpha = 0.01,
-  pv_cutoff = 0.01,
+  pvalue = 0.01,
   replicates = 3,
-  p_adjust = "none"
+  p_adjust = "none",
+  pv_cutoff
 )
 }
 \arguments{
-\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp_proc() function.}
+\item{input_proc}{Dataframe with organized procent deuteration data. Input generated using output_tp(percent = TRUE).}
 
 \item{input_up}{Dataframe with organized deuteration uptake. Input generated using output_tp() function.}
 
@@ -26,11 +27,13 @@ plot_heat_map_tp_proc(
 
 \item{alpha}{cutoff for critical interval}
 
-\item{pv_cutoff}{p-value cutoff here set up to 0.01}
+\item{pvalue}{p-value cutoff here set up to 0.01}
 
 \item{replicates}{number of replicates in sample. Default set to 3.}
 
 \item{p_adjust}{multiple-testing correction of the Welch p-values, passed to \code{\link[stats:p.adjust]{stats::p.adjust()}}: \code{"none"} (default, raw p-values) or e.g. \code{"BH"}. A peptide is significant when its (adjusted) p-value is below the cutoff AND its difference exceeds the critical interval.}
+
+\item{pv_cutoff}{deprecated, use \code{pvalue}.}
 }
 \value{
 heat map for average uptake per residue for significant peptides.
@@ -38,12 +41,17 @@ heat map for average uptake per residue for significant peptides.
 \description{
 Returns heat map with average values for significant uptake per residue.
 }
+\details{
+Percent-deuteration counterpart of \code{\link[=plot_heat_map_tp]{plot_heat_map_tp()}}: significance is
+tested on the uptake table \code{input_up} (Da, the package-wide rule), while
+the colors show the difference in percent deuteration, first state minus each state (from \code{input_proc}), with default ranges in percentage points; \code{\link[=plot_heat_map_tp]{plot_heat_map_tp()}} instead shows the relative change in uptake, (first - state) / first.
+}
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a_up<- output_tp(file_nm)
 a_proc<- output_tp(file_nm, percent=TRUE)
 plot_heat_map_tp_proc(input_proc=a_proc, input_up=a_up,
-replicates=3, pv_cutoff=0.01, alpha=0.01,
+replicates=3, pvalue=0.01, alpha=0.01,
 ranges=c(-Inf,-40, -30,-20,-10, 0,10, 20,30,40, Inf) )
 plot_heat_map_tp_proc(input_proc=a_proc, input_up=a_up)
 }

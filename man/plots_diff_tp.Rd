@@ -4,14 +4,16 @@
 \alias{plots_diff_tp}
 \title{Returns difference in average plot for timepoints in the data frame}
 \usage{
-plots_diff_tp(df, replicates = 3, cola)
+plots_diff_tp(df, replicates = 3, col, cola)
 }
 \arguments{
 \item{df}{output from functions output_tp or output_tp_proc.}
 
 \item{replicates}{number of replicates in set as default set to 3.}
 
-\item{cola}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+\item{col}{color pallette for different Protein States. As default Paired pallette from color.Brewer is used.}
+
+\item{cola}{deprecated, use \code{col}.}
 }
 \value{
 plots of difference of averages
@@ -22,6 +24,6 @@ Returns plots with difference in avarage for each peptide.
 \examples{
 file_nm<-system.file("extdata", "All_results_table.csv", package = "HDXBoxeR")
 a<- output_tp(file_nm)
-plots_diff_tp(df=a, replicates=3, cola=c(1:4))
+plots_diff_tp(df=a, replicates=3, col=c(1:4))
 plots_diff_tp(df=a)
 }
