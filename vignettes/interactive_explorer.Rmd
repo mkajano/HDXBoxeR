@@ -95,3 +95,14 @@ The saved file opens in any browser, without R.
 
 -   One time point per call.
 -   `p_adjust = "BH"` corrects the p-values for multiple testing.
+
+## How this connects to the rest of the package
+
+| Interactive | Static version | Explained in |
+|---|---|---|
+| `interactive_volcano()` | `plots_vol_tp()` | `vignette("HDXBoxeR")` |
+| `interactive_fissure_vent()` | `plot_fissure_vent()` | `vignette("fissure_vent")` |
+| `interactive_woods()` | `woods_CI_plot()` | `vignette("HDXBoxeR")` |
+| `significant_peptides_table()` | `hdx_results_table()`, `diff_peptides_prep()` | `vignette("HDXBoxeR")` |
+
+To show results on a structure, see `vignette("hdx_structure")`.

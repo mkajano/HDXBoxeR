@@ -130,4 +130,12 @@ qc <- peptide_qc(d3)
 qc[qc$issues != "", c("Protein.State", "Start", "End", "issues")]
 ```
 
-See `vignette("data_quality")` for coverage and back-exchange.
+## How this connects to the rest of the package
+
+| After loading | Use |
+|---|---|
+| Check the data | `peptide_qc()`, `general_info()`, `plot_peptide_coverage_map()` (`vignette("data_quality")`) |
+| Organize for analysis | `output_tp()` (time points), `output_tc()` (time courses) |
+| Compare two states | `plot_fissure_vent()` and the plots in `vignette("HDXBoxeR")` |
+| Compare more states, regions, time courses | `compare_states_tp()`, `compare_regions()`, `compare_timecourse()` (`vignette("multistate")`) |
+| Report | `hdx_summary_table()`, `hdx_results_table()`, `render_report()` |

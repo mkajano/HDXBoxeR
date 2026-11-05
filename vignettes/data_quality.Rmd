@@ -87,3 +87,13 @@ qc[qc$issues != "", c("Protein.State", "Start", "End", "Sequence", "issues")]
 ```
 
 In this example, peptide 182-193 has no undeuterated control, so HDXExaminer reports its uptake as 0.
+
+## How this connects to the rest of the package
+
+| Question | Use |
+|---|---|
+| Summary table for a paper (Masson et al. 2019) | `hdx_summary_table()` |
+| Everything in one HTML report | `render_report()` |
+| Correct for back-exchange | `output_tp(percent = "FD")` (`vignette("input_formats")`) |
+| States with different peptide maps | `compare_states_unmatched()` and its `coverage` table (`vignette("multistate")`) |
+| Residues covered by several peptides | `residue_regions()` uses this redundancy (`vignette("multistate")`) |

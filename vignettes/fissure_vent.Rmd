@@ -91,5 +91,18 @@ head(res[res$is_sig, c("Start", "End", "Sequence", "delta", "p_value", "ci")])
 ## Good to know
 
 -   Only the extent of the ellipse across the diagonal is a confidence interval. Its width and height alone are not.
--   The plot compares two states. For more states, call it for each pair, or use `compare_states_tp()` (`vignette("multistate")`).
 -   A peptide with identical replicates in both states cannot be tested. It is skipped, and a message says so.
+
+## How this connects to the rest of the package
+
+All of these use the same significance test; they differ in what they show.
+
+| Question | Use |
+|---|---|
+| The classic difference vs p-value picture | `plots_vol_tp()` |
+| The list of significant peptides | `diff_peptides_prep()`, `hdx_results_table()` |
+| Both states' uptake, with uncertainty, peptide by peptide | `plot_fissure_vent()` (this vignette) |
+| The same, interactive and linked to other plots | `interactive_fissure_vent()` (`vignette("interactive_explorer")`) |
+| More than two states | `compare_states_tp()` (`vignette("multistate")`) |
+| A whole region or time course | `compare_regions()`, `compare_timecourse()` (`vignette("multistate")`) |
+| Single residues | `residue_deconvolution()`, `residue_level_average()`, `residue_regions()` |

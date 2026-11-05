@@ -82,5 +82,15 @@ The same argument exists in the `pymol_script_*()` functions.
 
 ## Good to know
 
--   Residues are colored by the size of the difference, not by significance. For significant residues only, use `pymol_script_significant_residue()`.
+-   Residues are colored by the size of the difference, not by significance.
 -   One time point and one pair of states per call.
+
+## How this connects to the rest of the package
+
+| Question | Use |
+|---|---|
+| Per-residue values to color | `residue_level_average()`, `residue_deconvolution()` (`vignette("HDXBoxeR")`) |
+| Color only significant residues or peptides | `pymol_script_significant_residue()`, `pymol_script_significant_peptide()` |
+| Color by average uptake | `pymol_script_average_residue()` |
+| Regions that changed, to highlight | `residue_regions()` (`vignette("multistate")`) |
+| Peptide-level view | `plot_fissure_vent()` (`vignette("fissure_vent")`) |

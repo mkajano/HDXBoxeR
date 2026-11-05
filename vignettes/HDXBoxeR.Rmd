@@ -66,14 +66,18 @@ The vignette is divided into several sections that introduce different aspects o
 
 This vignette covers the two-state workflow. Other topics have their own vignettes:
 
-| Topic | Vignette |
-|---|---|
-| DynamX and other software, replicates, FD normalization | `vignette("input_formats")` |
-| Coverage, redundancy, back-exchange | `vignette("data_quality")` |
-| Fissure vent plots | `vignette("fissure_vent")` |
-| Three or more states, regions, time courses | `vignette("multistate")` |
-| Interactive plots | `vignette("interactive_explorer")` |
-| Structures | `vignette("hdx_structure")` |
+| Topic | Functions | Vignette |
+|---|---|---|
+| Load DynamX or other software; replicates; FD normalization | `read_hdx()`, `as_hdx_long()`, `output_tp(percent = "FD")` | `vignette("input_formats")` |
+| Coverage, redundancy, back-exchange, peptide checks | `general_info()`, `plot_peptide_coverage_map()`, `peptide_qc()` | `vignette("data_quality")` |
+| Two states, peptide by peptide | `plot_fissure_vent()` | `vignette("fissure_vent")` |
+| Three or more states, regions, time courses | `compare_states_tp()`, `compare_regions()`, `compare_timecourse()`, `residue_regions()` | `vignette("multistate")` |
+| Interactive plots | `interactive_fissure_explorer()` | `vignette("interactive_explorer")` |
+| Structures | `plot_hdx_structure()`, `pymol_script_*()` | `vignette("hdx_structure")` |
+| Tables for a paper, HTML report | `hdx_summary_table()`, `hdx_results_table()`, `render_report()` | sections 7-8 below |
+
+All functions use the same significance test: Welch p-value below `pvalue` and difference above the critical interval.
+`p_adjust = "BH"` corrects the p-values for multiple testing.
 
 ## 1. Input preparation
 
